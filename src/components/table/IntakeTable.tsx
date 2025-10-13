@@ -16,19 +16,19 @@ export default function CaseIntakeManagement() {
       id: 2,
       clientName: 'Sarah Mitchell',
       dateOfLoss: '2024-09-22',
-      caseType: 'Automobile Accident'
+      caseType: 'Property Damage'
     },
     {
       id: 3,
       clientName: 'Michael Chen',
       dateOfLoss: '2024-07-10',
-      caseType: 'Automobile Accident'
+      caseType: 'Contract Dispute'
     },
     {
       id: 4,
       clientName: 'Emily Rodriguez',
       dateOfLoss: '2024-10-05',
-      caseType: 'Personal Injury'
+      caseType: 'Employment Law'
     }
   ]);
 
@@ -62,12 +62,13 @@ export default function CaseIntakeManagement() {
   });
 };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
+    <div className="min-h-screen bg-white dark:bg-gray-900 p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h3 className="text-2xl font-bold text-slate-900">Manage and track case intakes</h3>
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white">Case Intake List</h1>
+            <p className="text-slate-600 dark:text-gray-400 mt-2">Manage and track case intakes</p>
           </div>
           <button
             onClick={handleCreateNew}
@@ -79,11 +80,11 @@ export default function CaseIntakeManagement() {
         </div>
 
         {/* Table Container */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden border border-slate-200">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-slate-100 border-b border-slate-200">
+                <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">S.No</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Client Name</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Date of Loss</th>
@@ -95,15 +96,15 @@ export default function CaseIntakeManagement() {
                 {intakes.map((intake, index) => (
                   <tr
                     key={intake.id}
-                    className={`border-b border-slate-200 hover:bg-slate-50 transition-colors duration-150 ${
+                    className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 ${
                       index === intakes.length - 1 ? 'border-b-0' : ''
                     }`}
                   >
-                    <td className="px-6 py-4 text-sm font-semibold text-slate-600">{index + 1}</td>
-                    <td className="px-6 py-4 text-sm text-slate-900 font-medium">{intake.clientName}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{formatDate(intake.dateOfLoss)}</td>
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{index + 1}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-white font-medium">{intake.clientName}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{formatDate(intake.dateOfLoss)}</td>
                     <td className="px-6 py-4 text-sm">
-                      <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
+                      <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-xs font-medium">
                         {intake.caseType}
                       </span>
                     </td>
@@ -111,21 +112,21 @@ export default function CaseIntakeManagement() {
                       <div className="flex justify-center gap-2">
                         <button
                           onClick={() => handleView(intake)}
-                          className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-150"
+                          className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
                           title="View"
                         >
                           <Eye size={18} />
                         </button>
                         <button
                           onClick={handleUpdate}
-                          className="p-2 text-slate-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-150"
+                          className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
                           title="Edit"
                         >
                           <Edit size={18} />
                         </button>
                         <button
                           onClick={() => handleDelete(intake.id)}
-                          className="p-2 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150"
+                          className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
                           title="Delete"
                         >
                           <Trash2 size={18} />
