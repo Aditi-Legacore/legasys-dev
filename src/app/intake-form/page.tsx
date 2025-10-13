@@ -1,6 +1,8 @@
 "use client";
 
-import IntakeFormWizard from "@/src/components/forms/IntakeForm";
+// Update the import path below to the correct relative path based on your project structure.
+// For example, if IntakeForm.tsx is at src/components/forms/IntakeForm.tsx, use the following:
+import IntakeFormWizard from "../../components/forms/IntakeForm";
 
 export default function Home() {
     return (

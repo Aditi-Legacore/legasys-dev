@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useForm, FormProvider, FieldError } from "react-hook-form";
-import { z } from "zod";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { useFormContext } from "react-hook-form";
-import { IntakeFormData, intakeFormSchema } from "@/src/lib/formValidationSchemas";
+import { IntakeFormData, intakeFormSchema } from "../../lib/formValidationSchemas";
 
 const steps = [
   "PLAINTIFF INFORMATION",
