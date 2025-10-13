@@ -3,10 +3,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Settings, Bell, Mail, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
+import { signOut, useSession } from "next-auth/react";
 import Searchbar from "./Searchbar";
 
 const Navbar: React.FC = () => {
   const { theme, setTheme } = useTheme();
+  const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -63,7 +65,7 @@ const Navbar: React.FC = () => {
             className="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
             <img
-              src="/avatar.png"
+              src={session?.user?.image || "/avatar.png"}
               alt="User Avatar"
               className="w-8 h-8 rounded-full border-2 border-gray-300"
             />
@@ -72,8 +74,8 @@ const Navbar: React.FC = () => {
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
               <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                <p className="font-semibold text-gray-900 dark:text-white">Robiul Hasan</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Admin</p>
+                <p className="font-semibold text-gray-900 dark:text-white">{session?.user?.name || "User"}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">User</p>
               </div>
               <ul className="py-2">
                 <li>
@@ -92,7 +94,10 @@ const Navbar: React.FC = () => {
                   </button>
                 </li>
                 <li>
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <button
+                    onClick={() => signOut({ callbackUrl: '/login' })}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
                     Logout
                   </button>
                 </li>

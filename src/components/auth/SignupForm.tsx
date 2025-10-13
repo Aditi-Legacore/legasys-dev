@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "@/lib/zod";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -31,8 +32,22 @@ export default function SignupForm() {
       body: JSON.stringify(values),
     });
 
-    if (res.ok) router.push("/login");
-    else alert("Signup failed");
+    if (res.ok) {
+      // Automatically sign in the user after successful signup
+      const signInRes = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirect: false,
+      });
+
+      if (!signInRes?.error) {
+        router.push("/dashboard");
+      } else {
+        alert("Signup successful, but login failed. Please try logging in manually.");
+      }
+    } else {
+      alert("Signup failed");
+    }
   };
 
   return (

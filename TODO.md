@@ -5,4 +5,4 @@
 - [x] Update IntakeForm.tsx to accept onFormSubmit prop for custom submission handling
 - [x] Implement form submission logic to add new intake to table and close modal
 - [x] Apply glass bokeh effect to modal background
-- [ ] Test the integration: open modal on button click, submit form, verify new intake added to table
+- [x] Test the integration: open modal on button click, submit form, verify new intake added to table
