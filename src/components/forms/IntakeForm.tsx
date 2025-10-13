@@ -17,7 +17,11 @@ const steps = [
 ];
 
 
-export default function IntakeFormWizard() {
+interface IntakeFormWizardProps {
+  onFormSubmit?: (data: IntakeFormData) => void;
+}
+
+export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps) {
   const [step, setStep] = useState(0);
   const methods = useForm<IntakeFormData>({
     resolver: zodResolver(intakeFormSchema),
@@ -25,8 +29,12 @@ export default function IntakeFormWizard() {
   });
 
   const onSubmit = (data: IntakeFormData) => {
-    console.log("Form submitted:", data);
-    alert("✅ Intake form submitted successfully!");
+    if (onFormSubmit) {
+      onFormSubmit(data);
+    } else {
+      console.log("Form submitted:", data);
+      alert("✅ Intake form submitted successfully!");
+    }
   };
 
   const nextStep = () => setStep((s) => s + 1);
