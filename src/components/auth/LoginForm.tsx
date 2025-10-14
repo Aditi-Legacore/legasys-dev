@@ -11,7 +11,7 @@ import Image from "next/image";
 import { Form, FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 
 interface LoginFormData {
   email: string;
@@ -22,6 +22,7 @@ export default function LoginForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
@@ -39,22 +40,27 @@ export default function LoginForm() {
   }, [form]);
 
   const onSubmit = async (values: LoginFormData) => {
-    const res = await signIn("credentials", {
-      ...values,
-      redirect: false,
-    });
+    setIsLoading(true);
+    try {
+      const res = await signIn("credentials", {
+        ...values,
+        redirect: false,
+      });
 
-    if (!res?.error) {
-      if (rememberMe) {
-        localStorage.setItem("rememberMe", "true");
-        localStorage.setItem("rememberedEmail", values.email);
+      if (!res?.error) {
+        if (rememberMe) {
+          localStorage.setItem("rememberMe", "true");
+          localStorage.setItem("rememberedEmail", values.email);
+        } else {
+          localStorage.removeItem("rememberMe");
+          localStorage.removeItem("rememberedEmail");
+        }
+        router.push("/dashboard");
       } else {
-        localStorage.removeItem("rememberMe");
-        localStorage.removeItem("rememberedEmail");
+        alert("Invalid credentials");
       }
-      router.push("/dashboard");
-    } else {
-      alert("Invalid credentials");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -169,9 +175,17 @@ export default function LoginForm() {
 
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
               >
-                Login
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Logging In...
+                  </>
+                ) : (
+                  "Login"
+                )}
               </Button>
 
               <div className="relative">
