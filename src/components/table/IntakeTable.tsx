@@ -12,6 +12,10 @@ interface CaseIntake {
   caseType: string;
 }
 
+import { Eye, Edit, Trash2, Plus } from 'lucide-react';
+import { CaseIntake } from '@/types/intake';
+import IntakeFormWizard from '@/components/forms/IntakeForm';
+import Pagination from '@/components/ui/pagination';
 
 export default function CaseIntakeManagement() {
   const [intakes, setIntakes] = useState<CaseIntake[]>([
@@ -50,6 +54,8 @@ export default function CaseIntakeManagement() {
   const [loadingEdit, setLoadingEdit] = useState<number | null>(null);
   const [loadingDelete, setLoadingDelete] = useState<number | null>(null);
   const [loadingCreate, setLoadingCreate] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 1;
 
   const handleView = async (intake: CaseIntake) => {
     setLoadingView(intake.id);
@@ -86,6 +92,7 @@ export default function CaseIntakeManagement() {
     setLoadingCreate(true);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
+  const handleFormSubmit = (data: any) => {
     const newIntake: CaseIntake = {
       id: intakes.length + 1,
       clientName: data.clientName,
@@ -95,6 +102,17 @@ export default function CaseIntakeManagement() {
     setIntakes([...intakes, newIntake]);
     setLoadingCreate(false);
     setShowFormModal(false);
+    setShowFormModal(false);
+    setCurrentPage(1); // Reset to first page when new item is added
+  };
+
+  // Calculate paginated intakes
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedIntakes = intakes.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const formatDate = (dateString: string): string => {
@@ -113,6 +131,8 @@ export default function CaseIntakeManagement() {
           <div>
             <h1 className="text-4xl font-bold text-slate-900 dark:text-white">Case Intake List</h1>
             <p className="text-slate-600 dark:text-gray-400 mt-2">Manage and track case intakes</p>
+            {/* <h1 className="text-4xl font-bold text-slate-900 dark:text-white">Case Intake List</h1> */}
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">Manage and track case intakes</p>
           </div>
           <button
             onClick={handleCreateNew}
@@ -147,7 +167,7 @@ export default function CaseIntakeManagement() {
                 </tr>
               </thead>
               <tbody>
-                {intakes.map((intake, index) => (
+                {paginatedIntakes.map((intake, index) => (
                   <tr
                     key={intake.id}
                     className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 ${
@@ -155,6 +175,10 @@ export default function CaseIntakeManagement() {
                     }`}
                   >
                     <td className="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{index + 1}</td>
+                      index === paginatedIntakes.length - 1 ? 'border-b-0' : ''
+                    }`}
+                  >
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{startIndex + index + 1}</td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-white font-medium">{intake.clientName}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{formatDate(intake.dateOfLoss)}</td>
                     <td className="px-6 py-4 text-sm">
@@ -220,6 +244,16 @@ export default function CaseIntakeManagement() {
           )}
         </div>
 
+        {/* Pagination */}
+        {intakes.length > 0 && (
+          <Pagination
+            totalItems={intakes.length}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
+        )}
+
         {/* View Modal */}
         {showModal && selectedIntake && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -252,6 +286,7 @@ export default function CaseIntakeManagement() {
         {/* Form Modal */}
         {showFormModal && (
           <div className="fixed inset-0 bg-opacity-20 flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-transparent bg-opacity-20 flex items-center justify-center p-4 z-50">
             <div className="bg-white bg-opacity-90 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold text-slate-900">Create New Intake</h2>

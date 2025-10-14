@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, FormProvider, FieldError } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { useFormContext } from "react-hook-form";
+import { useSession } from "next-auth/react";
 import { IntakeFormData, intakeFormSchema } from "../../lib/formValidationSchemas";
 
 const steps = [
@@ -18,17 +19,34 @@ const steps = [
 
 
 export default function IntakeFormWizard({ onFormSubmit, isSubmitting }: { onFormSubmit?: (data: IntakeFormData) => void; isSubmitting?: boolean }) {
+interface IntakeFormWizardProps {
+  onFormSubmit?: (data: IntakeFormData) => void;
+}
+
+export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps) {
   const [step, setStep] = useState(0);
   const methods = useForm<IntakeFormData>({
     resolver: zodResolver(intakeFormSchema),
     mode: "onBlur",
   });
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (session?.user) {
+      methods.setValue('clientName', session.user.name || '');
+      methods.setValue('email', session.user.email || '');
+    }
+  }, [session, methods]);
 
   const onSubmit = (data: IntakeFormData) => {
     console.log("Form submitted:", data);
     if (onFormSubmit) {
       onFormSubmit(data);
     } else {
+    if (onFormSubmit) {
+      onFormSubmit(data);
+    } else {
+      console.log("Form submitted:", data);
       alert("✅ Intake form submitted successfully!");
     }
   };
