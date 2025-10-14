@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { Settings, Bell, Mail, Sun, Moon } from "lucide-react";
+import { Settings, Bell, Mail, Sun, Moon, Loader2  } from "lucide-react";
 import { useTheme } from "next-themes";
 import { signOut, useSession } from "next-auth/react";
 import Searchbar from "./Searchbar";
@@ -11,6 +11,7 @@ const Navbar: React.FC = () => {
   const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setMounted(true), []);
@@ -95,10 +96,25 @@ const Navbar: React.FC = () => {
                 </li>
                 <li>
                   <button
-                    onClick={() => signOut({ callbackUrl: '/login' })}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    onClick={async () => {
+                      setIsLoggingOut(true);
+                      try {
+                        await signOut({ callbackUrl: '/login' });
+                      } finally {
+                        setIsLoggingOut(false);
+                      }
+                    }}
+                    disabled={isLoggingOut}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                   >
-                    Logout
+                    {isLoggingOut ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Logging Out...
+                      </>
+                    ) : (
+                      "Logout"
+                    )}
                   </button>
                 </li>
               </ul>
