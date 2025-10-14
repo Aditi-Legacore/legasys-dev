@@ -18,12 +18,12 @@ const steps = [
 ];
 
 
-export default function IntakeFormWizard({ onFormSubmit, isSubmitting }: { onFormSubmit?: (data: IntakeFormData) => void; isSubmitting?: boolean }) {
 interface IntakeFormWizardProps {
   onFormSubmit?: (data: IntakeFormData) => void;
+  isSubmitting?: boolean;
 }
 
-export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps) {
+export default function IntakeFormWizard({ onFormSubmit, isSubmitting }: IntakeFormWizardProps) {
   const [step, setStep] = useState(0);
   const methods = useForm<IntakeFormData>({
     resolver: zodResolver(intakeFormSchema),
@@ -40,9 +40,6 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
 
   const onSubmit = (data: IntakeFormData) => {
     console.log("Form submitted:", data);
-    if (onFormSubmit) {
-      onFormSubmit(data);
-    } else {
     if (onFormSubmit) {
       onFormSubmit(data);
     } else {
