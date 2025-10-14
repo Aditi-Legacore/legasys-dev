@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Eye, Edit, Trash2, Plus } from 'lucide-react';
 import { CaseIntake } from '@/types/intake';
 import IntakeFormWizard from '@/components/forms/IntakeForm';
+import Pagination from '@/components/ui/pagination';
 
 export default function CaseIntakeManagement() {
   const [intakes, setIntakes] = useState<CaseIntake[]>([
@@ -36,6 +37,8 @@ export default function CaseIntakeManagement() {
   const [selectedIntake, setSelectedIntake] = useState<CaseIntake | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 1;
 
   const handleView = (intake: CaseIntake) => {
   setSelectedIntake(intake);
@@ -65,6 +68,16 @@ export default function CaseIntakeManagement() {
     };
     setIntakes([...intakes, newIntake]);
     setShowFormModal(false);
+    setCurrentPage(1); // Reset to first page when new item is added
+  };
+
+  // Calculate paginated intakes
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedIntakes = intakes.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const formatDate = (dateString: string): string => {
@@ -106,14 +119,14 @@ export default function CaseIntakeManagement() {
                 </tr>
               </thead>
               <tbody>
-                {intakes.map((intake, index) => (
+                {paginatedIntakes.map((intake, index) => (
                   <tr
                     key={intake.id}
                     className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 ${
-                      index === intakes.length - 1 ? 'border-b-0' : ''
+                      index === paginatedIntakes.length - 1 ? 'border-b-0' : ''
                     }`}
                   >
-                    <td className="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{index + 1}</td>
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{startIndex + index + 1}</td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-white font-medium">{intake.clientName}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{formatDate(intake.dateOfLoss)}</td>
                     <td className="px-6 py-4 text-sm">
@@ -159,6 +172,16 @@ export default function CaseIntakeManagement() {
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {intakes.length > 0 && (
+          <Pagination
+            totalItems={intakes.length}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
+        )}
 
         {/* View Modal */}
         {showModal && selectedIntake && (
