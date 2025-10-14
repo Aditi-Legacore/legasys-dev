@@ -18,6 +18,7 @@ const steps = [
 ];
 
 
+export default function IntakeFormWizard({ onFormSubmit, isSubmitting }: { onFormSubmit?: (data: IntakeFormData) => void; isSubmitting?: boolean }) {
 interface IntakeFormWizardProps {
   onFormSubmit?: (data: IntakeFormData) => void;
 }
@@ -38,6 +39,10 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   }, [session, methods]);
 
   const onSubmit = (data: IntakeFormData) => {
+    console.log("Form submitted:", data);
+    if (onFormSubmit) {
+      onFormSubmit(data);
+    } else {
     if (onFormSubmit) {
       onFormSubmit(data);
     } else {
@@ -309,9 +314,10 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
             </p>
             <button
               type="submit"
-              className="w-full py-3 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 transition"
+              disabled={isSubmitting}
+              className="w-full py-3 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Submit Form
+              {isSubmitting ? "Submitting..." : "Submit Form"}
             </button>
           </motion.div>
         )}

@@ -1,6 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Eye, Edit, Trash2, Plus, Loader2 } from 'lucide-react';
+import IntakeFormWizard from '../forms/IntakeForm';
+
+// Mock types
+interface CaseIntake {
+  id: number;
+  clientName: string;
+  dateOfLoss: string;
+  caseType: string;
+}
+
 import { Eye, Edit, Trash2, Plus } from 'lucide-react';
 import { CaseIntake } from '@/types/intake';
 import IntakeFormWizard from '@/components/forms/IntakeForm';
@@ -8,12 +19,12 @@ import Pagination from '@/components/ui/pagination';
 
 export default function CaseIntakeManagement() {
   const [intakes, setIntakes] = useState<CaseIntake[]>([
-  {
-    id: 1,
-    clientName: 'John Anderson',
-    dateOfLoss: '2024-08-15',
-    caseType: 'Personal Injury'
-  },
+    {
+      id: 1,
+      clientName: 'John Anderson',
+      dateOfLoss: '2024-08-15',
+      caseType: 'Personal Injury'
+    },
     {
       id: 2,
       clientName: 'Sarah Mitchell',
@@ -37,28 +48,50 @@ export default function CaseIntakeManagement() {
   const [selectedIntake, setSelectedIntake] = useState<CaseIntake | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
+  
+  // Loading states
+  const [loadingView, setLoadingView] = useState<number | null>(null);
+  const [loadingEdit, setLoadingEdit] = useState<number | null>(null);
+  const [loadingDelete, setLoadingDelete] = useState<number | null>(null);
+  const [loadingCreate, setLoadingCreate] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 1;
 
-  const handleView = (intake: CaseIntake) => {
-  setSelectedIntake(intake);
-  setShowModal(true);
-};
+  const handleView = async (intake: CaseIntake) => {
+    setLoadingView(intake.id);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setSelectedIntake(intake);
+    setShowModal(true);
+    setLoadingView(null);
+  };
 
-  const handleDelete = (id: number) => {
-  if (window.confirm('Are you sure you want to delete this intake?')) {
-    setIntakes(intakes.filter((intake) => intake.id !== id));
-  }
-};
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Are you sure you want to delete this intake?')) {
+      setLoadingDelete(id);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setIntakes(intakes.filter((intake) => intake.id !== id));
+      setLoadingDelete(null);
+    }
+  };
 
-  const handleUpdate = () => {
+  const handleUpdate = async (id: number) => {
+    setLoadingEdit(id);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
     alert('Update functionality will be implemented');
+    setLoadingEdit(null);
   };
 
   const handleCreateNew = () => {
     setShowFormModal(true);
   };
 
+  const handleFormSubmit = async (data: any) => {
+    setLoadingCreate(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
   const handleFormSubmit = (data: any) => {
     const newIntake: CaseIntake = {
       id: intakes.length + 1,
@@ -67,6 +100,8 @@ export default function CaseIntakeManagement() {
       caseType: data.caseType,
     };
     setIntakes([...intakes, newIntake]);
+    setLoadingCreate(false);
+    setShowFormModal(false);
     setShowFormModal(false);
     setCurrentPage(1); // Reset to first page when new item is added
   };
@@ -81,27 +116,40 @@ export default function CaseIntakeManagement() {
   };
 
   const formatDate = (dateString: string): string => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-};
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white">Case Intake List</h1>
+            <p className="text-slate-600 dark:text-gray-400 mt-2">Manage and track case intakes</p>
             {/* <h1 className="text-4xl font-bold text-slate-900 dark:text-white">Case Intake List</h1> */}
             <p className="text-2xl font-bold text-slate-900 dark:text-white">Manage and track case intakes</p>
           </div>
           <button
             onClick={handleCreateNew}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 shadow-md hover:shadow-lg"
+            disabled={loadingCreate}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Plus size={20} />
-            Create New Intake
+            {loadingCreate ? (
+              <>
+                <Loader2 size={20} className="animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                <Plus size={20} />
+                Create New Intake
+              </>
+            )}
           </button>
         </div>
 
@@ -123,6 +171,10 @@ export default function CaseIntakeManagement() {
                   <tr
                     key={intake.id}
                     className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 ${
+                      index === intakes.length - 1 ? 'border-b-0' : ''
+                    }`}
+                  >
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{index + 1}</td>
                       index === paginatedIntakes.length - 1 ? 'border-b-0' : ''
                     }`}
                   >
@@ -138,24 +190,43 @@ export default function CaseIntakeManagement() {
                       <div className="flex justify-center gap-2">
                         <button
                           onClick={() => handleView(intake)}
+                          disabled={loadingView === intake.id}
+                          className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                           className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
                           title="View"
                         >
-                          <Eye size={18} />
+                          {loadingView === intake.id ? (
+                            <Loader2 size={18} className="animate-spin" />
+                          ) : (
+                            <Eye size={18} />
+                          )}
                         </button>
                         <button
+                          onClick={() => handleUpdate(intake.id)}
+                          disabled={loadingEdit === intake.id}
+                          className="p-2 text-slate-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                           onClick={handleUpdate}
                           className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
                           title="Edit"
                         >
-                          <Edit size={18} />
+                          {loadingEdit === intake.id ? (
+                            <Loader2 size={18} className="animate-spin" />
+                          ) : (
+                            <Edit size={18} />
+                          )}
                         </button>
                         <button
                           onClick={() => handleDelete(intake.id)}
+                          disabled={loadingDelete === intake.id}
+                          className="p-2 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                           className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
                           title="Delete"
                         >
-                          <Trash2 size={18} />
+                          {loadingDelete === intake.id ? (
+                            <Loader2 size={18} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={18} />
+                          )}
                         </button>
                       </div>
                     </td>
@@ -214,6 +285,7 @@ export default function CaseIntakeManagement() {
 
         {/* Form Modal */}
         {showFormModal && (
+          <div className="fixed inset-0 bg-opacity-20 flex items-center justify-center p-4 z-50">
           <div className="fixed inset-0 bg-transparent bg-opacity-20 flex items-center justify-center p-4 z-50">
             <div className="bg-white bg-opacity-90 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
               <div className="flex justify-between items-center mb-4">
@@ -221,6 +293,7 @@ export default function CaseIntakeManagement() {
                 <button
                   onClick={() => setShowFormModal(false)}
                   className="text-slate-600 hover:text-slate-900 text-2xl"
+                  disabled={loadingCreate}
                 >
                   ×
                 </button>
