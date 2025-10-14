@@ -8,32 +8,33 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid())
+  id            String       @id @default(cuid())
   name          String?
-  email         String   @unique
+  email         String       @unique
   password      String?
   emailVerified DateTime?
   image         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
   accounts      Account[]
   sessions      Session[]
+  intakes       IntakeInfo[]
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String? @db.Text
-  access_token       String? @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String? @db.Text
-  session_state      String?
-  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -54,3 +55,61 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model IntakeInfo {
+  id     String @id @default(cuid())
+  userId String // foreign key linking to User
+
+  // 👤 Plaintiff Information
+  clientName  String
+  phoneNumber String?
+  email       String?
+  address     String?
+  dateOfBirth DateTime?
+
+  // 🚗 Accident Information
+  accidentDate        DateTime?
+  accidentLocation    String?
+  accidentDescription String?
+
+  // 🏦 Insurance Information
+  insuranceCompany String?
+  policyNumber     String?
+  claimNumber      String?
+
+  // 📝 Other Details
+  caseType String?
+
+  healthCarrier String?
+  healthPhone   String?
+  healthType    String?
+  healthAddress String?
+  healthGroup   String?
+  healthPolicy  String?
+
+  medicare       String? // "Yes" / "No"
+  medicareNumber String?
+  medicaid       String? // "Yes" / "No"
+  medicaidNumber String?
+
+  // Step 5: Medical Treatment / Injuries
+  ambulance        String? // "Yes" / "No"
+  ambulanceCompany String?
+  admitted         String? // "Yes" / "No"
+  lengthOfStay     String?
+
+  doctorHospital1 String?
+  address1        String?
+  phone1          String?
+  treatmentDate1  DateTime?
+
+  // Step 6: Injuries / Prior Info
+  bodyPartsAffected    String?
+  priorInjuries        String?
+  priorInsuranceClaims String?
+  priorAttorneys       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

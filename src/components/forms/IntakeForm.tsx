@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, FormProvider, FieldError } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { useFormContext } from "react-hook-form";
+import { useSession } from "next-auth/react";
 import { IntakeFormData, intakeFormSchema } from "../../lib/formValidationSchemas";
 
 const steps = [
@@ -27,6 +28,16 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
     resolver: zodResolver(intakeFormSchema),
     mode: "onBlur",
   });
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (session?.user) {
+      methods.setValue('clientName', session.user.name || '');
+      methods.setValue('email', session.user.email || '');
+    }
+    console.log(session?.user);
+    
+  }, [session, methods]);
 
   const onSubmit = (data: IntakeFormData) => {
     if (onFormSubmit) {
