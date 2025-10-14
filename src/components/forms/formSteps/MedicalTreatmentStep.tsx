@@ -21,7 +21,7 @@ export default function MedicalTreatmentStep() {
       <div className="space-y-6">
         {[1, 2, 3].map((num) => (
           <div key={num} className="p-2 rounded-2xl">
-            <h3 className="font-semibold text-lg mb-2 text-gray-500">
+            <h3 className="font-semibold text-lg mb-2 text-gray-700 dark:text-gray-200">
               Doctor / Hospital {num}
             </h3>
             <InputField name={`doctorHospital${num}`} label="Doctor / Hospital Name" />

@@ -5,7 +5,7 @@ export default function ClientInsuranceStep() {
   return (
     <div className="space-y-6 w-full">
       {/* Client Automobile Insurance */}
-      <h2 className="text-xl font-semibold pb-2 text-gray-500">
+      <h2 className="text-xl font-semibold pb-2 text-gray-700 dark:text-gray-200">
         Client Automobile Insurance
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -21,7 +21,7 @@ export default function ClientInsuranceStep() {
       </div>
 
       {/* Client Health Insurance */}
-      <h2 className="text-xl font-semibold pb-2 pt-6 text-gray-500">
+      <h2 className="text-xl font-semibold pb-2 pt-6 text-gray-700 dark:text-gray-200">
         Client Health Insurance
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

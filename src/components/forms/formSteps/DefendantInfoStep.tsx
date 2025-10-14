@@ -5,7 +5,7 @@ export default function DefendantInfoStep() {
   return (
     <div className="space-y-8 w-full">
       {/* Defendant #1 / Driver */}
-      <h2 className="text-xl font-semibold text-gray-500 pb-2">
+      <h2 className="text-xl font-semibold  text-gray-700 dark:text-gray-200  pb-2">
         Defendant #1 / Driver
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -29,7 +29,7 @@ export default function DefendantInfoStep() {
       <TextareaField name="defendant1Damage" label="Damage" />
 
       {/* Defendant #2 / Owner */}
-      <h2 className="text-xl font-semibold text-gray-500 pb-2 pt-6">
+      <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200  pb-2 pt-6">
         Defendant #2 / Owner
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

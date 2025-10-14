@@ -1,7 +1,7 @@
 export default function SubmitStep() {
     return (
       <div className="text-center space-y-3">
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-300">
           Please review all information carefully before submitting.
         </p>
         <button
@@ -13,4 +13,4 @@ export default function SubmitStep() {
       </div>
     );
   }
-  
+    
