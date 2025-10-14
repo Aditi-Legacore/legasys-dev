@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Eye, Edit, Trash2, Plus } from 'lucide-react';
 import { CaseIntake } from '@/types/intake';
 import IntakeFormWizard from '@/components/forms/IntakeForm';
+import { useRouter } from 'next/navigation';
 
 export default function CaseIntakeManagement() {
   const [intakes, setIntakes] = useState<CaseIntake[]>([
@@ -35,7 +36,8 @@ export default function CaseIntakeManagement() {
 
   const [selectedIntake, setSelectedIntake] = useState<CaseIntake | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [showFormModal, setShowFormModal] = useState(false);
+  // const [showFormModal, setShowFormModal] = useState(false);
+  const router = useRouter();  
 
   const handleView = (intake: CaseIntake) => {
   setSelectedIntake(intake);
@@ -52,20 +54,26 @@ export default function CaseIntakeManagement() {
     alert('Update functionality will be implemented');
   };
 
+  // const handleCreateNew = () => {
+  //   setShowFormModal(true);
+  // };
+
+  // ✅ Instead of modal, navigate to intake-form page
   const handleCreateNew = () => {
-    setShowFormModal(true);
+    router.push('/intake-form');
   };
 
-  const handleFormSubmit = (data: any) => {
-    const newIntake: CaseIntake = {
-      id: intakes.length + 1,
-      clientName: data.clientName,
-      dateOfLoss: data.accidentDate,
-      caseType: data.caseType,
-    };
-    setIntakes([...intakes, newIntake]);
-    setShowFormModal(false);
-  };
+
+  // const handleFormSubmit = (data: any) => {
+  //   const newIntake: CaseIntake = {
+  //     id: intakes.length + 1,
+  //     clientName: data.clientName,
+  //     dateOfLoss: data.accidentDate,
+  //     caseType: data.caseType,
+  //   };
+  //   setIntakes([...intakes, newIntake]);
+  //   // setShowFormModal(false);
+  // };
 
   const formatDate = (dateString: string): string => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -189,7 +197,7 @@ export default function CaseIntakeManagement() {
         )}
 
         {/* Form Modal */}
-        {showFormModal && (
+        {/* {showFormModal && (
           <div className="fixed inset-0 bg-transparent bg-opacity-20 flex items-center justify-center p-4 z-50">
             <div className="bg-white bg-opacity-90 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
               <div className="flex justify-between items-center mb-4">
@@ -204,7 +212,7 @@ export default function CaseIntakeManagement() {
               <IntakeFormWizard onFormSubmit={handleFormSubmit} />
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
