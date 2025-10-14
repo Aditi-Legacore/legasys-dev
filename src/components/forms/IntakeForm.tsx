@@ -17,7 +17,7 @@ const steps = [
 ];
 
 
-export default function IntakeFormWizard() {
+export default function IntakeFormWizard({ onFormSubmit, isSubmitting }: { onFormSubmit?: (data: IntakeFormData) => void; isSubmitting?: boolean }) {
   const [step, setStep] = useState(0);
   const methods = useForm<IntakeFormData>({
     resolver: zodResolver(intakeFormSchema),
@@ -26,7 +26,11 @@ export default function IntakeFormWizard() {
 
   const onSubmit = (data: IntakeFormData) => {
     console.log("Form submitted:", data);
-    alert("✅ Intake form submitted successfully!");
+    if (onFormSubmit) {
+      onFormSubmit(data);
+    } else {
+      alert("✅ Intake form submitted successfully!");
+    }
   };
 
   const nextStep = () => setStep((s) => s + 1);
@@ -292,9 +296,10 @@ export default function IntakeFormWizard() {
             </p>
             <button
               type="submit"
-              className="w-full py-3 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 transition"
+              disabled={isSubmitting}
+              className="w-full py-3 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Submit Form
+              {isSubmitting ? "Submitting..." : "Submit Form"}
             </button>
           </motion.div>
         )}
