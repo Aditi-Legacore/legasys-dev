@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "@/lib/zod";
@@ -10,7 +11,7 @@ import Image from "next/image";
 import { Form, FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { User, Mail, Lock, Eye } from "lucide-react";
+import { User, Mail, Lock, Eye, Loader2 } from "lucide-react";
 
 interface SignupFormData {
   name: string;
@@ -20,33 +21,39 @@ interface SignupFormData {
 
 export default function SignupForm() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: { name: "", email: "", password: "" },
   });
 
   const onSubmit = async (values: SignupFormData) => {
-    const res = await fetch("/api/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-
-    if (res.ok) {
-      // Automatically sign in the user after successful signup
-      const signInRes = await signIn("credentials", {
-        email: values.email,
-        password: values.password,
-        redirect: false,
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
       });
 
-      if (!signInRes?.error) {
-        router.push("/dashboard");
+      if (res.ok) {
+        // Automatically sign in the user after successful signup
+        const signInRes = await signIn("credentials", {
+          email: values.email,
+          password: values.password,
+          redirect: false,
+        });
+
+        if (!signInRes?.error) {
+          router.push("/dashboard");
+        } else {
+          alert("Signup successful, but login failed. Please try logging in manually.");
+        }
       } else {
-        alert("Signup successful, but login failed. Please try logging in manually.");
+        alert("Signup failed");
       }
-    } else {
-      alert("Signup failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -74,7 +81,7 @@ export default function SignupForm() {
                 <Image
                   src="/legacore.png"
                   alt="Logo"
-                  width={50} 
+                  width={50}
                   height={50}
                   className="object-contain"
                   priority
@@ -156,9 +163,17 @@ export default function SignupForm() {
 
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
               >
-                Sign Up
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing Up...
+                  </>
+                ) : (
+                  "Sign Up"
+                )}
               </Button>
 
               <div className="text-center">
