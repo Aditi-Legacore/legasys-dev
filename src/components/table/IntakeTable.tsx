@@ -67,8 +67,8 @@ export default function CaseIntakeManagement() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-white">Case Intake List</h1>
-            <p className="text-slate-600 dark:text-gray-400 mt-2">Manage and track case intakes</p>
+            {/* <h1 className="text-4xl font-bold text-slate-900 dark:text-white">Case Intake List</h1> */}
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">Manage and track case intakes</p>
           </div>
           <button
             onClick={handleCreateNew}
