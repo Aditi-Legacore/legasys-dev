@@ -52,7 +52,7 @@ export default function LoginForm() {
         localStorage.removeItem("rememberMe");
         localStorage.removeItem("rememberedEmail");
       }
-      router.push("/");
+      router.push("/dashboard");
     } else {
       alert("Invalid credentials");
     }

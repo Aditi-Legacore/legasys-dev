@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Eye, Edit, Trash2, Plus } from 'lucide-react';
 import { CaseIntake } from '@/types/intake';
+import IntakeFormWizard from '@/components/forms/IntakeForm';
 
 export default function CaseIntakeManagement() {
   const [intakes, setIntakes] = useState<CaseIntake[]>([
@@ -34,6 +35,7 @@ export default function CaseIntakeManagement() {
 
   const [selectedIntake, setSelectedIntake] = useState<CaseIntake | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
 
   const handleView = (intake: CaseIntake) => {
   setSelectedIntake(intake);
@@ -51,7 +53,18 @@ export default function CaseIntakeManagement() {
   };
 
   const handleCreateNew = () => {
-    alert('Create New Intake form will be implemented');
+    setShowFormModal(true);
+  };
+
+  const handleFormSubmit = (data: any) => {
+    const newIntake: CaseIntake = {
+      id: intakes.length + 1,
+      clientName: data.clientName,
+      dateOfLoss: data.accidentDate,
+      caseType: data.caseType,
+    };
+    setIntakes([...intakes, newIntake]);
+    setShowFormModal(false);
   };
 
   const formatDate = (dateString: string): string => {
@@ -172,6 +185,24 @@ export default function CaseIntakeManagement() {
               >
                 Close
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Form Modal */}
+        {showFormModal && (
+          <div className="fixed inset-0 bg-transparent bg-opacity-20 flex items-center justify-center p-4 z-50">
+            <div className="bg-white bg-opacity-90 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-slate-900">Create New Intake</h2>
+                <button
+                  onClick={() => setShowFormModal(false)}
+                  className="text-slate-600 hover:text-slate-900 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+              <IntakeFormWizard onFormSubmit={handleFormSubmit} />
             </div>
           </div>
         )}
