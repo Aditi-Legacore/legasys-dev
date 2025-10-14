@@ -3,9 +3,7 @@ import { z } from "zod";
 export const intakeFormSchema = z.object({
   // Step 1 - Plaintiff Info
   clientName: z.string().min(1, "Client name is required"),
-//   gender: z.enum(["Male", "Female"], { required_error: "Gender is required" }),
-  gender: z.enum(["Male", "Female"])
-  .refine((val) => val !== undefined, { message: "Gender is required" }),
+  gender: z.enum(["Male", "Female"]).refine((val) => val !== undefined, { message: "Gender is required" }),
   dob: z.string().min(1, "Date of birth is required"),
   phone: z.string().min(10, "Enter a valid phone number"),
   email: z.string().email("Invalid email address"),
@@ -16,17 +14,40 @@ export const intakeFormSchema = z.object({
   // Step 2 - Accident Info
   accidentDate: z.string().min(1, "Accident date required"),
   accidentTime: z.string().min(1, "Accident time required"),
-  caseType: z.enum(["Auto Accident", "Slip & Fall", "Other"]).optional().refine(Boolean, { message: "Case type is required" }),
+  caseType: z.enum(["Auto Accident", "Slip & Fall", "Other"]).refine((val) => val !== undefined, { message: "Case type is required" }),
   policeCase: z.string().optional(),
   accidentLocation: z.string().min(1, "Accident location required"),
-  seatBelt: z.enum(["Yes", "No"]).optional().refine(Boolean, { message: "Seat belt selection is required" }),
+  seatBelt: z.enum(["Yes", "No"]).refine((val) => val !== undefined, { message: "Seat belt selection is required" }),
   seatBeltReason: z.string().optional(),
   accidentDescription: z.string().min(10, "Description required"),
-  autoInsurance: z.string().min(1, "Auto insurance required"),
-  healthInsurance: z.string().optional(),
 
-  // Step 3 - Defendant Information (already optional in your UI, so not mandatory)
-  // Add fields here if needed.
+  // Step 3 - Defendant Information (optional)
+  defendant1Name: z.string().optional(),
+  defendant1Phone: z.string().optional(),
+  defendant1Address: z.string().optional(),
+  defendant1Carrier: z.string().optional(),
+  defendant1CarrierPhone: z.string().optional(),
+  defendant1Policy: z.string().optional(),
+  defendant1Claim: z.string().optional(),
+  defendant1Adjuster: z.string().optional(),
+  defendant1Insured: z.string().optional(),
+  defendant1Year: z.string().optional(),
+  defendant1Make: z.string().optional(),
+  defendant1Model: z.string().optional(),
+  defendant1Damage: z.string().optional(),
+  defendant2Name: z.string().optional(),
+  defendant2Phone: z.string().optional(),
+  defendant2Address: z.string().optional(),
+  defendant2Carrier: z.string().optional(),
+  defendant2CarrierPhone: z.string().optional(),
+  defendant2Policy: z.string().optional(),
+  defendant2Claim: z.string().optional(),
+  defendant2Adjuster: z.string().optional(),
+  defendant2Insured: z.string().optional(),
+  defendant2Year: z.string().optional(),
+  defendant2Make: z.string().optional(),
+  defendant2Model: z.string().optional(),
+  defendant2Damage: z.string().optional(),
 
   // Step 4 - Client Automobile & Health Insurance
   autoName: z.string().min(1, "Auto Name is required"),
@@ -51,10 +72,9 @@ export const intakeFormSchema = z.object({
   medicaidNumber: z.string().optional(),
 
   // Step 5 - Medical Treatment
-  ambulance: z.enum(["Yes", "No"]).optional().refine(Boolean, { message: "Ambulance selection required" }),
-  admitted: z.enum(["Yes", "No"]).optional().refine(Boolean, { message: "Admitted selection required" }),
+  ambulance: z.enum(["Yes", "No"]).refine((val) => val !== undefined, { message: "Ambulance selection required" }),
+  admitted: z.enum(["Yes", "No"]).refine((val) => val !== undefined, { message: "Admitted selection required" }),
   ambulanceCompany: z.string().optional(),
- 
   lengthOfStay: z.string().optional(),
 
   doctorHospital1: z.string().min(1, "Doctor/Hospital name is required"),
@@ -77,10 +97,6 @@ export const intakeFormSchema = z.object({
   priorInjuries: z.string().optional(),
   priorInsuranceClaims: z.string().optional(),
   priorAttorneys: z.string().optional(),
-
-  // already existing
-  doctorHospital: z.string().min(1, "Doctor/Hospital required"),
-  injuries: z.string().min(1, "Please describe injuries"),
 });
 
 export type IntakeFormData = z.infer<typeof intakeFormSchema>;
