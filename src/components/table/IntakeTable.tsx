@@ -12,41 +12,6 @@ interface CaseIntake {
   caseType: string;
 }
 
-// // Mock IntakeFormWizard component
-// const IntakeFormWizard = ({ onFormSubmit }: { onFormSubmit: (data: any) => void }) => (
-//   <div className="space-y-4">
-//     <input
-//       type="text"
-//       placeholder="Client Name"
-//       className="w-full px-4 py-2 border rounded-lg"
-//       id="clientName"
-//     />
-//     <input
-//       type="date"
-//       placeholder="Accident Date"
-//       className="w-full px-4 py-2 border rounded-lg"
-//       id="accidentDate"
-//     />
-//     <input
-//       type="text"
-//       placeholder="Case Type"
-//       className="w-full px-4 py-2 border rounded-lg"
-//       id="caseType"
-//     />
-//     <button
-//       onClick={() => {
-//         onFormSubmit({
-//           clientName: (document.getElementById('clientName') as HTMLInputElement).value,
-//           accidentDate: (document.getElementById('accidentDate') as HTMLInputElement).value,
-//           caseType: (document.getElementById('caseType') as HTMLInputElement).value,
-//         });
-//       }}
-//       className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg"
-//     >
-//       Submit
-//     </button>
-//   </div>
-// );
 
 export default function CaseIntakeManagement() {
   const [intakes, setIntakes] = useState<CaseIntake[]>([
