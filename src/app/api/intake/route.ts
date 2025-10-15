@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // Helper to convert empty strings to null
-const toNullable = (value: any) => (value === "" || value === undefined ? null : value);
+const toNullable = (value: string | undefined): string | null => (value === "" || value === undefined ? null : value);
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,10 +24,10 @@ export async function POST(request: NextRequest) {
         accidentTime: toNullable(data.accidentTime),
         accidentLocation: toNullable(data.accidentLocation),
         accidentDescription: toNullable(data.accidentDescription),
-        caseType: toNullable(data.caseType),
-        policeCase: toNullable(data.policeCase),
-        seatBelt: toNullable(data.seatBelt),
-        seatBeltReason: toNullable(data.seatBeltReason),
+        // caseType: toNullable(data.caseType),
+        // policeCase: toNullable(data.policeCase),
+        // seatBelt: toNullable(data.seatBelt),
+        // seatBeltReason: toNullable(data.seatBeltReason),
 
         // Defendant 1
         defendant1Name: toNullable(data.defendant1Name),
@@ -36,9 +36,9 @@ export async function POST(request: NextRequest) {
         defendant1Carrier: toNullable(data.defendant1Carrier),
         defendant1CarrierPhone: toNullable(data.defendant1CarrierPhone),
         defendant1Policy: toNullable(data.defendant1Policy),
-        defendant1Claim: toNullable(data.defendant1Claim),
-        defendant1Adjuster: toNullable(data.defendant1Adjuster),
-        defendant1Insured: toNullable(data.defendant1Insured),
+        // defendant1Claim: toNullable(data.defendant1Claim),
+        // defendant1Adjuster: toNullable(data.defendant1Adjuster),
+        // defendant1Insured: toNullable(data.defendant1Insured),
         defendant1Year: toNullable(data.defendant1Year),
         defendant1Make: toNullable(data.defendant1Make),
         defendant1Model: toNullable(data.defendant1Model),
@@ -51,9 +51,9 @@ export async function POST(request: NextRequest) {
         defendant2Carrier: toNullable(data.defendant2Carrier),
         defendant2CarrierPhone: toNullable(data.defendant2CarrierPhone),
         defendant2Policy: toNullable(data.defendant2Policy),
-        defendant2Claim: toNullable(data.defendant2Claim),
-        defendant2Adjuster: toNullable(data.defendant2Adjuster),
-        defendant2Insured: toNullable(data.defendant2Insured),
+        // defendant2Claim: toNullable(data.defendant2Claim),
+        // defendant2Adjuster: toNullable(data.defendant2Adjuster),
+        // defendant2Insured: toNullable(data.defendant2Insured),
         defendant2Year: toNullable(data.defendant2Year),
         defendant2Make: toNullable(data.defendant2Make),
         defendant2Model: toNullable(data.defendant2Model),
@@ -66,9 +66,9 @@ export async function POST(request: NextRequest) {
         autoCarrier: toNullable(data.autoCarrier),
         autoAgent: toNullable(data.autoAgent),
         autoPolicy: toNullable(data.autoPolicy),
-        autoClaim: toNullable(data.autoClaim),
-        autoAdjuster: toNullable(data.autoAdjuster),
-        autoInsured: toNullable(data.autoInsured),
+        // autoClaim: toNullable(data.autoClaim),
+        // autoAdjuster: toNullable(data.autoAdjuster),
+        // autoInsured: toNullable(data.autoInsured),
 
         // Health Insurance
         healthCarrier: toNullable(data.healthCarrier),
@@ -77,10 +77,10 @@ export async function POST(request: NextRequest) {
         healthAddress: toNullable(data.healthAddress),
         healthGroup: toNullable(data.healthGroup),
         healthPolicy: toNullable(data.healthPolicy),
-        medicare: toNullable(data.medicare),
-        medicareNumber: toNullable(data.medicareNumber),
-        medicaid: toNullable(data.medicaid),
-        medicaidNumber: toNullable(data.medicaidNumber),
+        // medicare: toNullable(data.medicare),
+        // medicareNumber: toNullable(data.medicareNumber),
+        // medicaid: toNullable(data.medicaid),
+        // medicaidNumber: toNullable(data.medicaidNumber),
 
         // Medical Treatment
         ambulance: data.ambulance,

@@ -43,10 +43,10 @@ const steps = [
 // 👇 Define the fields to validate at each step
 const stepFields: (keyof IntakeFormData)[][] = [
   ["clientName", "email","gender","phone"], // Step 1
-  ["accidentDate", "accidentLocation","accidentDescription","caseType","seatBelt"], // Step 2
+  ["accidentDate", "accidentLocation","accidentDescription"], // Step 2
   ["defendant1Name"], // Step 3
-  ["healthAddress","medicare","medicaid"], // Step 4
-  ["doctorHospital1"], // Step 5
+  ["healthAddress"], // Step 4
+  ["doctorHospital1","ambulance","admitted"], // Step 5
   ["bodyPartsAffected"], // Step 6
   [], // Step 7 (Submit)
 ];

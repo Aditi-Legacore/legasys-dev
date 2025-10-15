@@ -74,10 +74,10 @@ model IntakeInfo {
   accidentTime        String?
   accidentLocation    String?
   accidentDescription String?
-  caseType            String?
-  policeCase          String?
-  seatBelt            String?
-  seatBeltReason      String?
+  // caseType            String?
+  // policeCase          String?
+  // seatBelt            String?
+  // seatBeltReason      String?
 
   // Defendant 1 / Driver
   defendant1Name         String?
@@ -86,9 +86,9 @@ model IntakeInfo {
   defendant1Carrier      String?
   defendant1CarrierPhone String?
   defendant1Policy       String?
-  defendant1Claim        String?
-  defendant1Adjuster     String?
-  defendant1Insured      String?
+  // defendant1Claim        String?
+  // defendant1Adjuster     String?
+  // defendant1Insured      String?
   defendant1Year         String?
   defendant1Make         String?
   defendant1Model        String?
@@ -101,9 +101,9 @@ model IntakeInfo {
   defendant2Carrier      String?
   defendant2CarrierPhone String?
   defendant2Policy       String?
-  defendant2Claim        String?
-  defendant2Adjuster     String?
-  defendant2Insured      String?
+  // defendant2Claim        String?
+  // defendant2Adjuster     String?
+  // defendant2Insured      String?
   defendant2Year         String?
   defendant2Make         String?
   defendant2Model        String?
@@ -116,9 +116,9 @@ model IntakeInfo {
   autoCarrier  String?
   autoAgent    String?
   autoPolicy   String?
-  autoClaim    String?
-  autoAdjuster String?
-  autoInsured  String?
+  // autoClaim    String?
+  // autoAdjuster String?
+  // autoInsured  String?
 
   // Client Health Insurance
   healthCarrier String?
@@ -128,10 +128,10 @@ model IntakeInfo {
   healthGroup   String?
   healthPolicy  String?
 
-  medicare       String? // "Yes" / "No"
-  medicareNumber String?
-  medicaid       String? // "Yes" / "No"
-  medicaidNumber String?
+  // medicare       String? // "Yes" / "No"
+  // medicareNumber String?
+  // medicaid       String? // "Yes" / "No"
+  // medicaidNumber String?
 
   // Medical Treatment
   ambulance        String? // "Yes" / "No"
@@ -149,10 +149,10 @@ model IntakeInfo {
   phone2          String?
   treatmentDate2  DateTime?
 
-  doctorHospital3 String?
-  address3        String?
-  phone3          String?
-  treatmentDate3  DateTime?
+  // doctorHospital3 String?
+  // address3        String?
+  // phone3          String?
+  // treatmentDate3  DateTime?
 
   // Injuries
   bodyPartsAffected    String?

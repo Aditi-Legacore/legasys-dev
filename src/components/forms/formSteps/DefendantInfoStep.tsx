@@ -15,9 +15,9 @@ export default function DefendantInfoStep() {
         <InputField name="defendant1Carrier" label="Carrier" />
         <InputField name="defendant1CarrierPhone" label="Carrier Phone" />
         <InputField name="defendant1Policy" label="Policy #" />
-        <InputField name="defendant1Claim" label="Claim #" />
+        {/* <InputField name="defendant1Claim" label="Claim #" />
         <InputField name="defendant1Adjuster" label="Adjuster" />
-        <InputField name="defendant1Insured" label="Insured" />
+        <InputField name="defendant1Insured" label="Insured" /> */}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -39,9 +39,9 @@ export default function DefendantInfoStep() {
         <InputField name="defendant2Carrier" label="Carrier" />
         <InputField name="defendant2CarrierPhone" label="Carrier Phone" />
         <InputField name="defendant2Policy" label="Policy #" />
-        <InputField name="defendant2Claim" label="Claim #" />
+        {/* <InputField name="defendant2Claim" label="Claim #" />
         <InputField name="defendant2Adjuster" label="Adjuster" />
-        <InputField name="defendant2Insured" label="Insured" />
+        <InputField name="defendant2Insured" label="Insured" /> */}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
