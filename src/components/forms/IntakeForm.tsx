@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
@@ -40,6 +40,17 @@ const steps = [
   "Submit",
 ];
 
+// 👇 Define the fields to validate at each step
+const stepFields: (keyof IntakeFormData)[][] = [
+  ["clientName", "email"], // Step 0
+  ["accidentDate", "accidentLocation","accidentDescription"], // Step 1
+  ["defendant1Name"], // Step 2
+  ["healthAddress"], // Step 3
+  ["doctorHospital1"], // Step 4
+  ["bodyPartsAffected"], // Step 5
+  [], // Step 6 (Submit)
+];
+
 interface IntakeFormWizardProps {
   onFormSubmit?: (data: IntakeFormData) => void;
 }
@@ -54,14 +65,26 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   });
   const { data: session } = useSession();
 
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     if (session?.user) {
       methods.setValue("clientName", session.user.name || "");
       methods.setValue("email", session.user.email || "");
     }
-  }, [session, methods]);
+    if (containerRef.current) {
+      containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [session, methods,step]);
 
   const router = useRouter();
+
+  // ✅ Scroll to top whenever step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step]);
 
   const onSubmit = async (data: IntakeFormData) => {
     try {
@@ -97,7 +120,24 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
     }
   };
 
-  const nextStep = () => setStep((s) => s + 1);
+  
+  // ✅ Validate current step before moving to the next
+  const nextStep = async () => {
+    const fieldsToValidate = stepFields[step];
+
+    if (fieldsToValidate.length > 0) {
+      const isValid = await methods.trigger(fieldsToValidate);
+      if (!isValid) {
+        toast.error("Please fill in all required fields before proceeding.");
+        return; // ❌ Stop if validation fails
+      }
+    }
+
+    setStep((s) => s + 1);
+  };
+
+
+  // const nextStep = () => setStep((s) => s + 1);
   const prevStep = () => setStep((s) => s - 1);
 
   const renderStep = () => {
@@ -115,6 +155,10 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
 
   return (
     <FormProvider {...methods}>
+      <div
+  ref={containerRef}
+  className="max-h-[80vh] overflow-auto"   // 👈 make this container scrollable
+>
       <form
         onSubmit={methods.handleSubmit(onSubmit)}
         className="max-w-4xl bg-white dark:bg-gray-900 p-8 rounded-xl shadow-xl transition-all duration-300"
@@ -172,6 +216,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
           )}
         </div>
       </form>
+      </div>
     </FormProvider>
   );
 }
