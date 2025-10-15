@@ -68,6 +68,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    
     if (session?.user) {
       methods.setValue("clientName", session.user.name || "");
       methods.setValue("email", session.user.email || "");
@@ -78,6 +79,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [session, methods,step]);
+  
 
   const router = useRouter();
 

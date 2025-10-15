@@ -99,10 +99,10 @@ export async function POST(request: NextRequest) {
         phone2: toNullable(data.phone2),
         treatmentDate2: toNullable(data.treatmentDate2) ? new Date(data.treatmentDate2) : null,
 
-        doctorHospital3: toNullable(data.doctorHospital3),
-        address3: toNullable(data.address3),
-        phone3: toNullable(data.phone3),
-        treatmentDate3: toNullable(data.treatmentDate3) ? new Date(data.treatmentDate3) : null,
+        // doctorHospital3: toNullable(data.doctorHospital3),
+        // address3: toNullable(data.address3),
+        // phone3: toNullable(data.phone3),
+        // treatmentDate3: toNullable(data.treatmentDate3) ? new Date(data.treatmentDate3) : null,
 
         // Injuries
         bodyPartsAffected: data.bodyPartsAffected,
