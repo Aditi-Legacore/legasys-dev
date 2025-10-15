@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-// import { prisma } from "../../../lib/prisma";
 import { prisma } from "@/lib/prisma";
 
+// Helper to convert empty strings to null
+const toNullable = (value: any) => (value === "" || value === undefined ? null : value);
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,97 +10,105 @@ export async function POST(request: NextRequest) {
 
     const newIntake = await prisma.intakeInfo.create({
       data: {
-        userId: data.userId,
+        userId: toNullable(data.userId),
         clientName: data.clientName,
-        gender: data.gender,
-        phoneNumber: data.phone,
+        gender: data.gender ?? null,
+        phoneNumber: data.phone ?? null,
         email: data.email,
-        address: data.address,
-        city: data.city,
-        zip: data.zip,
-        dateOfBirth: data.dob ? new Date(data.dob) : null,
-        accidentDate: data.accidentDate ? new Date(data.accidentDate) : null,
-        accidentTime: data.accidentTime,
-        accidentLocation: data.accidentLocation,
-        accidentDescription: data.accidentDescription,
-        caseType: data.caseType,
-        policeCase: data.policeCase,
-        seatBelt: data.seatBelt,
-        seatBeltReason: data.seatBeltReason,
+        address: data.address ?? null,
+        city: data.city ?? null,
+        zip: data.zip ?? null,
+        
+        dateOfBirth: toNullable(data.dob) ? new Date(data.dob) : null,
+        accidentDate: toNullable(data.accidentDate) ? new Date(data.accidentDate) : null,
+        accidentTime: toNullable(data.accidentTime),
+        accidentLocation: toNullable(data.accidentLocation),
+        accidentDescription: toNullable(data.accidentDescription),
+        caseType: toNullable(data.caseType),
+        policeCase: toNullable(data.policeCase),
+        seatBelt: toNullable(data.seatBelt),
+        seatBeltReason: toNullable(data.seatBeltReason),
+
         // Defendant 1
-        defendant1Name: data.defendant1Name,
-        defendant1Phone: data.defendant1Phone,
-        defendant1Address: data.defendant1Address,
-        defendant1Carrier: data.defendant1Carrier,
-        defendant1CarrierPhone: data.defendant1CarrierPhone,
-        defendant1Policy: data.defendant1Policy,
-        defendant1Claim: data.defendant1Claim,
-        defendant1Adjuster: data.defendant1Adjuster,
-        defendant1Insured: data.defendant1Insured,
-        defendant1Year: data.defendant1Year,
-        defendant1Make: data.defendant1Make,
-        defendant1Model: data.defendant1Model,
-        defendant1Damage: data.defendant1Damage,
+        defendant1Name: toNullable(data.defendant1Name),
+        defendant1Phone: toNullable(data.defendant1Phone),
+        defendant1Address: toNullable(data.defendant1Address),
+        defendant1Carrier: toNullable(data.defendant1Carrier),
+        defendant1CarrierPhone: toNullable(data.defendant1CarrierPhone),
+        defendant1Policy: toNullable(data.defendant1Policy),
+        defendant1Claim: toNullable(data.defendant1Claim),
+        defendant1Adjuster: toNullable(data.defendant1Adjuster),
+        defendant1Insured: toNullable(data.defendant1Insured),
+        defendant1Year: toNullable(data.defendant1Year),
+        defendant1Make: toNullable(data.defendant1Make),
+        defendant1Model: toNullable(data.defendant1Model),
+        defendant1Damage: toNullable(data.defendant1Damage),
+
         // Defendant 2
-        defendant2Name: data.defendant2Name,
-        defendant2Phone: data.defendant2Phone,
-        defendant2Address: data.defendant2Address,
-        defendant2Carrier: data.defendant2Carrier,
-        defendant2CarrierPhone: data.defendant2CarrierPhone,
-        defendant2Policy: data.defendant2Policy,
-        defendant2Claim: data.defendant2Claim,
-        defendant2Adjuster: data.defendant2Adjuster,
-        defendant2Insured: data.defendant2Insured,
-        defendant2Year: data.defendant2Year,
-        defendant2Make: data.defendant2Make,
-        defendant2Model: data.defendant2Model,
-        defendant2Damage: data.defendant2Damage,
+        defendant2Name: toNullable(data.defendant2Name),
+        defendant2Phone: toNullable(data.defendant2Phone),
+        defendant2Address: toNullable(data.defendant2Address),
+        defendant2Carrier: toNullable(data.defendant2Carrier),
+        defendant2CarrierPhone: toNullable(data.defendant2CarrierPhone),
+        defendant2Policy: toNullable(data.defendant2Policy),
+        defendant2Claim: toNullable(data.defendant2Claim),
+        defendant2Adjuster: toNullable(data.defendant2Adjuster),
+        defendant2Insured: toNullable(data.defendant2Insured),
+        defendant2Year: toNullable(data.defendant2Year),
+        defendant2Make: toNullable(data.defendant2Make),
+        defendant2Model: toNullable(data.defendant2Model),
+        defendant2Damage: toNullable(data.defendant2Damage),
+
         // Auto Insurance
-        autoName: data.autoName,
-        autoPhone: data.autoPhone,
-        autoAddress: data.autoAddress,
-        autoCarrier: data.autoCarrier,
-        autoAgent: data.autoAgent,
-        autoPolicy: data.autoPolicy,
-        autoClaim: data.autoClaim,
-        autoAdjuster: data.autoAdjuster,
-        autoInsured: data.autoInsured,
+        autoName: toNullable(data.autoName),
+        autoPhone: toNullable(data.autoPhone),
+        autoAddress: toNullable(data.autoAddress),
+        autoCarrier: toNullable(data.autoCarrier),
+        autoAgent: toNullable(data.autoAgent),
+        autoPolicy: toNullable(data.autoPolicy),
+        autoClaim: toNullable(data.autoClaim),
+        autoAdjuster: toNullable(data.autoAdjuster),
+        autoInsured: toNullable(data.autoInsured),
+
         // Health Insurance
-        healthCarrier: data.healthCarrier,
-        healthPhone: data.healthPhone,
-        healthType: data.healthType,
-        healthAddress: data.healthAddress,
-        healthGroup: data.healthGroup,
-        healthPolicy: data.healthPolicy,
-        medicare: data.medicare,
-        medicareNumber: data.medicareNumber,
-        medicaid: data.medicaid,
-        medicaidNumber: data.medicaidNumber,
+        healthCarrier: toNullable(data.healthCarrier),
+        healthPhone: toNullable(data.healthPhone),
+        healthType: toNullable(data.healthType),
+        healthAddress: toNullable(data.healthAddress),
+        healthGroup: toNullable(data.healthGroup),
+        healthPolicy: toNullable(data.healthPolicy),
+        medicare: toNullable(data.medicare),
+        medicareNumber: toNullable(data.medicareNumber),
+        medicaid: toNullable(data.medicaid),
+        medicaidNumber: toNullable(data.medicaidNumber),
+
         // Medical Treatment
         ambulance: data.ambulance,
-        ambulanceCompany: data.ambulanceCompany,
+        ambulanceCompany: toNullable(data.ambulanceCompany),
         admitted: data.admitted,
-        lengthOfStay: data.lengthOfStay,
-        // Doctor/Hospital 1
+        lengthOfStay: toNullable(data.lengthOfStay),
+
+        // Doctor/Hospital
         doctorHospital1: data.doctorHospital1,
         address1: data.address1,
         phone1: data.phone1,
-        treatmentDate1: data.treatmentDate1 ? new Date(data.treatmentDate1) : null,
-        // Doctor/Hospital 2
-        doctorHospital2: data.doctorHospital2,
-        address2: data.address2,
-        phone2: data.phone2,
-        treatmentDate2: data.treatmentDate2 ? new Date(data.treatmentDate2) : null,
-        // Doctor/Hospital 3
-        doctorHospital3: data.doctorHospital3,
-        address3: data.address3,
-        phone3: data.phone3,
-        treatmentDate3: data.treatmentDate3 ? new Date(data.treatmentDate3) : null,
+        treatmentDate1: toNullable(data.treatmentDate1) ? new Date(data.treatmentDate1) : null,
+
+        doctorHospital2: toNullable(data.doctorHospital2),
+        address2: toNullable(data.address2),
+        phone2: toNullable(data.phone2),
+        treatmentDate2: toNullable(data.treatmentDate2) ? new Date(data.treatmentDate2) : null,
+
+        doctorHospital3: toNullable(data.doctorHospital3),
+        address3: toNullable(data.address3),
+        phone3: toNullable(data.phone3),
+        treatmentDate3: toNullable(data.treatmentDate3) ? new Date(data.treatmentDate3) : null,
+
         // Injuries
         bodyPartsAffected: data.bodyPartsAffected,
-        priorInjuries: data.priorInjuries,
-        priorInsuranceClaims: data.priorInsuranceClaims,
-        priorAttorneys: data.priorAttorneys,
+        priorInjuries: toNullable(data.priorInjuries),
+        priorInsuranceClaims: toNullable(data.priorInsuranceClaims),
+        priorAttorneys: toNullable(data.priorAttorneys),
       },
     });
 
@@ -121,3 +130,4 @@ export async function GET() {
     return NextResponse.json({ error: "Failed to fetch intake info" }, { status: 500 });
   }
 }
+      
