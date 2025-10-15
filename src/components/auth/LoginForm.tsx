@@ -67,13 +67,13 @@ export default function LoginForm() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
       {/* Left side: Illustration */}
-      <div className="md:w-1/2 relative flex items-center justify-center bg-gradient-to-br">
+      <div className="hidden md:flex md:w-1/2 relative items-center justify-center bg-gradient-to-br">
         <div className="relative w-full h-[90vh]"> {/* adjust height as needed */}
           <Image
             src="/login-bg.webp"
             alt="Login illustration"
             fill
-            className="object-contain md:object-cover"
+            className="object-cover"
             priority
           />
         </div>
@@ -81,7 +81,7 @@ export default function LoginForm() {
 
 
       {/* Right side: Form */}
-      <div className="md:w-1/2 flex items-center justify-center p-8">
+      <div className="flex-1 md:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md space-y-8">
           {/* Logo and Title */}
           <div className="space-y-2">
