@@ -1,11 +1,24 @@
 import { useState, useEffect } from "react";
 import { useForm, FormProvider, FieldError } from "react-hook-form";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { useFormContext } from "react-hook-form";
 import { useSession } from "next-auth/react";
 import { IntakeFormData, intakeFormSchema } from "../../lib/formValidationSchemas";
+import { toast } from "sonner";
+
+// Extend the session user type to include 'id'
+import type { DefaultUser } from "next-auth";
+import { useRouter } from "next/navigation";
+
+declare module "next-auth" {
+  interface Session {
+    user: DefaultUser & { id?: string | null };
+  }
+  interface User extends DefaultUser {
+    id?: string | null;
+  }
+}
 
 const steps = [
   "PLAINTIFF INFORMATION",
@@ -17,14 +30,13 @@ const steps = [
   "Submit",
 ];
 
-
 interface IntakeFormWizardProps {
   onFormSubmit?: (data: IntakeFormData) => void;
-  isSubmitting?: boolean;
 }
 
-export default function IntakeFormWizard({ onFormSubmit, isSubmitting }: IntakeFormWizardProps) {
+export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps) {
   const [step, setStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const methods = useForm<IntakeFormData>({
     resolver: zodResolver(intakeFormSchema),
     mode: "onBlur",
@@ -33,18 +45,44 @@ export default function IntakeFormWizard({ onFormSubmit, isSubmitting }: IntakeF
 
   useEffect(() => {
     if (session?.user) {
-      methods.setValue('clientName', session.user.name || '');
-      methods.setValue('email', session.user.email || '');
+      methods.setValue("clientName", session.user.name || "");
+      methods.setValue("email", session.user.email || "");
     }
   }, [session, methods]);
 
-  const onSubmit = (data: IntakeFormData) => {
-    console.log("Form submitted:", data);
-    if (onFormSubmit) {
-      onFormSubmit(data);
-    } else {
-      console.log("Form submitted:", data);
-      alert("✅ Intake form submitted successfully!");
+  const router = useRouter();
+
+  const onSubmit = async (data: IntakeFormData) => {
+    try {
+      const response = await fetch("/api/intake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...data,
+          userId: session?.user?.id || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorDetails = await response.text();
+        console.error("❌ Server Error:", errorDetails);
+        throw new Error("Failed to submit form");
+      }
+
+      const savedData = await response.json();
+      console.log("✅ Intake form saved:", savedData);
+
+      toast.success("✅ Intake form saved successfully!");
+
+      setTimeout(() => {
+        router.push("/");
+      }, 1000);
+    } catch (error) {
+      console.error(
+        "❌ Form submission failed:",
+        error instanceof Error ? error.message : error
+      );
+      toast.error("⚠️ There was an error submitting the form. Please try again.");
     }
   };
 
@@ -54,38 +92,35 @@ export default function IntakeFormWizard({ onFormSubmit, isSubmitting }: IntakeF
   return (
     <FormProvider {...methods}>
       <form
-    onSubmit={methods.handleSubmit(onSubmit)}
-    className=" max-w-4xl bg-white p-8 rounded-xl shadow-xl transition-all duration-300"
-  >
+        onSubmit={methods.handleSubmit(onSubmit)}
+        className="max-w-4xl bg-white dark:bg-gray-900 p-8 rounded-xl shadow-xl transition-all duration-300"
+      >
         {/* Header */}
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
+        <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white mb-8">
           Step {step + 1}: {steps[step]}
         </h2>
 
         {/* Step indicators with clickable function */}
         <div className="flex justify-between mb-6 mx-auto w-full max-w-3xl">
-        {steps.map((label, index) => (
+          {steps.map((label, index) => (
             <div
-            key={label}
-            onClick={() => setStep(index)}  // 👈 Go to that step on click
-            className={`flex-1 text-center text-xs sm:text-sm font-semibold cursor-pointer transition ${
-                index <= step ? "text-indigo-500" : "text-gray-400"
-            }`}
+              key={label}
+              onClick={() => setStep(index)}
+              className={`flex-1 text-center text-xs sm:text-sm font-semibold cursor-pointer transition ${
+                index <= step ? "text-indigo-500 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"
+              }`}
             >
-            <div
+              <div
                 className={`w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center ${
-                index <= step
-                    ? "bg-indigo-500 text-white"
-                    : "bg-gray-200 text-gray-500"
+                  index <= step ? "bg-indigo-500 text-white" : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300"
                 }`}
-            >
+              >
                 {index + 1}
+              </div>
+              {label}
             </div>
-            {label}
-            </div>
-        ))}
+          ))}
         </div>
-
 
         {/* Step 1 */}
         {step === 0 && (
@@ -119,200 +154,153 @@ export default function IntakeFormWizard({ onFormSubmit, isSubmitting }: IntakeF
 
         {/* Step 3 */}
         {step === 2 && (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-8 w-full"
-        >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 w-full">
             {/* Defendant #1 / Driver */}
-            <h2 className="text-xl font-semibold text-gray-500 pb-2">
-            Defendant #1 / Driver
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200 pb-2">Defendant #1 / Driver</h2>
 
             {/* Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField name="defendant1Name" label="Name" />
-            <InputField name="defendant1Phone" label="Phone" />
-            <InputField name="defendant1Address" label="Address" />
-            <InputField name="defendant1Carrier" label="Carrier" />
-            <InputField name="defendant1CarrierPhone" label="Carrier Phone" />
-            <InputField name="defendant1Policy" label="Policy #" />
-            <InputField name="defendant1Claim" label="Claim #" />
-            <InputField name="defendant1Adjuster" label="Adjuster" />
-            <InputField name="defendant1Insured" label="Insured" />
+              <InputField name="defendant1Name" label="Name" />
+              <InputField name="defendant1Phone" label="Phone" />
+              <InputField name="defendant1Address" label="Address" />
+              <InputField name="defendant1Carrier" label="Carrier" />
+              <InputField name="defendant1CarrierPhone" label="Carrier Phone" />
+              <InputField name="defendant1Policy" label="Policy #" />
+              <InputField name="defendant1Claim" label="Claim #" />
+              <InputField name="defendant1Adjuster" label="Adjuster" />
+              <InputField name="defendant1Insured" label="Insured" />
             </div>
 
             {/* Vehicle Info */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <InputField name="defendant1Year" label="Year" />
-            <InputField name="defendant1Make" label="Make" />
-            <InputField name="defendant1Model" label="Model" />
+              <InputField name="defendant1Year" label="Year" />
+              <InputField name="defendant1Make" label="Make" />
+              <InputField name="defendant1Model" label="Model" />
             </div>
 
             {/* Damage */}
             <TextareaField name="defendant1Damage" label="Damage" />
 
             {/* Defendant #2 / Owner */}
-            <h2 className="text-xl font-semibold text-gray-500 pb-2 pt-6">
-            Defendant #2 / Owner
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200 pb-2 pt-6">Defendant #2 / Owner</h2>
 
             {/* Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField name="defendant2Name" label="Name" />
-            <InputField name="defendant2Phone" label="Phone" />
-            <InputField name="defendant2Address" label="Address" />
-            <InputField name="defendant2Carrier" label="Carrier" />
-            <InputField name="defendant2CarrierPhone" label="Carrier Phone" />
-            <InputField name="defendant2Policy" label="Policy #" />
-            <InputField name="defendant2Claim" label="Claim #" />
-            <InputField name="defendant2Adjuster" label="Adjuster" />
-            <InputField name="defendant2Insured" label="Insured" />
+              <InputField name="defendant2Name" label="Name" />
+              <InputField name="defendant2Phone" label="Phone" />
+              <InputField name="defendant2Address" label="Address" />
+              <InputField name="defendant2Carrier" label="Carrier" />
+              <InputField name="defendant2CarrierPhone" label="Carrier Phone" />
+              <InputField name="defendant2Policy" label="Policy #" />
+              <InputField name="defendant2Claim" label="Claim #" />
+              <InputField name="defendant2Adjuster" label="Adjuster" />
+              <InputField name="defendant2Insured" label="Insured" />
             </div>
 
             {/* Vehicle Info */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <InputField name="defendant2Year" label="Year" />
-            <InputField name="defendant2Make" label="Make" />
-            <InputField name="defendant2Model" label="Model" />
+              <InputField name="defendant2Year" label="Year" />
+              <InputField name="defendant2Make" label="Make" />
+              <InputField name="defendant2Model" label="Model" />
             </div>
 
             {/* Damage */}
             <TextareaField name="defendant2Damage" label="Damage" />
-        </motion.div>
+          </motion.div>
         )}
-
-
 
         {/* Step 4 */}
         {step === 3 && (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-6 w-full"
-        >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 w-full">
             {/* Client Automobile Insurance */}
-            <h2 className="text-xl font-semibold  pb-2 text-gray-500">Client Automobile Insurance</h2>
+            <h2 className="text-xl font-semibold pb-2 text-gray-700 dark:text-gray-200">Client Automobile Insurance</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField name="autoName" label="Name" />
-            <InputField name="autoPhone" label="Phone" />
-            <InputField name="autoAddress" label="Address" />
-            <InputField name="autoCarrier" label="Carrier" />
-            <InputField name="autoAgent" label="Agent" />
-            <InputField name="autoPolicy" label="Policy #" />
-            <InputField name="autoClaim" label="Claim #" />
-            <InputField name="autoAdjuster" label="Adjuster" />
-            <InputField name="autoInsured" label="Insured" />
+              <InputField name="autoName" label="Name" />
+              <InputField name="autoPhone" label="Phone" />
+              <InputField name="autoAddress" label="Address" />
+              <InputField name="autoCarrier" label="Carrier" />
+              <InputField name="autoAgent" label="Agent" />
+              <InputField name="autoPolicy" label="Policy #" />
+              <InputField name="autoClaim" label="Claim #" />
+              <InputField name="autoAdjuster" label="Adjuster" />
+              <InputField name="autoInsured" label="Insured" />
             </div>
 
             {/* Client Health Insurance */}
-            <h2 className="text-xl font-semibold  pb-2 pt-6 text-gray-500">Client Health Insurance</h2>
+            <h2 className="text-xl font-semibold pb-2 pt-6 text-gray-700 dark:text-gray-200">Client Health Insurance</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField name="healthCarrier" label="Carrier" />
-            <InputField name="healthPhone" label="Phone #" />
-            <InputField name="healthType" label="Type of Health Insurance (PPO / HMO)" />
-            <InputField name="healthAddress" label="Address" />
-            <InputField name="healthGroup" label="Group #" />
-            <InputField name="healthPolicy" label="Policy #" />
+              <InputField name="healthCarrier" label="Carrier" />
+              <InputField name="healthPhone" label="Phone #" />
+              <InputField name="healthType" label="Type of Health Insurance (PPO / HMO)" />
+              <InputField name="healthAddress" label="Address" />
+              <InputField name="healthGroup" label="Group #" />
+              <InputField name="healthPolicy" label="Policy #" />
             </div>
 
             {/* Medicare */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+              <div>
                 <RadioGroup name="medicare" label="Medicare" options={["Yes", "No"]} />
-            </div>
-            <InputField name="medicareNumber" label="Medicare #" />
+              </div>
+              <InputField name="medicareNumber" label="Medicare #" />
             </div>
 
             {/* Medicaid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+              <div>
                 <RadioGroup name="medicaid" label="Medicaid" options={["Yes", "No"]} />
+              </div>
+              <InputField name="medicaidNumber" label="Medicaid #" />
             </div>
-            <InputField name="medicaidNumber" label="Medicaid #" />
-            </div>
-        </motion.div>
+          </motion.div>
         )}
-
 
         {/* Step 5 */}
         {step === 4 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4 w-full">
-            <RadioGroup
-            name="ambulance"
-            label="Transported by ambulance?"
-            options={["Yes", "No"]}
-            />
-            <InputField
-            name="ambulanceCompany"
-            label="Name of Ambulance Company"
-            />
-            <RadioGroup
-            name="admitted"
-            label="Were you admitted?"
-            options={["Yes", "No"]}
-            />
-            <InputField
-            name="lengthOfStay"
-            label="Length of stay"
-            />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4 w-full">
+            <RadioGroup name="ambulance" label="Transported by ambulance?" options={["Yes", "No"]} />
+            <InputField name="ambulanceCompany" label="Name of Ambulance Company" />
+            <RadioGroup name="admitted" label="Were you admitted?" options={["Yes", "No"]} />
+            <InputField name="lengthOfStay" label="Length of stay" />
 
             <div className="space-y-6">
-            {[1, 2, 3].map((num) => (
-                <div key={num} className=" p-2 rounded-2xl  ">
-                <h3 className="font-semibold text-lg mb-2 text-gray-500">Doctor / Hospital {num}</h3>
-                <InputField name={`doctorHospital${num}`} label="Doctor / Hospital Name" />
-                <InputField name={`address${num}`} label="Address" />
-                <InputField name={`phone${num}`} label="Phone Number" />
-                <InputField name={`treatmentDate${num}`} label="Date(s) of Treatment" type="date" />
+              {[1, 2, 3].map((num) => (
+                <div key={num} className="p-2 rounded-2xl">
+                  <h3 className="font-semibold text-lg mb-2 text-gray-700 dark:text-gray-200">Doctor / Hospital {num}</h3>
+                  <InputField name={`doctorHospital${num}`} label="Doctor / Hospital Name" />
+                  <InputField name={`address${num}`} label="Address" />
+                  <InputField name={`phone${num}`} label="Phone Number" />
+                  <InputField name={`treatmentDate${num}`} label="Date(s) of Treatment" type="date" />
                 </div>
-            ))}
+              ))}
             </div>
-        </motion.div>
+          </motion.div>
         )}
 
         {/* Step 6 */}
         {step === 5 && (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-6 w-full"
-        >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 w-full">
             <TextareaField
-            name="bodyPartsAffected"
-            label="Describe all parts of the body affected by this accident"
-            
+              name="bodyPartsAffected"
+              label="Describe all parts of the body affected by this accident"
             />
 
-            <TextareaField
-            name="priorInjuries"
-            label="Describe any prior injuries"
-            />
+            <TextareaField name="priorInjuries" label="Describe any prior injuries" />
 
-            <InputField
-            name="priorInsuranceClaims"
-            label="Prior Insurance Claims"
-            />
+            <InputField name="priorInsuranceClaims" label="Prior Insurance Claims" />
 
-            <InputField
-            name="priorAttorneys"
-            label="Prior Attorneys for PI or WC Injuries"
-            />
-        </motion.div>
+            <InputField name="priorAttorneys" label="Prior Attorneys for PI or WC Injuries" />
+          </motion.div>
         )}
 
-
-
-        {/* Step 7 */}
+        {/* Step 7 (Submit) */}
         {step === 6 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center space-y-3">
-            <p className="text-gray-600">
-              Please review all information carefully before submitting.
-            </p>
+            <p className="text-gray-600 dark:text-gray-300">Please review all information carefully before submitting.</p>
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full py-3 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSubmitting || !methods.formState.isValid}
+              className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? "Submitting..." : "Submit Form"}
             </button>
@@ -320,12 +308,12 @@ export default function IntakeFormWizard({ onFormSubmit, isSubmitting }: IntakeF
         )}
 
         {/* Buttons */}
-        <div className="flex justify-between pt-4 border-t mt-4">
+        <div className="flex justify-between pt-4 border-t mt-4 dark:border-gray-700">
           {step > 0 && (
             <button
               type="button"
               onClick={prevStep}
-              className="px-5 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
+              className="px-5 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition"
             >
               Back
             </button>
@@ -334,7 +322,7 @@ export default function IntakeFormWizard({ onFormSubmit, isSubmitting }: IntakeF
             <button
               type="button"
               onClick={nextStep}
-              className="ml-auto px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+              className="ml-auto px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition"
             >
               Next
             </button>
@@ -360,11 +348,11 @@ export function InputField({ name, label, type = "text" }: InputProps) {
 
   return (
     <div>
-      <label className="block font-medium text-gray-900 mb-1">{label}</label>
+      <label className="block font-medium text-gray-900 dark:text-gray-200 mb-1">{label}</label>
       <input
         {...register(name)}
         type={type}
-        className="w-full rounded-lg border text-gray-500 border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+        className="w-full rounded-lg border text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition"
       />
       {fieldError && <p className="text-red-500 text-sm mt-1">{fieldError.message}</p>}
     </div>
@@ -385,11 +373,11 @@ export function TextareaField({ name, label }: TextareaProps) {
 
   return (
     <div>
-      <label className="block font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block font-medium text-gray-900 dark:text-gray-200 mb-1">{label}</label>
       <textarea
         {...register(name)}
         rows={3}
-        className="w-full text-gray-500 rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+        className="w-full text-gray-800 dark:text-gray-100 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition"
       ></textarea>
       {fieldError && <p className="text-red-500 text-sm mt-1">{fieldError.message}</p>}
     </div>
@@ -411,15 +399,15 @@ export function RadioGroup({ name, label, options }: RadioProps) {
 
   return (
     <div>
-      <p className="block font-medium text-gray-700 mb-1">{label}</p>
+      <p className="block font-medium text-gray-900 dark:text-gray-200 mb-1">{label}</p>
       <div className="flex gap-6 flex-wrap">
         {options.map((opt) => (
-          <label key={opt} className="flex items-center gap-2 text-gray-800">
+          <label key={opt} className="flex items-center gap-2 text-gray-800 dark:text-gray-200">
             <input
               type="radio"
               value={opt}
               {...register(name)}
-              className="text-indigo-600 focus:ring-indigo-500"
+              className="text-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-400"
             />
             {opt}
           </label>
