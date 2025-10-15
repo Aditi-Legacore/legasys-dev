@@ -42,13 +42,13 @@ const steps = [
 
 // 👇 Define the fields to validate at each step
 const stepFields: (keyof IntakeFormData)[][] = [
-  ["clientName", "email"], // Step 0
-  ["accidentDate", "accidentLocation","accidentDescription"], // Step 1
-  ["defendant1Name"], // Step 2
-  ["healthAddress"], // Step 3
-  ["doctorHospital1"], // Step 4
-  ["bodyPartsAffected"], // Step 5
-  [], // Step 6 (Submit)
+  ["clientName", "email","gender","phone"], // Step 1
+  ["accidentDate", "accidentLocation","accidentDescription","caseType","seatBelt"], // Step 2
+  ["defendant1Name"], // Step 3
+  ["healthAddress","medicare","medicaid"], // Step 4
+  ["doctorHospital1"], // Step 5
+  ["bodyPartsAffected"], // Step 6
+  [], // Step 7 (Submit)
 ];
 
 interface IntakeFormWizardProps {
