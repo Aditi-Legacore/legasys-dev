@@ -15,9 +15,9 @@ export default function ClientInsuranceStep() {
         <InputField name="autoCarrier" label="Carrier" />
         <InputField name="autoAgent" label="Agent" />
         <InputField name="autoPolicy" label="Policy #" />
-        <InputField name="autoClaim" label="Claim #" />
+        {/* <InputField name="autoClaim" label="Claim #" />
         <InputField name="autoAdjuster" label="Adjuster" />
-        <InputField name="autoInsured" label="Insured" />
+        <InputField name="autoInsured" label="Insured" /> */}
       </div>
 
       {/* Client Health Insurance */}
@@ -37,20 +37,20 @@ export default function ClientInsuranceStep() {
       </div>
 
       {/* Medicare */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <RadioGroup name="medicare" label="Medicare" options={["Yes", "No"]} />
         </div>
         <InputField name="medicareNumber" label="Medicare #" />
-      </div>
+      </div> */}
 
       {/* Medicaid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <RadioGroup name="medicaid" label="Medicaid" options={["Yes", "No"]} />
         </div>
         <InputField name="medicaidNumber" label="Medicaid #" />
-      </div>
+      </div> */}
     </div>
   );
 }
