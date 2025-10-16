@@ -49,6 +49,7 @@ export default function SignupForm() {
 
         if (!signInRes?.error) {
           router.push("/");
+          window.location.reload();
         } else {
           alert("Signup successful, but login failed. Please try logging in manually.");
         }

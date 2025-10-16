@@ -58,6 +58,7 @@ export default function LoginForm() {
           localStorage.removeItem("rememberedEmail");
         }
         router.push("/");
+        window.location.reload();
       } else {
         alert("Invalid credentials");
       }
