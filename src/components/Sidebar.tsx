@@ -73,7 +73,7 @@ const Sidebar: React.FC = () => {
           <ul className="space-y-2">
             <li>
               <Link
-                href="/"
+                href="/intake-list"
                 onClick={() => {
                   setActiveItem("intake-list");
                   setIsMobileMenuOpen(false);

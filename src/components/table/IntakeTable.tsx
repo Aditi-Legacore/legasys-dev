@@ -1,112 +1,76 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { Edit, Trash2, Download, Share2, Eye } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Edit, Trash2, Eye, Plus, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { IntakeData } from '@/types/intake';
+import Pagination from '@/components/ui/pagination';
 
-export default function IntakePreviewPage() {
-  const params = useParams();
+interface CaseIntake {
+  id: number | string;
+  clientName: string;
+  accidentDate: string;
+  accidentDescription: string;
+}
+
+export default function IntakeTable() {
   const router = useRouter();
-  const [intake, setIntake] = useState<IntakeData | null>(null);
+  const [intakes, setIntakes] = useState<CaseIntake[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingDelete, setLoadingDelete] = useState(false);
-  const [loadingPdf, setLoadingPdf] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [showPdfPreview, setShowPdfPreview] = useState(false);
-
-  const id = params.id as string;
+  const [loadingView, setLoadingView] = useState<number | string | null>(null);
+  const [loadingEdit, setLoadingEdit] = useState<number | string | null>(null);
+  const [loadingDelete, setLoadingDelete] = useState<number | string | null>(null);
+  const [selectedIntake, setSelectedIntake] = useState<CaseIntake | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
-    const fetchIntake = async () => {
+    const fetchIntakes = async () => {
       try {
-        const res = await fetch(`/api/intake/${id}`);
-        if (!res.ok) throw new Error('Failed to fetch intake');
+        const res = await fetch('/api/intake');
+        if (!res.ok) throw new Error('Failed to fetch intakes');
         const data = await res.json();
-        setIntake(data);
+        setIntakes(data);
       } catch (error) {
         console.error(error);
-        toast.error('Failed to load intake details.');
+        toast.error('Failed to load intakes.');
       } finally {
         setLoading(false);
       }
     };
-    if (id) fetchIntake();
-  }, [id]);
+    fetchIntakes();
+  }, []);
 
-  useEffect(() => {
-    return () => {
-      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-    };
-  }, [pdfUrl]);
-
-  const handleUpdate = () => {
-    toast.info('Update functionality will be implemented.');
+  const handleView = (intake: CaseIntake) => {
+    router.push(`/intake-preview/${intake.id}`);
   };
 
-  const handleDelete = async () => {
+  const handleUpdate = (id: number | string) => {
+    router.push(`/intake-form?id=${id}`);
+  };
+
+  const handleDelete = async (id: number | string) => {
     if (!confirm('Are you sure you want to delete this intake?')) return;
-    setLoadingDelete(true);
+    setLoadingDelete(id);
     try {
       const res = await fetch(`/api/intake/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete intake');
+      setIntakes(intakes.filter(i => i.id !== id));
       toast.success('Intake deleted successfully.');
-      router.push('/');
     } catch (error) {
       console.error(error);
       toast.error('Failed to delete intake.');
     } finally {
-      setLoadingDelete(false);
+      setLoadingDelete(null);
     }
   };
 
-  const generatePdf = async () => {
-    setLoadingPdf(true);
-    try {
-      const res = await fetch(`/api/intake/${id}/pdf`, { method: 'POST' });
-      if (!res.ok) throw new Error('Failed to generate PDF');
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-      setPdfUrl(url);
-      toast.success('PDF generated successfully.');
-      return url;
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast.error('Failed to generate PDF.');
-      return null;
-    } finally {
-      setLoadingPdf(false);
-    }
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
-  const handlePreview = async () => {
-    let url = pdfUrl;
-    if (!url) url = await generatePdf();
-    if (url) setShowPdfPreview(true);
-  };
-
-  const handleDownload = async () => {
-    let url = pdfUrl;
-    if (!url) url = await generatePdf();
-    if (url) {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `intake-${id}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast.success('PDF downloaded successfully.');
-    }
-  };
-
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast.success('Link copied to clipboard.');
-  };
-
-  const formatDate = (dateString: string | null): string => {
+  const formatDate = (dateString: string): string => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -114,6 +78,9 @@ export default function IntakePreviewPage() {
       day: 'numeric',
     });
   };
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedIntakes = intakes.slice(startIndex, startIndex + itemsPerPage);
 
   if (loading) {
     return (
@@ -123,388 +90,234 @@ export default function IntakePreviewPage() {
     );
   }
 
-  if (!intake) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-        <p className="text-slate-500">Intake not found.</p>
-      </div>
-    );
-  }
-
   return (
-    <>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                Case Intake Preview
-              </h1>
-              <p className="text-slate-600 dark:text-gray-400 text-sm">
-                Review and manage case intake details
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+              Case Intake Management
+            </h1>
+            <p className="text-slate-600 dark:text-gray-400 text-sm">
+              Manage and review all case intakes
+            </p>
+          </div>
+          <button
+            onClick={() => router.push('/intake-form')}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            <Plus size={16} />
+            New Intake
+          </button>
+        </div>
+
+        {/* Desktop Table View - Hidden on mobile */}
+        <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                    S.No
+                  </th>
+                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                    Client Name
+                  </th>
+                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                    Date of Loss
+                  </th>
+                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                    Accident Description
+                  </th>
+                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-center text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedIntakes.map((intake, index) => (
+                  <tr
+                    key={intake.id}
+                    className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150"
+                  >
+                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      {startIndex + index + 1}
+                    </td>
+                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-900 dark:text-white font-medium">
+                      {intake.clientName}
+                    </td>
+                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-600 dark:text-gray-400">
+                      {formatDate(intake.accidentDate)}
+                    </td>
+                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm">
+                      <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 lg:px-3 py-1 rounded-full text-xs font-medium">
+                        {intake.accidentDescription}
+                      </span>
+                    </td>
+                    <td className="px-4 lg:px-6 py-3 lg:py-4">
+                      <div className="flex justify-center gap-1 lg:gap-2">
+                        <button
+                          onClick={() => handleView(intake)}
+                          disabled={loadingView === intake.id}
+                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
+                          title="View"
+                        >
+                          {loadingView === intake.id ? (
+                            <Loader2 size={16} className="lg:w-[18px] lg:h-[18px] animate-spin" />
+                          ) : (
+                            <Eye size={16} className="lg:w-[18px] lg:h-[18px]" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleUpdate(intake.id)}
+                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
+                          title="Edit"
+                        >
+                          {loadingEdit === intake.id ? (
+                            <Loader2 size={16} className="lg:w-[18px] lg:h-[18px] animate-spin" />
+                          ) : (
+                            <Edit size={16} className="lg:w-[18px] lg:h-[18px]" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(intake.id)}
+                          disabled={loadingDelete === intake.id}
+                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
+                          title="Delete"
+                        >
+                          {loadingDelete === intake.id ? (
+                            <Loader2 size={16} className="lg:w-[18px] lg:h-[18px] animate-spin" />
+                          ) : (
+                            <Trash2 size={16} className="lg:w-[18px] lg:h-[18px]" />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Mobile Card View - Visible only on mobile */}
+        <div className="md:hidden space-y-4">
+          {paginatedIntakes.map((intake, index) => (
+            <div
+              key={intake.id}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700"
+            >
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300">
+                      {startIndex + index + 1}
+                    </span>
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
+                      {intake.clientName}
+                    </h3>
+                  </div>
+                  <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-medium">
+                    {intake.accidentDescription}
+                  </span>
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => handleView(intake)}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
+                    title="View"
+                  >
+                    <Eye size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleUpdate(intake.id)}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
+                    title="Edit"
+                  >
+                    <Edit size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(intake.id)}
+                    disabled={loadingDelete === intake.id}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
+                    title="Delete"
+                  >
+                    {loadingDelete === intake.id ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={16} />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Date of Loss: {formatDate(intake.accidentDate)}
+              </div>
+            </div>
+          ))}
+
+          {intakes.length === 0 && (
+            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+              <p className="text-slate-500 text-base">
+                No case intakes found. Create one to get started.
               </p>
             </div>
-
-            {/* Client Info Card - Top Right */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700 min-w-[280px]">
-              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-3">Client Information</h3>
-              <div className="space-y-2">
-                <div>
-                  <p className="text-lg font-semibold text-slate-900 dark:text-white">{intake.clientName}</p>
-                </div>
-                <div className="text-sm space-y-1">
-                  <p className="text-slate-600 dark:text-gray-400">
-                    <span className="inline-block w-16">Email:</span>
-                    <span className="text-slate-900 dark:text-white">{intake.email}</span>
-                  </p>
-                  <p className="text-slate-600 dark:text-gray-400">
-                    <span className="inline-block w-16">Phone:</span>
-                    <span className="text-slate-900 dark:text-white">{intake.phoneNumber || 'N/A'}</span>
-                  </p>
-                  <p className="text-slate-600 dark:text-gray-400">
-                    <span className="inline-block w-16">DOB:</span>
-                    <span className="text-slate-900 dark:text-white">{formatDate(intake.dateOfBirth)}</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-2 flex-wrap mb-6">
-            <button
-              onClick={handleUpdate}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-            >
-              <Edit size={16} />
-              Update
-            </button>
-            <button
-              onClick={handlePreview}
-              disabled={loadingPdf}
-              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
-            >
-              {loadingPdf ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                <Eye size={16} />
-              )}
-              Preview PDF
-            </button>
-            <button
-              onClick={handleDownload}
-              disabled={loadingPdf}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
-            >
-              {loadingPdf ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                <Download size={16} />
-              )}
-              Download
-            </button>
-            <button
-              onClick={handleShare}
-              className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-            >
-              <Share2 size={16} />
-              Share
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={loadingDelete}
-              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
-            >
-              {loadingDelete ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                <Trash2 size={16} />
-              )}
-              Delete
-            </button>
-          </div>
-
-          {/* Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Plaintiff Information */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-                Plaintiff Information
-              </h2>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Name:</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{intake.clientName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Gender:</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{intake.gender || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Address:</span>
-                  <span className="font-medium text-slate-900 dark:text-white text-right">{intake.address || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">City:</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{intake.city || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Zip:</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{intake.zip || 'N/A'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Accident Information */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-                Accident Information
-              </h2>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Date:</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{formatDate(intake.accidentDate)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Time:</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{intake.accidentTime || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Location:</span>
-                  <span className="font-medium text-slate-900 dark:text-white text-right max-w-[60%]">{intake.accidentLocation || 'N/A'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-600 dark:text-gray-400 block mb-1">Description:</span>
-                  <p className="font-medium text-slate-900 dark:text-white">{intake.accidentDescription || 'N/A'}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Defendant 1 Information */}
-            {intake.defendant1Name && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-                <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-                  Defendant 1 Information
-                </h2>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-gray-400">Name:</span>
-                    <span className="font-medium text-slate-900 dark:text-white">{intake.defendant1Name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-gray-400">Phone:</span>
-                    <span className="font-medium text-slate-900 dark:text-white">{intake.defendant1Phone || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-gray-400">Carrier:</span>
-                    <span className="font-medium text-slate-900 dark:text-white">{intake.defendant1Carrier || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-gray-400">Policy:</span>
-                    <span className="font-medium text-slate-900 dark:text-white">{intake.defendant1Policy || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-gray-400">Vehicle:</span>
-                    <span className="font-medium text-slate-900 dark:text-white">{intake.defendant1Year} {intake.defendant1Make} {intake.defendant1Model || 'N/A'}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Defendant 2 Information */}
-            {intake.defendant2Name && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-                <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-                  Defendant 2 Information
-                </h2>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-gray-400">Name:</span>
-                    <span className="font-medium text-slate-900 dark:text-white">{intake.defendant2Name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-gray-400">Phone:</span>
-                    <span className="font-medium text-slate-900 dark:text-white">{intake.defendant2Phone || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-gray-400">Carrier:</span>
-                    <span className="font-medium text-slate-900 dark:text-white">{intake.defendant2Carrier || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-gray-400">Policy:</span>
-                    <span className="font-medium text-slate-900 dark:text-white">{intake.defendant2Policy || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-gray-400">Vehicle:</span>
-                    <span className="font-medium text-slate-900 dark:text-white">{intake.defendant2Year} {intake.defendant2Make} {intake.defendant2Model || 'N/A'}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Auto Insurance */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-                Auto Insurance
-              </h2>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Carrier:</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{intake.autoCarrier || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Agent:</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{intake.autoAgent || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Policy:</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{intake.autoPolicy || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Phone:</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{intake.autoPhone || 'N/A'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Health Insurance */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-                Health Insurance
-              </h2>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Carrier:</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{intake.healthCarrier || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Type:</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{intake.healthType || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Group:</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{intake.healthGroup || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-gray-400">Policy:</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{intake.healthPolicy || 'N/A'}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Medical Treatment - Full Width */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700 mt-6">
-            <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-              Medical Treatment
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
-              <div>
-                <span className="text-slate-600 dark:text-gray-400 block mb-1">Ambulance:</span>
-                <span className="font-medium text-slate-900 dark:text-white">{intake.ambulance ? 'Yes' : 'No'}</span>
-              </div>
-              <div>
-                <span className="text-slate-600 dark:text-gray-400 block mb-1">Company:</span>
-                <span className="font-medium text-slate-900 dark:text-white">{intake.ambulanceCompany || 'N/A'}</span>
-              </div>
-              <div>
-                <span className="text-slate-600 dark:text-gray-400 block mb-1">Admitted:</span>
-                <span className="font-medium text-slate-900 dark:text-white">{intake.admitted ? 'Yes' : 'No'}</span>
-              </div>
-              <div>
-                <span className="text-slate-600 dark:text-gray-400 block mb-1">Length of Stay:</span>
-                <span className="font-medium text-slate-900 dark:text-white">{intake.lengthOfStay || 'N/A'}</span>
-              </div>
-            </div>
-
-            {(intake.doctorHospital1 || intake.doctorHospital2 || intake.doctorHospital3) && (
-              <div className="space-y-4 mt-4">
-                {intake.doctorHospital1 && (
-                  <div className="border-l-4 border-blue-500 pl-4 py-2 bg-gray-50 dark:bg-gray-700/50">
-                    <h4 className="font-semibold text-slate-900 dark:text-white mb-2">Treatment 1</h4>
-                    <div className="space-y-1 text-sm">
-                      <p><span className="text-slate-600 dark:text-gray-400">Doctor/Hospital:</span> <span className="font-medium text-slate-900 dark:text-white">{intake.doctorHospital1}</span></p>
-                      <p><span className="text-slate-600 dark:text-gray-400">Address:</span> <span className="font-medium text-slate-900 dark:text-white">{intake.address1 || 'N/A'}</span></p>
-                      <p><span className="text-slate-600 dark:text-gray-400">Phone:</span> <span className="font-medium text-slate-900 dark:text-white">{intake.phone1 || 'N/A'}</span></p>
-                      <p><span className="text-slate-600 dark:text-gray-400">Date:</span> <span className="font-medium text-slate-900 dark:text-white">{formatDate(intake.treatmentDate1)}</span></p>
-                    </div>
-                  </div>
-                )}
-                {intake.doctorHospital2 && (
-                  <div className="border-l-4 border-blue-500 pl-4 py-2 bg-gray-50 dark:bg-gray-700/50">
-                    <h4 className="font-semibold text-slate-900 dark:text-white mb-2">Treatment 2</h4>
-                    <div className="space-y-1 text-sm">
-                      <p><span className="text-slate-600 dark:text-gray-400">Doctor/Hospital:</span> <span className="font-medium text-slate-900 dark:text-white">{intake.doctorHospital2}</span></p>
-                      <p><span className="text-slate-600 dark:text-gray-400">Address:</span> <span className="font-medium text-slate-900 dark:text-white">{intake.address2 || 'N/A'}</span></p>
-                      <p><span className="text-slate-600 dark:text-gray-400">Phone:</span> <span className="font-medium text-slate-900 dark:text-white">{intake.phone2 || 'N/A'}</span></p>
-                      <p><span className="text-slate-600 dark:text-gray-400">Date:</span> <span className="font-medium text-slate-900 dark:text-white">{formatDate(intake.treatmentDate2)}</span></p>
-                    </div>
-                  </div>
-                )}
-                {intake.doctorHospital3 && (
-                  <div className="border-l-4 border-blue-500 pl-4 py-2 bg-gray-50 dark:bg-gray-700/50">
-                    <h4 className="font-semibold text-slate-900 dark:text-white mb-2">Treatment 3</h4>
-                    <div className="space-y-1 text-sm">
-                      <p><span className="text-slate-600 dark:text-gray-400">Doctor/Hospital:</span> <span className="font-medium text-slate-900 dark:text-white">{intake.doctorHospital3}</span></p>
-                      <p><span className="text-slate-600 dark:text-gray-400">Address:</span> <span className="font-medium text-slate-900 dark:text-white">{intake.address3 || 'N/A'}</span></p>
-                      <p><span className="text-slate-600 dark:text-gray-400">Phone:</span> <span className="font-medium text-slate-900 dark:text-white">{intake.phone3 || 'N/A'}</span></p>
-                      <p><span className="text-slate-600 dark:text-gray-400">Date:</span> <span className="font-medium text-slate-900 dark:text-white">{formatDate(intake.treatmentDate3)}</span></p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Injuries - Full Width */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700 mt-6">
-            <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-              Injuries & Prior History
-            </h2>
-            <div className="space-y-3 text-sm">
-              <div>
-                <span className="text-slate-600 dark:text-gray-400 block mb-1">Body Parts Affected:</span>
-                <p className="font-medium text-slate-900 dark:text-white">{intake.bodyPartsAffected || 'N/A'}</p>
-              </div>
-              <div>
-                <span className="text-slate-600 dark:text-gray-400 block mb-1">Prior Injuries:</span>
-                <p className="font-medium text-slate-900 dark:text-white">{intake.priorInjuries || 'N/A'}</p>
-              </div>
-              <div>
-                <span className="text-slate-600 dark:text-gray-400 block mb-1">Prior Insurance Claims:</span>
-                <p className="font-medium text-slate-900 dark:text-white">{intake.priorInsuranceClaims || 'N/A'}</p>
-              </div>
-              <div>
-                <span className="text-slate-600 dark:text-gray-400 block mb-1">Prior Attorneys:</span>
-                <p className="font-medium text-slate-900 dark:text-white">{intake.priorAttorneys || 'N/A'}</p>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
-      </div>
 
-      {/* PDF Preview Modal */}
-      {showPdfPreview && pdfUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-6xl h-5/6 flex flex-col">
-            <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">PDF Preview</h3>
+        {/* Pagination */}
+        {intakes.length > itemsPerPage && (
+          <div className="mt-6">
+            <Pagination
+              totalItems={intakes.length}
+              itemsPerPage={itemsPerPage}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
+
+        {/* View Modal */}
+        {showModal && selectedIntake && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6 relative">
               <button
-                onClick={() => setShowPdfPreview(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                onClick={() => setShowModal(false)}
+                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                aria-label="Close modal"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X size={20} />
               </button>
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <iframe src={pdfUrl} className="w-full h-full" title="PDF Preview" />
+
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-6 pr-8">
+                Case Details
+              </h2>
+
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-slate-600 dark:text-gray-400 mb-1">Client Name</p>
+                  <p className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">
+                    {selectedIntake.clientName}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600 dark:text-gray-400 mb-1">Date of Loss</p>
+                  <p className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">
+                    {formatDate(selectedIntake.accidentDate)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600 dark:text-gray-400 mb-1">Accident Description</p>
+                  <p className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">
+                    {selectedIntake.accidentDescription}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </>
+        )}
+      </div>
+    </div>
   );
 }
