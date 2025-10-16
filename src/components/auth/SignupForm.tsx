@@ -11,7 +11,9 @@ import Image from "next/image";
 import { Form, FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { User, Mail, Lock, Eye, Loader2 } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import LoginBg from "../../../public/assets/images/auth/login-bg.png";
+import LoginLogoBg from "../../../public/assets/images/auth/logo.png";
 
 interface SignupFormData {
   name: string;
@@ -21,6 +23,7 @@ interface SignupFormData {
 
 export default function SignupForm() {
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -58,28 +61,30 @@ export default function SignupForm() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-white">
+    <div className="min-h-screen flex flex-col justify-center md:flex-row bg-white">
       {/* Left side: Illustration */}
-      <div className="hidden md:flex md:w-1/2 relative items-center justify-center bg-gradient-to-br">
-        <div className="relative w-full h-[90vh]"> {/* adjust height as needed */}
+      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center bg-gradient-to-br">
+        <div className="relative w-full h-[70vh] lg:h-[80vh] xl:h-[90vh]"> {/* adjust height as needed */}
           <Image
-            src="/login-bg.webp"
+            src={LoginBg}
             alt="Login illustration"
             fill
-            priority
             className="object-cover"
+            priority
           />
         </div>
       </div>
+
+
       {/* Right side: Form */}
-      <div className="flex-1 md:w-1/2 flex items-center justify-center p-8">
+      <div className="lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md space-y-8">
           {/* Logo and Title */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+          <div className="space-y-2 text-center">
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <div className="w-10 h-10 md:w-[50px] md:h-[50px] bg-white rounded-lg flex items-center justify-center overflow-hidden">
                 <Image
-                  src="/legacore.png"
+                  src={LoginLogoBg}
                   alt="Logo"
                   width={50}
                   height={50}
@@ -87,8 +92,7 @@ export default function SignupForm() {
                   priority
                 />
               </div>
-
-              <span className="text-xl font-bold text-gray-900">Legasys</span>
+              <span className="text-xl font-semibold text-gray-900">Legasys</span>
             </div>
             <h1 className="text-3xl font-bold text-gray-900">Create your Account</h1>
             <p className="text-gray-600">Sign up to get started with Legasys.</p>
@@ -149,11 +153,21 @@ export default function SignupForm() {
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                         <Input
                           {...field}
-                          type="password"
-                          placeholder="•••••••••"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="password"
                           className="pl-11 pr-11 h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
-                        <Eye className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 cursor-pointer" />
+                        {showPassword ? (
+                          <EyeOff
+                            className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 cursor-pointer"
+                            onClick={() => setShowPassword(false)}
+                          />
+                        ) : (
+                          <Eye
+                            className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 cursor-pointer"
+                            onClick={() => setShowPassword(true)}
+                          />
+                        )}
                       </div>
                     </FormControl>
                     <FormMessage />
