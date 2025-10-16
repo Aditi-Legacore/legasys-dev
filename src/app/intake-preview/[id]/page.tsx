@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Edit, Trash2, Download, Share2, Eye } from 'lucide-react';
+import { Edit, Trash2, Download, Share2, Eye, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { IntakeData } from '@/types/intake';
 
@@ -158,8 +158,15 @@ export default function IntakePreviewPage() {
       <div ref={contentRef} className="min-h-screen bg-white dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 lg:mb-8">
-            <div>
+          <div className="flex items-center justify-between gap-4 mb-6 lg:mb-8">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center justify-center bg-gray-600 hover:bg-gray-700 text-white p-2 rounded-lg transition-colors duration-200"
+              title="Back"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div className="flex-1 text-center">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white">
                 Case Intake Preview
               </h1>
@@ -167,37 +174,37 @@ export default function IntakePreviewPage() {
                 Review and manage case intake details
               </p>
             </div>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2">
               <button
                 onClick={handleUpdate}
-                className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200"
+                className="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors duration-200"
+                title="Update"
               >
                 <Edit size={16} />
-                Update
               </button>
               <button
                 onClick={handlePreview}
                 disabled={loadingPdf}
-                className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 disabled:opacity-50"
+                className="flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-lg transition-colors duration-200 disabled:opacity-50"
+                title="Preview PDF"
               >
                 {loadingPdf ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <Eye size={16} />
                 )}
-                Preview PDF
               </button>
               <button
                 onClick={handleDelete}
                 disabled={loadingDelete}
-                className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 disabled:opacity-50"
+                className="flex items-center justify-center bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors duration-200 disabled:opacity-50"
+                title="Delete"
               >
                 {loadingDelete ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <Trash2 size={16} />
                 )}
-                Delete
               </button>
             </div>
           </div>
