@@ -9,7 +9,7 @@ interface CaseIntake {
   id: number | string;
   clientName: string;
   accidentDate: string;
-  caseType: string;
+  accidentDescription: string;
 }
 
 export default function CaseIntakeManagement() {
@@ -138,7 +138,7 @@ export default function CaseIntakeManagement() {
                     Date of Loss
                   </th>
                   <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
-                    Case Type
+                    Accident Description
                   </th>
                   <th className="px-4 lg:px-6 py-3 lg:py-4 text-center text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
                     Actions
@@ -162,7 +162,7 @@ export default function CaseIntakeManagement() {
                     </td>
                     <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm">
                       <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 lg:px-3 py-1 rounded-full text-xs font-medium">
-                        {intake.caseType}
+                        {intake.accidentDescription}
                       </span>
                     </td>
                     <td className="px-4 lg:px-6 py-3 lg:py-4">
@@ -237,7 +237,7 @@ export default function CaseIntakeManagement() {
                     </h3>
                   </div>
                   <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-medium">
-                    {intake.caseType}
+                    {intake.accidentDescription}
                   </span>
                 </div>
               </div>
@@ -342,9 +342,9 @@ export default function CaseIntakeManagement() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-600 dark:text-gray-400 mb-1">Case Type</p>
+                  <p className="text-sm text-slate-600 dark:text-gray-400 mb-1">Accident Description</p>
                   <p className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">
-                    {selectedIntake.caseType}
+                    {selectedIntake.accidentDescription}
                   </p>
                 </div>
               </div>

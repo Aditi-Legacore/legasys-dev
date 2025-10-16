@@ -10,7 +10,7 @@ import AccidentInfoStep from "./formSteps/AccidentInfoStep";
 import DefendantInfoStep from "./formSteps/DefendantInfoStep";
 import ClientInsuranceStep from "./formSteps/ClientInsuranceStep";
 import MedicalTreatmentStep from "./formSteps/MedicalTreatmentStep";
-import InjuriesStep from "./formSteps/InjuriesStep";
+// import InjuriesStep from "./formSteps/InjuriesStep";
 import SubmitStep from "./formSteps/SubmitStep";
 import { useSession } from "next-auth/react";
 
@@ -36,7 +36,6 @@ const steps = [
   "DEFENDANT INFORMATION",
   "CLIENT INSURANCE INFORMATION",
   "MEDICAL TREATMENT",
-  "INJURIES",
   "Submit",
 ];
 
@@ -47,7 +46,7 @@ const stepFields: (keyof IntakeFormData)[][] = [
   ["defendant1Name"], // Step 3
   ["healthAddress"], // Step 4
   ["doctorHospital1","ambulance","admitted"], // Step 5
-  ["bodyPartsAffected"], // Step 6
+  // ["bodyPartsAffected"], // Step 6
   [], // Step 7 (Submit)
 ];
 
@@ -68,6 +67,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    
     if (session?.user) {
       methods.setValue("clientName", session.user.name || "");
       methods.setValue("email", session.user.email || "");
@@ -78,6 +78,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [session, methods,step]);
+  
 
   const router = useRouter();
 
@@ -147,8 +148,8 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
       case 2: return <DefendantInfoStep />;
       case 3: return <ClientInsuranceStep />;
       case 4: return <MedicalTreatmentStep />;
-      case 5: return <InjuriesStep />;
-      case 6: return <SubmitStep />;
+      // case 5: return <InjuriesStep />;
+      case 5: return <SubmitStep />;
       default: return null;
     }
   };
