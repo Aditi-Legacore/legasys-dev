@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import jsPDF from "jspdf";
 
-export default function SubmitStep() {
+interface SubmitStepProps {
+  isSubmitting?: boolean;
+}
+
+export default function SubmitStep({ isSubmitting = false }: SubmitStepProps) {
   const [selectedOption, setSelectedOption] = useState("");
   const [consent, setConsent] = useState(false);
   const { getValues } = useFormContext(); // 🧠 get all form values from wizard
@@ -115,14 +119,14 @@ export default function SubmitStep() {
       {/* Submit Button */}
       <button
         type="submit"
-        disabled={!consent}
+        disabled={!consent || isSubmitting}
         className={`w-full py-3 rounded-lg font-semibold transition ${
-          consent
+          consent && !isSubmitting
             ? "bg-green-600 text-white hover:bg-green-700"
             : "bg-gray-400 text-gray-700 cursor-not-allowed"
         }`}
       >
-        Submit Form
+        {isSubmitting ? "Submitting..." : "Submit Form"}
       </button>
     </div>
   );

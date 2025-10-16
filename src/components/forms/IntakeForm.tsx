@@ -41,13 +41,12 @@ const steps = [
 
 // 👇 Define the fields to validate at each step
 const stepFields: (keyof IntakeFormData)[][] = [
-  ["clientName", "email","gender","phone"], // Step 1
-  ["accidentDate", "accidentLocation","accidentDescription"], // Step 2
+  ["clientName", "email", "gender", "phone"], // Step 1
+  ["accidentDate", "accidentLocation", "accidentDescription"], // Step 2
   ["defendant1Name"], // Step 3
-  ["healthAddress"], // Step 4
-  ["doctorHospital1","ambulance","admitted"], // Step 5
-  // ["bodyPartsAffected"], // Step 6
-  [], // Step 7 (Submit)
+  [], // Step 4 (Client Insurance - no required fields)
+  [], // Step 5 (Medical Treatment - no required fields)
+  [], // Step 6 (Submit)
 ];
 
 interface IntakeFormWizardProps {
@@ -56,7 +55,7 @@ interface IntakeFormWizardProps {
 
 export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps) {
   const [step, setStep] = useState(0);
-  //  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const methods = useForm<IntakeFormData>({
     resolver: zodResolver(intakeFormSchema),
@@ -88,6 +87,9 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   }, [step]);
 
   const onSubmit = async (data: IntakeFormData) => {
+    console.log("🚀 Form submission attempted with data:", data);
+    console.log("Session user ID:", session?.user?.id);
+    setIsSubmitting(true);
     try {
       const response = await fetch("/api/intake", {
         method: "POST",
@@ -97,6 +99,9 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
           userId: session?.user?.id || null,
         }),
       });
+
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
 
       if (!response.ok) {
         const errorDetails = await response.text();
@@ -118,6 +123,8 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
         error instanceof Error ? error.message : error
       );
       toast.error("⚠️ There was an error submitting the form. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -149,7 +156,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
       case 3: return <ClientInsuranceStep />;
       case 4: return <MedicalTreatmentStep />;
       // case 5: return <InjuriesStep />;
-      case 5: return <SubmitStep />;
+      case 5: return <SubmitStep isSubmitting={isSubmitting} />;
       default: return null;
     }
   };
