@@ -3,15 +3,17 @@
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import jsPDF from "jspdf";
+import { Button } from "@/components/ui/button";
 
 interface SubmitStepProps {
   isSubmitting?: boolean;
 }
 
 export default function SubmitStep({ isSubmitting = false }: SubmitStepProps) {
-  const [selectedOption, setSelectedOption] = useState("");
   const [consent, setConsent] = useState(false);
-  const { getValues } = useFormContext(); // 🧠 get all form values from wizard
+  const { getValues, setValue, register, watch } = useFormContext(); // 🧠 get all form values from wizard
+
+  const hearAboutUs = watch("hearAboutUs");
 
   const options = [
     { value: "Internet", label: "Internet" },
@@ -61,10 +63,12 @@ export default function SubmitStep({ isSubmitting = false }: SubmitStepProps) {
             >
               <input
                 type="radio"
-                name="hearAboutUs"
+                {...register("hearAboutUs")}
                 value={opt.value}
-                checked={selectedOption === opt.value}
-                onChange={(e) => setSelectedOption(e.target.value)}
+                checked={hearAboutUs === opt.value}
+                onChange={(e) => {
+                  setValue("hearAboutUs", e.target.value);
+                }}
                 className="text-blue-600 focus:ring-blue-500"
               />
               <span className="text-gray-700 dark:text-gray-300">
@@ -74,14 +78,13 @@ export default function SubmitStep({ isSubmitting = false }: SubmitStepProps) {
           ))}
         </div>
 
-        {selectedOption && (
+        {hearAboutUs && (
           <div className="mt-3">
             <input
               type="text"
-              placeholder={`Please specify ${selectedOption}`}
-              {...{
-                name: "hearAboutUsDetail",
-              }}
+              placeholder={`Please specify ${hearAboutUs}`}
+              {...register("hearAboutUsDetail")}
+              onChange={(e) => setValue("hearAboutUsDetail", e.target.value)}
               className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300 dark:bg-gray-800 dark:text-white"
             />
           </div>
@@ -117,7 +120,7 @@ export default function SubmitStep({ isSubmitting = false }: SubmitStepProps) {
       </div>
 
       {/* Submit Button */}
-      <button
+      <Button
         type="submit"
         disabled={!consent || isSubmitting}
         className={`w-full py-3 rounded-lg font-semibold transition ${
@@ -125,9 +128,16 @@ export default function SubmitStep({ isSubmitting = false }: SubmitStepProps) {
             ? "bg-green-600 text-white hover:bg-green-700"
             : "bg-gray-400 text-gray-700 cursor-not-allowed"
         }`}
+        onClick={(e) => {
+          console.log("Button clicked");
+          if (!consent || isSubmitting) {
+            e.preventDefault();
+            console.log("Button disabled, preventing submit");
+          }
+        }}
       >
         {isSubmitting ? "Submitting..." : "Submit Form"}
-      </button>
+      </Button>
     </div>
   );
 }

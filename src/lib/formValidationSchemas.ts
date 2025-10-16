@@ -82,6 +82,10 @@ export const intakeFormSchema = z.object({
   currentTreatmentDetails: z.string().optional(),
   currentTreatmentFrom: z.string().optional(),
   currentTreatmentTo: z.string().optional(),
+
+  // Step 6 - Submit
+  hearAboutUs: z.string().optional(),
+  hearAboutUsDetail: z.string().optional(),
 });
 
 export type IntakeFormData = z.infer<typeof intakeFormSchema>;

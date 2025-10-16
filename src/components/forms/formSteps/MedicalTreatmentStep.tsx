@@ -60,16 +60,14 @@ export default function MedicalTreatmentStep() {
             name="priorTreatmentDetails"
             label="Treatment Details"
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <DateInputField
               name="priorTreatmentFrom"
               label="Treatment Date (From)"
-              type="date"
             />
-            <InputField
+            <DateInputField
               name="priorTreatmentTo"
               label="Treatment Date (To)"
-              type="date"
             />
           </div>
           <InputField
@@ -106,16 +104,14 @@ export default function MedicalTreatmentStep() {
             name="currentTreatmentDetails"
             label="Treatment Details"
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <DateInputField
               name="currentTreatmentFrom"
               label="Treatment Date (From)"
-              
             />
             <DateInputField
               name="currentTreatmentTo"
               label="Treatment Date (To)"
-              
             />
           </div>
         </div>

@@ -11,7 +11,7 @@ export default function AccidentInfoStep() {
   return (
     <div className="space-y-4 w-full">
       {/* <InputField name="accidentDate" label="Date of Accident *" type="date" /> */}
-      <DateInputField name="accidentDate" label="Date of Accident" />
+      <DateInputField name="accidentDate" label="Date of Accident *" />
       <InputField name="accidentTime" label="Time" type="time" />
       {/* <RadioGroup
         name="caseType"

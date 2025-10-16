@@ -91,6 +91,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
     console.log("Session user ID:", session?.user?.id);
     setIsSubmitting(true);
     try {
+      console.log("Making fetch request to /api/intake");
       const response = await fetch("/api/intake", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -115,7 +116,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
       toast.success("✅ Intake form saved successfully!");
 
       setTimeout(() => {
-        router.push("/");
+        router.push("/intake-list");
       }, 1000);
     } catch (error) {
       console.error(
@@ -161,16 +162,36 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
     }
   };
 
+  const handleFinalSubmit = async () => {
+    const isValid = await methods.trigger(); // validate all known fields
+    if (!isValid) {
+      toast.error("Please fill in all required fields before submitting.");
+      return;
+    }
+
+    methods.handleSubmit(onSubmit)();
+  };
+
   return (
     <FormProvider {...methods}>
       <div
-  ref={containerRef}
-  className="max-h-[80vh] overflow-auto"   // 👈 make this container scrollable
->
-      <form
-        onSubmit={methods.handleSubmit(onSubmit)}
-        className="max-w-4xl bg-white dark:bg-gray-900 p-8 rounded-xl shadow-xl transition-all duration-300"
+        ref={containerRef}
+        className="w-full mx-auto max-h-[80vh] overflow-auto"
       >
+        <form
+          onSubmit={(e) => {
+            console.log("Form onSubmit triggered");
+            e.preventDefault();
+            console.log("Calling methods.handleSubmit(onSubmit)");
+            methods.handleSubmit(onSubmit, (errors) => {
+              console.log("❌ Validation failed:", errors);
+            })();
+          }}
+          className="bg-white dark:bg-gray-900 p-4 sm:p-6 lg:p-8 rounded-xl shadow-xl transition-all duration-300"
+        >
+        <input type="hidden" {...methods.register("hearAboutUs")} />
+        <input type="hidden" {...methods.register("hearAboutUsDetail")} />
+
         {/* Header */}
         <h2 className="text-2xl font-bold text-center dark:text-white text-gray-800 mb-8">
           Step {step + 1}: {steps[step]}
