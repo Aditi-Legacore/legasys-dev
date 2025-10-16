@@ -5,10 +5,9 @@
 import IntakeFormWizard from "../../components/forms/IntakeForm";
 
 export default function Home() {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
-        
-        <IntakeFormWizard />
-      </div>
-    );
-  }
+  return (
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col items-center justify-center p-6">
+      <IntakeFormWizard />
+    </div>
+  );
+}

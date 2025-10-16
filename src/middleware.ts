@@ -8,7 +8,7 @@ export default withAuth(
 
     // If user is authenticated and trying to access login or signup, redirect to dashboard
     if (token && (pathname === "/login" || pathname === "/signup")) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+      return NextResponse.redirect(new URL("/", req.url));
     }
 
     // Allow the request to proceed

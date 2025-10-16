@@ -1,9 +1,7 @@
-import CaseIntakeManagement from "@/components/table/IntakeTable";
-
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <CaseIntakeManagement />
+    <div className="min-h-screen flex items-center justify-center">
+      <h1 className="text-2xl font-bold">Welcome to Legasys</h1>
     </div>
   );
 }
