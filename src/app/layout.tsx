@@ -1,3 +1,4 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -31,23 +32,20 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100`}
+      >
         <Providers>
           {session ? (
             <div className="flex h-screen">
-              {/* Sidebar */}
               <Sidebar />
-
-              {/* Main content */}
               <div className="flex flex-col flex-1">
                 <Navbar />
                 <main className="flex-1 overflow-y-auto p-6">{children}</main>
               </div>
             </div>
           ) : (
-            <div className="min-h-screen">
-              {children}
-            </div>
+            <div className="min-h-screen">{children}</div>
           )}
         </Providers>
       </body>
