@@ -41,13 +41,12 @@ const steps = [
 
 // 👇 Define the fields to validate at each step
 const stepFields: (keyof IntakeFormData)[][] = [
-  ["clientName", "email","gender","phone"], // Step 1
-  ["accidentDate", "accidentLocation","accidentDescription"], // Step 2
+  ["clientName", "email", "gender", "phone"], // Step 1
+  ["accidentDate", "accidentLocation", "accidentDescription"], // Step 2
   ["defendant1Name"], // Step 3
-  ["healthAddress"], // Step 4
-  ["doctorHospital1","ambulance","admitted"], // Step 5
-  // ["bodyPartsAffected"], // Step 6
-  [], // Step 7 (Submit)
+  [], // Step 4 (Client Insurance - no required fields)
+  [], // Step 5 (Medical Treatment - no required fields)
+  [], // Step 6 (Submit)
 ];
 
 interface IntakeFormWizardProps {
@@ -56,7 +55,7 @@ interface IntakeFormWizardProps {
 
 export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps) {
   const [step, setStep] = useState(0);
-  //  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const methods = useForm<IntakeFormData>({
     resolver: zodResolver(intakeFormSchema),
@@ -88,7 +87,11 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   }, [step]);
 
   const onSubmit = async (data: IntakeFormData) => {
+    console.log("🚀 Form submission attempted with data:", data);
+    console.log("Session user ID:", session?.user?.id);
+    setIsSubmitting(true);
     try {
+      console.log("Making fetch request to /api/intake");
       const response = await fetch("/api/intake", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -97,6 +100,9 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
           userId: session?.user?.id || null,
         }),
       });
+
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
 
       if (!response.ok) {
         const errorDetails = await response.text();
@@ -110,7 +116,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
       toast.success("✅ Intake form saved successfully!");
 
       setTimeout(() => {
-        router.push("/");
+        router.push("/intake-list");
       }, 1000);
     } catch (error) {
       console.error(
@@ -118,6 +124,8 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
         error instanceof Error ? error.message : error
       );
       toast.error("⚠️ There was an error submitting the form. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -149,21 +157,41 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
       case 3: return <ClientInsuranceStep />;
       case 4: return <MedicalTreatmentStep />;
       // case 5: return <InjuriesStep />;
-      case 5: return <SubmitStep />;
+      case 5: return <SubmitStep isSubmitting={isSubmitting} />;
       default: return null;
     }
+  };
+
+  const handleFinalSubmit = async () => {
+    const isValid = await methods.trigger(); // validate all known fields
+    if (!isValid) {
+      toast.error("Please fill in all required fields before submitting.");
+      return;
+    }
+
+    methods.handleSubmit(onSubmit)();
   };
 
   return (
     <FormProvider {...methods}>
       <div
-  ref={containerRef}
-  className="max-h-[80vh] overflow-auto"   // 👈 make this container scrollable
->
-      <form
-        onSubmit={methods.handleSubmit(onSubmit)}
-        className="max-w-4xl bg-white dark:bg-gray-900 p-8 rounded-xl shadow-xl transition-all duration-300"
+        ref={containerRef}
+        className="w-full mx-auto max-h-[80vh] overflow-auto"
       >
+        <form
+          onSubmit={(e) => {
+            console.log("Form onSubmit triggered");
+            e.preventDefault();
+            console.log("Calling methods.handleSubmit(onSubmit)");
+            methods.handleSubmit(onSubmit, (errors) => {
+              console.log("❌ Validation failed:", errors);
+            })();
+          }}
+          className="bg-white dark:bg-gray-900 p-4 sm:p-6 lg:p-8 rounded-xl shadow-xl transition-all duration-300"
+        >
+        <input type="hidden" {...methods.register("hearAboutUs")} />
+        <input type="hidden" {...methods.register("hearAboutUsDetail")} />
+
         {/* Header */}
         <h2 className="text-2xl font-bold text-center dark:text-white text-gray-800 mb-8">
           Step {step + 1}: {steps[step]}

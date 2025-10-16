@@ -9,7 +9,7 @@ export default function ClientInsuranceStep() {
       <h2 className="text-xl font-semibold pb-2 text-gray-700 dark:text-gray-200">
         Client Automobile Insurance
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <InputField name="autoName" label="Auto Insurance Carrier Name" />
         <InputField name="autoPhone" label="Phone" />
         <InputField name="autoAddress" label="Address" />
@@ -26,7 +26,7 @@ export default function ClientInsuranceStep() {
       <h2 className="text-xl font-semibold pb-2 pt-6 text-gray-700 dark:text-gray-200">
         Client Health Insurance
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <InputField name="healthCarrier" label="Health Insurance Carrier Name" />
         <InputField name="healthPhone" label="Phone" />
         {/* <InputField
@@ -38,12 +38,12 @@ export default function ClientInsuranceStep() {
         <InputField name="healthAgent" label="Agent" />
         <InputField name="healthPolicy" label="Policy #" />
         <InputField name="healthClaim" label="Claim #" />
-        
+
       </div>
       <InputField name="healthAdjuster" label="Adjuster" />
 
       {/* Medicare */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <RadioGroup name="medicare" label="Medicare" options={["Yes", "No"]} />
         </div>
@@ -51,7 +51,7 @@ export default function ClientInsuranceStep() {
       </div>
 
       {/* Medicaid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <RadioGroup name="medicaid" label="Medicaid" options={["Yes", "No"]} />
         </div>
