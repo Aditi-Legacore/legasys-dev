@@ -99,6 +99,10 @@ export default function IntakeTable() {
     });
   };
 
+  const truncateText = (text: string, maxLength: number): string => {
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedIntakes = intakes.slice(startIndex, startIndex + itemsPerPage);
 
@@ -240,17 +244,17 @@ export default function IntakeTable() {
               className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700"
             >
               <div className="flex justify-between items-start mb-3">
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 overflow-hidden">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300">
                       {startIndex + index + 1}
                     </span>
                     <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
-                      {intake.clientName}
+                      {truncateText(intake.clientName, 20)}
                     </h3>
                   </div>
-                  <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-medium">
-                    {intake.accidentDescription}
+                  <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-medium max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                    {truncateText(intake.accidentDescription, 20)}
                   </span>
                 </div>
                 <div className="flex gap-1">
