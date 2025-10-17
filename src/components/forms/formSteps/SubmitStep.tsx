@@ -120,24 +120,27 @@ export default function SubmitStep({ isSubmitting = false }: SubmitStepProps) {
       </div>
 
       {/* Submit Button */}
-      <Button
-        type="submit"
-        disabled={!consent || isSubmitting}
-        className={`w-full py-3 rounded-lg font-semibold transition ${
-          consent && !isSubmitting
-            ? "bg-green-600 text-white hover:bg-green-700"
-            : "bg-gray-400 text-gray-700 cursor-not-allowed"
-        }`}
-        onClick={(e) => {
-          console.log("Button clicked");
-          if (!consent || isSubmitting) {
-            e.preventDefault();
-            console.log("Button disabled, preventing submit");
-          }
-        }}
-      >
-        {isSubmitting ? "Submitting..." : "Submit Form"}
-      </Button>
+      <div className="flex justify-end">
+  <Button
+    type="submit"
+    disabled={!consent || isSubmitting}
+    className={`py-3 rounded-lg font-semibold transition ${
+      consent && !isSubmitting
+        ? "bg-green-600 text-white hover:bg-green-700"
+        : "bg-gray-400 text-gray-700 cursor-not-allowed"
+    }`}
+    onClick={(e) => {
+      console.log("Button clicked");
+      if (!consent || isSubmitting) {
+        e.preventDefault();
+        console.log("Button disabled, preventing submit");
+      }
+    }}
+  >
+    {isSubmitting ? "Submitting..." : "Submit Form"}
+  </Button>
+</div>
+
     </div>
   );
 }
