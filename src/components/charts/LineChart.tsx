@@ -36,10 +36,14 @@ export default function LineChart() {
     const fetchIntakes = async () => {
       try {
         const response = await fetch('/api/intake');
+        if (!response.ok) {
+          throw new Error('Failed to fetch intakes');
+        }
         const data = await response.json();
         setIntakes(data);
       } catch (error) {
         console.error('Failed to fetch intakes:', error);
+        setIntakes([]);
       } finally {
         setLoading(false);
       }
