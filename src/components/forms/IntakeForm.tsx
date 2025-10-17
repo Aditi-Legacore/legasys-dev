@@ -126,9 +126,18 @@ useEffect(() => {
         if (!res.ok) throw new Error("Failed to fetch intake data");
         const data = await res.json();
 
-        Object.keys(data).forEach((key) => {
-          if (data[key] !== null && data[key] !== undefined) {
-            methods.setValue(key as keyof IntakeFormData, data[key]);
+        // Map database fields back to form fields
+        const mappedData = {
+          ...data,
+          phone: data.phoneNumber || '',
+          dob: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
+          phoneNumber: data.phoneNumber || '',
+          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
+        };
+
+        Object.keys(mappedData).forEach((key) => {
+          if (mappedData[key] !== null && mappedData[key] !== undefined) {
+            methods.setValue(key as keyof IntakeFormData, mappedData[key]);
           }
         });
       } catch (err) {

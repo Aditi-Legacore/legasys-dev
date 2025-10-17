@@ -7,19 +7,29 @@ const toNullable = (value: string | undefined): string | null => (value === "" |
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
+    console.log("📥 POST /api/intake - Received data:", data);
+
+    // Validate userId if provided
+    if (data.userId) {
+      const user = await prisma.user.findUnique({ where: { id: data.userId } });
+      if (!user) {
+        data.userId = null; // Set to null if user doesn't exist
+      }
+    }
 
     const newIntake = await prisma.intakeInfo.create({
       data: {
         userId: toNullable(data.userId),
         clientName: data.clientName,
         gender: data.gender ?? null,
-        phoneNumber: data.phone ?? null,
+        phoneNumber: data.phoneNumber ?? null,
         email: data.email,
         address: data.address ?? null,
         city: data.city ?? null,
         zip: data.zip ?? null,
-        
-        dateOfBirth: toNullable(data.dob) ? new Date(data.dob) : null,
+
+        dateOfBirth: toNullable(data.dateOfBirth) ? new Date(data.dateOfBirth) : null,
+        ssn: toNullable(data.ssn),
         accidentDate: toNullable(data.accidentDate) ? new Date(data.accidentDate) : null,
         accidentTime: toNullable(data.accidentTime),
         accidentLocation: toNullable(data.accidentLocation),
@@ -89,9 +99,9 @@ export async function POST(request: NextRequest) {
         lengthOfStay: toNullable(data.lengthOfStay),
 
         // Doctor/Hospital
-        doctorHospital1: data.doctorHospital1,
-        address1: data.address1,
-        phone1: data.phone1,
+        doctorHospital1: toNullable(data.doctorHospital1),
+        address1: toNullable(data.address1),
+        phone1: toNullable(data.phone1),
         treatmentDate1: toNullable(data.treatmentDate1) ? new Date(data.treatmentDate1) : null,
 
         doctorHospital2: toNullable(data.doctorHospital2),
@@ -105,17 +115,33 @@ export async function POST(request: NextRequest) {
         // treatmentDate3: toNullable(data.treatmentDate3) ? new Date(data.treatmentDate3) : null,
 
         // Injuries
-        bodyPartsAffected: data.bodyPartsAffected,
+        bodyPartsAffected: toNullable(data.bodyPartsAffected),
         priorInjuries: toNullable(data.priorInjuries),
+        priorDoctorHospital: toNullable(data.priorDoctorHospital),
+        priorHospitalAddressPhone: toNullable(data.priorHospitalAddressPhone),
+        priorTreatmentDetails: toNullable(data.priorTreatmentDetails),
+        priorTreatmentFrom: toNullable(data.priorTreatmentFrom) ? new Date(data.priorTreatmentFrom) : null,
+        priorTreatmentTo: toNullable(data.priorTreatmentTo) ? new Date(data.priorTreatmentTo) : null,
         priorInsuranceClaims: toNullable(data.priorInsuranceClaims),
         priorAttorneys: toNullable(data.priorAttorneys),
+
+        // current treatment
+        currentTreatment: toNullable(data.currentTreatment),
+        currentDoctorHospital: toNullable(data.currentDoctorHospital),
+        currentHospitalAddressPhone: toNullable(data.currentHospitalAddressPhone),
+        currentTreatmentDetails: toNullable(data.currentTreatmentDetails),
+        currentTreatmentFrom: toNullable(data.currentTreatmentFrom) ? new Date(data.currentTreatmentFrom) : null,
+        currentTreatmentTo: toNullable(data.currentTreatmentTo) ? new Date(data.currentTreatmentTo) : null,
+
+        hearAboutUs: toNullable(data.hearAboutUs),
+        hearAboutUsDetail: toNullable(data.hearAboutUsDetail),
       },
     });
 
     return NextResponse.json(newIntake, { status: 201 });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Failed to save intake info" }, { status: 500 });
+  } catch (err: any) {
+    console.error("❌ POST /api/intake error:", err);
+    return NextResponse.json({ error: "Failed to save intake info", details: err.message }, { status: 500 });
   }
 }
 
