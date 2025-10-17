@@ -68,12 +68,16 @@ model IntakeInfo {
   city        String?
   zip         String?
   dateOfBirth DateTime?
+  ssn         String?   // ✅ added this line
 
   // 🚗 Accident Information
   accidentDate        DateTime?
   accidentTime        String?
   accidentLocation    String?
   accidentDescription String?
+  workAtAccident   String? 
+  passenger   String? 
+  passengerName   String? 
   // caseType            String?
   // policeCase          String?
   // seatBelt            String?
@@ -81,7 +85,7 @@ model IntakeInfo {
 
   // Defendant 1 / Driver
   defendant1Name         String?
-  defendant1Phone        String?
+  // defendant1Phone        String?
   defendant1Address      String?
   defendant1Carrier      String?
   defendant1CarrierPhone String?
@@ -116,8 +120,8 @@ model IntakeInfo {
   autoCarrier  String?
   autoAgent    String?
   autoPolicy   String?
-  // autoClaim    String?
-  // autoAdjuster String?
+  autoClaim    String?
+  autoAdditionalinfo String?
   // autoInsured  String?
 
   // Client Health Insurance
@@ -127,11 +131,15 @@ model IntakeInfo {
   healthAddress String?
   healthGroup   String?
   healthPolicy  String?
+  healthClaim  String?
+  healthAgent  String?
+  healthAdjuster  String?
+  healthAdditionalinfo  String?
 
-  // medicare       String? // "Yes" / "No"
-  // medicareNumber String?
-  // medicaid       String? // "Yes" / "No"
-  // medicaidNumber String?
+  medicare       String? // "Yes" / "No"
+  medicareNumber String?
+  medicaid       String? // "Yes" / "No"
+  medicaidNumber String?
 
   // Medical Treatment
   ambulance        String? // "Yes" / "No"
@@ -157,8 +165,24 @@ model IntakeInfo {
   // Injuries
   bodyPartsAffected    String?
   priorInjuries        String?
+  priorDoctorHospital        String?
+  priorHospitalAddressPhone        String?
+  priorTreatmentDetails        String?
+  priorTreatmentFrom        DateTime?
+  priorTreatmentTo        DateTime?
   priorInsuranceClaims String?
   priorAttorneys       String?
+
+  // current treatment
+  currentTreatment       String?
+  currentDoctorHospital       String?
+  currentHospitalAddressPhone       String?
+  currentTreatmentDetails       String?
+  currentTreatmentFrom        DateTime?
+  currentTreatmentTo        DateTime?
+  
+  hearAboutUs         String?
+  hearAboutUsDetail         String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

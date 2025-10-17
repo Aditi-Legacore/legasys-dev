@@ -1,60 +1,68 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { renderToStream } from '@react-pdf/renderer';
-import IntakePDFDocument from '@/components/pdf/IntakePDFDocument';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-export async function POST(
-  req: NextRequest,
+export async function GET(
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const id = params.id;
+    if (!id) {
+      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+    }
 
-    // Fetch intake data
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
-    const intakeRes = await fetch(`${baseUrl}/api/intake/${id}`, {
-      cache: 'no-store',
+    const intake = await prisma.intakeInfo.findUnique({
+      where: { id },
     });
-    
-    if (!intakeRes.ok) {
-      return NextResponse.json({ error: 'Intake not found' }, { status: 404 });
-    }
-    
-    const intake = await intakeRes.json();
 
-    // Generate PDF stream
-    const stream = await renderToStream(<IntakePDFDocument intake={intake} />);
-    
-    // Convert stream to buffer
-    const chunks: Uint8Array[] = [];
-    for await (const chunk of stream) {
-      // renderToStream may yield strings or binary chunks; normalize to Uint8Array/Buffer
-      if (typeof chunk === 'string') {
-        chunks.push(Buffer.from(chunk));
-      } else {
-        chunks.push(chunk);
-      }
+    if (!intake) {
+      return NextResponse.json({ error: "Intake not found" }, { status: 404 });
     }
-    const pdfBuffer = Buffer.concat(chunks);
 
-    // Return PDF
-    return new NextResponse(pdfBuffer, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="intake-${id}.pdf"`,
-      },
+    return NextResponse.json(intake, { status: 200 });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Failed to fetch intake" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    if (!id) {
+      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+    }
+
+    await prisma.intakeInfo.delete({
+      where: { id },
     });
-  } catch (error: unknown) {
-    console.error('Error generating PDF:', error);
-    let details: string;
-    if (error instanceof Error) {
-      details = error.message;
-    } else {
-      details = String(error);
-    }
-    return NextResponse.json(
-      { error: 'Failed to generate PDF', details },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ message: "Intake deleted successfully" }, { status: 200 });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Failed to delete intake" }, { status: 500 });
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = params.id;
+    const body = await request.json();
+
+    const updatedIntake = await prisma.intakeInfo.update({
+      where: { id },
+      data: body,
+    });
+
+    return NextResponse.json(updatedIntake, { status: 200 });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Failed to update intake" }, { status: 500 });
   }
 }

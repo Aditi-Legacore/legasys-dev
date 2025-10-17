@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
         // Defendant 1
         defendant1Name: toNullable(data.defendant1Name),
-        defendant1Phone: toNullable(data.defendant1Phone),
+        // defendant1Phone: toNullable(data.defendant1Phone),
         defendant1Address: toNullable(data.defendant1Address),
         defendant1Carrier: toNullable(data.defendant1Carrier),
         defendant1CarrierPhone: toNullable(data.defendant1CarrierPhone),
