@@ -118,7 +118,7 @@ export default function MedicalTreatmentStep() {
       )}
 
       {/* Default Doctor/Hospital List */}
-      {/* <div className="space-y-6">
+      <div className="space-y-6">
         {[1, 2].map((num) => (
           <div key={num} className="p-2 rounded-2xl">
             <h3 className="font-semibold text-lg mb-2 text-gray-700 dark:text-gray-200">
@@ -130,14 +130,19 @@ export default function MedicalTreatmentStep() {
             />
             <InputField name={`address${num}`} label="Address" />
             <InputField name={`phone${num}`} label="Phone Number" />
-            <InputField
+            <DateInputField
               name={`treatmentDate${num}`}
               label="Date(s) of Treatment"
-              type="date"
             />
           </div>
         ))}
-      </div> */}
+      </div>
+
+      {/* Body Parts Affected */}
+      <TextareaField
+        name="bodyPartsAffected"
+        label="Body Parts Affected"
+      />
     </div>
   );
 }
