@@ -26,26 +26,26 @@ export async function GET(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    if (!id) {
-      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
-    }
+// export async function DELETE(
+//   request: NextRequest,
+//   { params }: { params: Promise<{ id: string }> }
+// ) {
+//   try {
+//     const { id } = await params;
+//     if (!id) {
+//       return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+//     }
 
-    await prisma.intakeInfo.delete({
-      where: { id },
-    });
+//     await prisma.intakeInfo.delete({
+//       where: { id },
+//     });
 
-    return NextResponse.json({ message: "Intake deleted successfully" }, { status: 200 });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Failed to delete intake" }, { status: 500 });
-  }
-}
+//     return NextResponse.json({ message: "Intake deleted successfully" }, { status: 200 });
+//   } catch (err) {
+//     console.error(err);
+//     return NextResponse.json({ error: "Failed to delete intake" }, { status: 500 });
+//   }
+// }
 
 // export async function PUT(
 //   request: NextRequest,
@@ -66,6 +66,42 @@ export async function DELETE(
 //     return NextResponse.json({ error: "Failed to update intake" }, { status: 500 });
 //   }
 // }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    if (!id) {
+      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+    }
+
+    const existing = await prisma.intakeInfo.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Intake not found" }, { status: 404 });
+    }
+
+    await prisma.intakeInfo.delete({
+      where: { id },
+    });
+
+    return NextResponse.json(
+      { message: "Intake deleted successfully" },
+      { status: 200 }
+    );
+  } catch (err: any) {
+    console.error("❌ Delete error:", err);
+    return NextResponse.json(
+      { error: "Failed to delete intake", details: err.message },
+      { status: 500 }
+    );
+  }
+}
 
 
 export async function PUT(

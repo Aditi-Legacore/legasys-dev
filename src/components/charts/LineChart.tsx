@@ -36,10 +36,19 @@ export default function LineChart() {
     const fetchIntakes = async () => {
       try {
         const response = await fetch('/api/intake');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
-        setIntakes(data);
+        if (Array.isArray(data)) {
+          setIntakes(data);
+        } else {
+          console.error('Fetched data is not an array:', data);
+          setIntakes([]);
+        }
       } catch (error) {
         console.error('Failed to fetch intakes:', error);
+        setIntakes([]);
       } finally {
         setLoading(false);
       }
@@ -56,6 +65,10 @@ export default function LineChart() {
   }
 
   const getChartData = (period: string, intakes: Intake[]) => {
+    if (!Array.isArray(intakes)) {
+      return { categories: [], data: [] };
+    }
+
     const now = new Date();
     let filteredIntakes: Intake[] = [];
     let categories: string[] = [];
