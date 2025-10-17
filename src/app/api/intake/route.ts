@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
 
     const newIntake = await prisma.intakeInfo.create({
       data: {
-        userId: toNullable(data.userId),
+        ...(data.userId && { user: { connect: { id: data.userId } } }),
         clientName: data.clientName,
         gender: data.gender ?? null,
         phoneNumber: data.phone ?? null,
@@ -105,10 +105,25 @@ export async function POST(request: NextRequest) {
         // treatmentDate3: toNullable(data.treatmentDate3) ? new Date(data.treatmentDate3) : null,
 
         // Injuries
-        bodyPartsAffected: data.bodyPartsAffected,
+        bodyPartsAffected: toNullable(data.bodyPartsAffected),
         priorInjuries: toNullable(data.priorInjuries),
         priorInsuranceClaims: toNullable(data.priorInsuranceClaims),
         priorAttorneys: toNullable(data.priorAttorneys),
+
+        // Additional fields
+        priorDoctorHospital: toNullable(data.priorDoctorHospital),
+        priorHospitalAddressPhone: toNullable(data.priorHospitalAddressPhone),
+        priorTreatmentDetails: toNullable(data.priorTreatmentDetails),
+        priorTreatmentFrom: toNullable(data.priorTreatmentFrom) ? new Date(data.priorTreatmentFrom) : null,
+        priorTreatmentTo: toNullable(data.priorTreatmentTo) ? new Date(data.priorTreatmentTo) : null,
+        currentTreatment: toNullable(data.currentTreatment),
+        currentDoctorHospital: toNullable(data.currentDoctorHospital),
+        currentHospitalAddressPhone: toNullable(data.currentHospitalAddressPhone),
+        currentTreatmentDetails: toNullable(data.currentTreatmentDetails),
+        currentTreatmentFrom: toNullable(data.currentTreatmentFrom) ? new Date(data.currentTreatmentFrom) : null,
+        currentTreatmentTo: toNullable(data.currentTreatmentTo) ? new Date(data.currentTreatmentTo) : null,
+        hearAboutUs: toNullable(data.hearAboutUs),
+        hearAboutUsDetail: toNullable(data.hearAboutUsDetail),
       },
     });
 

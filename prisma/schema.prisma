@@ -68,12 +68,16 @@ model IntakeInfo {
   city        String?
   zip         String?
   dateOfBirth DateTime?
+  ssn         String?
 
   // 🚗 Accident Information
   accidentDate        DateTime?
   accidentTime        String?
   accidentLocation    String?
   accidentDescription String?
+  passenger           String?
+  passengerName       String?
+  workAtAccident      String?
   // caseType            String?
   // policeCase          String?
   // seatBelt            String?
@@ -116,7 +120,7 @@ model IntakeInfo {
   autoCarrier  String?
   autoAgent    String?
   autoPolicy   String?
-  // autoClaim    String?
+  autoClaim    String?
   // autoAdjuster String?
   // autoInsured  String?
 
@@ -127,11 +131,13 @@ model IntakeInfo {
   healthAddress String?
   healthGroup   String?
   healthPolicy  String?
+  healthClaim   String?
+  healthAdjuster String?
 
-  // medicare       String? // "Yes" / "No"
-  // medicareNumber String?
-  // medicaid       String? // "Yes" / "No"
-  // medicaidNumber String?
+  medicare       String? // "Yes" / "No"
+  medicareNumber String?
+  medicaid       String? // "Yes" / "No"
+  medicaidNumber String?
 
   // Medical Treatment
   ambulance        String? // "Yes" / "No"
@@ -159,6 +165,21 @@ model IntakeInfo {
   priorInjuries        String?
   priorInsuranceClaims String?
   priorAttorneys       String?
+
+  // Additional fields from form
+  priorDoctorHospital        String?
+  priorHospitalAddressPhone  String?
+  priorTreatmentDetails      String?
+  priorTreatmentFrom         DateTime?
+  priorTreatmentTo           DateTime?
+  currentTreatment           String?
+  currentDoctorHospital      String?
+  currentHospitalAddressPhone String?
+  currentTreatmentDetails    String?
+  currentTreatmentFrom       DateTime?
+  currentTreatmentTo         DateTime?
+  hearAboutUs                String?
+  hearAboutUsDetail          String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
