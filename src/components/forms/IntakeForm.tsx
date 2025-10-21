@@ -339,7 +339,8 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
             <div
               key={label}
               onClick={() => setStep(index)}
-              className={`flex-1 text-center text-xs sm:text-sm font-semibold cursor-pointer transition 
+              className={`flex-1 text-center text-xs sm:text-sm font-semibold cursor-pointer transition
+                ${index === step ? "block" : "hidden sm:block"}
                 ${index <= step ? "text-indigo-500 dark:text-indigo-400" : "text-gray-400"}`}
             >
               <div

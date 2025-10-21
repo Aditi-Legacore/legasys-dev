@@ -20,6 +20,7 @@ export default function IntakeTable() {
   const [loadingView, setLoadingView] = useState<number | string | null>(null);
   const [loadingEdit, setLoadingEdit] = useState<number | string | null>(null);
   const [loadingDelete, setLoadingDelete] = useState<number | string | null>(null);
+  const [loadingNew, setLoadingNew] = useState(false); // ✅ Added loader for "New Intake"
   const [selectedIntake, setSelectedIntake] = useState<CaseIntake | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,12 +43,22 @@ export default function IntakeTable() {
     fetchIntakes();
   }, []);
 
-  const handleView = (intake: CaseIntake) => {
-    router.push(`/intake-preview/${intake.id}`);
+  const handleView = async (intake: CaseIntake) => {
+    setLoadingView(intake.id);
+    try {
+      router.push(`/intake-preview/${intake.id}`);
+    } finally {
+      setLoadingView(null);
+    }
   };
 
-  const handleUpdate = (id: number | string) => {
-    router.push(`/intake-form?id=${id}`);
+  const handleUpdate = async (id: number | string) => {
+    setLoadingEdit(id);
+    try {
+      router.push(`/intake-form?id=${id}`);
+    } finally {
+      setLoadingEdit(null);
+    }
   };
 
   const handleDelete = async (id: number | string) => {
@@ -67,6 +78,15 @@ export default function IntakeTable() {
     }
   };
 
+  const handleNewIntake = async () => {
+    setLoadingNew(true);
+    try {
+      router.push('/intake-form');
+    } finally {
+      setLoadingNew(false);
+    }
+  };
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -78,6 +98,10 @@ export default function IntakeTable() {
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  const truncateText = (text: string, maxLength: number): string => {
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -105,15 +129,20 @@ export default function IntakeTable() {
             </p>
           </div>
           <button
-            onClick={() => router.push('/intake-form')}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+            onClick={handleNewIntake}
+            disabled={loadingNew}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
           >
-            <Plus size={16} />
-            New Intake
+            {loadingNew ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Plus size={16} />
+            )}
+            {loadingNew ? 'Loading...' : 'New Intake'}
           </button>
         </div>
 
-        {/* Desktop Table View - Hidden on mobile */}
+        {/* Desktop Table View */}
         <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -158,39 +187,45 @@ export default function IntakeTable() {
                     </td>
                     <td className="px-4 lg:px-6 py-3 lg:py-4">
                       <div className="flex justify-center gap-1 lg:gap-2">
+                        {/* View Button */}
                         <button
                           onClick={() => handleView(intake)}
                           disabled={loadingView === intake.id}
-                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
+                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                           title="View"
                         >
                           {loadingView === intake.id ? (
-                            <Loader2 size={16} className="lg:w-[18px] lg:h-[18px] animate-spin" />
+                            <Loader2 size={16} className="animate-spin" />
                           ) : (
-                            <Eye size={16} className="lg:w-[18px] lg:h-[18px]" />
+                            <Eye size={16} />
                           )}
                         </button>
+
+                        {/* Edit Button */}
                         <button
                           onClick={() => handleUpdate(intake.id)}
-                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
+                          disabled={loadingEdit === intake.id}
+                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                           title="Edit"
                         >
                           {loadingEdit === intake.id ? (
-                            <Loader2 size={16} className="lg:w-[18px] lg:h-[18px] animate-spin" />
+                            <Loader2 size={16} className="animate-spin" />
                           ) : (
-                            <Edit size={16} className="lg:w-[18px] lg:h-[18px]" />
+                            <Edit size={16} />
                           )}
                         </button>
+
+                        {/* Delete Button */}
                         <button
                           onClick={() => handleDelete(intake.id)}
                           disabled={loadingDelete === intake.id}
-                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
+                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                           title="Delete"
                         >
                           {loadingDelete === intake.id ? (
-                            <Loader2 size={16} className="lg:w-[18px] lg:h-[18px] animate-spin" />
+                            <Loader2 size={16} className="animate-spin" />
                           ) : (
-                            <Trash2 size={16} className="lg:w-[18px] lg:h-[18px]" />
+                            <Trash2 size={16} />
                           )}
                         </button>
                       </div>
@@ -202,7 +237,7 @@ export default function IntakeTable() {
           </div>
         </div>
 
-        {/* Mobile Card View - Visible only on mobile */}
+        {/* Mobile Card View */}
         <div className="md:hidden space-y-4">
           {paginatedIntakes.map((intake, index) => (
             <div
@@ -210,33 +245,43 @@ export default function IntakeTable() {
               className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700"
             >
               <div className="flex justify-between items-start mb-3">
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 overflow-hidden">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300">
                       {startIndex + index + 1}
                     </span>
                     <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
-                      {intake.clientName}
+                      {truncateText(intake.clientName, 20)}
                     </h3>
                   </div>
-                  <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-medium">
-                    {intake.accidentDescription}
+                  <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-medium max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                    {truncateText(intake.accidentDescription, 20)}
                   </span>
                 </div>
                 <div className="flex gap-1">
                   <button
                     onClick={() => handleView(intake)}
-                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
+                    disabled={loadingView === intake.id}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                     title="View"
                   >
-                    <Eye size={16} />
+                    {loadingView === intake.id ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Eye size={16} />
+                    )}
                   </button>
                   <button
                     onClick={() => handleUpdate(intake.id)}
-                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
+                    disabled={loadingEdit === intake.id}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                     title="Edit"
                   >
-                    <Edit size={16} />
+                    {loadingEdit === intake.id ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Edit size={16} />
+                    )}
                   </button>
                   <button
                     onClick={() => handleDelete(intake.id)}

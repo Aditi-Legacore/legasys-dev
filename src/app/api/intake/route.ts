@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     const newIntake = await prisma.intakeInfo.create({
       data: {
-        userId: toNullable(data.userId),
+        ...(data.userId && { user: { connect: { id: data.userId } } }),
         clientName: data.clientName,
         gender: data.gender ?? null,
         phoneNumber: data.phoneNumber ?? null,
@@ -126,6 +126,12 @@ export async function POST(request: NextRequest) {
         priorAttorneys: toNullable(data.priorAttorneys),
 
         // current treatment
+        // Additional fields
+        // priorDoctorHospital: toNullable(data.priorDoctorHospital),
+        // priorHospitalAddressPhone: toNullable(data.priorHospitalAddressPhone),
+        // priorTreatmentDetails: toNullable(data.priorTreatmentDetails),
+        // priorTreatmentFrom: toNullable(data.priorTreatmentFrom) ? new Date(data.priorTreatmentFrom) : null,
+        // priorTreatmentTo: toNullable(data.priorTreatmentTo) ? new Date(data.priorTreatmentTo) : null,
         currentTreatment: toNullable(data.currentTreatment),
         currentDoctorHospital: toNullable(data.currentDoctorHospital),
         currentHospitalAddressPhone: toNullable(data.currentHospitalAddressPhone),
