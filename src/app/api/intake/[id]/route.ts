@@ -113,7 +113,7 @@ export async function PUT(
     const data = await req.json();
 
     console.log("📝 PUT /api/intake ID:", id);
-    console.log("📦 PUT body:", data);
+    // console.log("📦 PUT body:", data);
 
     // Validate userId if provided
     if (data.userId) {

@@ -78,21 +78,14 @@ model IntakeInfo {
   passenger           String?
   passengerName       String?
   workAtAccident      String?
-  // caseType            String?
-  // policeCase          String?
-  // seatBelt            String?
-  // seatBeltReason      String?
-
+  
   // Defendant 1 / Driver
   defendant1Name         String?
-  // defendant1Phone        String?
+ 
   defendant1Address      String?
   defendant1Carrier      String?
   defendant1CarrierPhone String?
-  // defendant1Policy       String?
-  // defendant1Claim        String?
-  // defendant1Adjuster     String?
-  // defendant1Insured      String?
+  
   defendant1Year         String?
   defendant1Make         String?
   defendant1Model        String?
@@ -100,14 +93,11 @@ model IntakeInfo {
 
   // Defendant 2 / Owner
   defendant2Name         String?
-  // defendant2Phone        String?
+ 
   defendant2Address      String?
   defendant2Carrier      String?
   defendant2CarrierPhone String?
-  // defendant2Policy       String?
-  // defendant2Claim        String?
-  // defendant2Adjuster     String?
-  // defendant2Insured      String?
+ 
   defendant2Year         String?
   defendant2Make         String?
   defendant2Model        String?
@@ -117,20 +107,19 @@ model IntakeInfo {
   autoName     String?
   autoPhone    String?
   autoAddress  String?
-  // autoCarrier  String?
+  
   autoAgent    String?
   autoPolicy   String?
   autoClaim    String?
   autoAdditionalinfo    String?
-  // autoAdjuster String?
-  // autoInsured  String?
+ 
 
   // Client Health Insurance
   healthCarrier String?
   healthPhone   String?
-  // healthType    String?
+ 
   healthAddress String?
-  // healthGroup   String?
+  
   healthPolicy  String?
   healthClaim   String?
   healthAdjuster String?
@@ -158,10 +147,6 @@ model IntakeInfo {
   phone2          String?
   treatmentDate2  DateTime?
 
-  // doctorHospital3 String?
-  // address3        String?
-  // phone3          String?
-  // treatmentDate3  DateTime?
 
   // Injuries
   bodyPartsAffected    String?
@@ -174,12 +159,7 @@ model IntakeInfo {
   priorInsuranceClaims String?
   priorAttorneys       String?
 
-  // Additional fields from form
-  // priorDoctorHospital        String?
-  // priorHospitalAddressPhone  String?
-  // priorTreatmentDetails      String?
-  // priorTreatmentFrom         DateTime?
-  // priorTreatmentTo           DateTime?
+  
   currentTreatment           String?
   currentDoctorHospital      String?
   currentHospitalAddressPhone String?
