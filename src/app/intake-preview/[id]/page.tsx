@@ -233,7 +233,7 @@ export default function IntakePreviewPage() {
                     <p className="text-black dark:text-gray-200"><strong>Address:</strong> {intake.defendant1Address || 'N/A'}</p>
                     <p className="text-black dark:text-gray-200"><strong>Carrier:</strong> {intake.defendant1Carrier || 'N/A'}</p>
                     <p className="text-black dark:text-gray-200"><strong>Carrier Phone:</strong> {intake.defendant1CarrierPhone || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Policy:</strong> {intake.defendant1Policy || 'N/A'}</p>
+                    {/* <p className="text-black dark:text-gray-200"><strong>Policy:</strong> {intake.defendant1Policy || 'N/A'}</p> */}
                     <p className="text-black dark:text-gray-200"><strong>Year:</strong> {intake.defendant1Year || 'N/A'}</p>
                     <p className="text-black dark:text-gray-200"><strong>Make:</strong> {intake.defendant1Make || 'N/A'}</p>
                     <p className="text-black dark:text-gray-200"><strong>Model:</strong> {intake.defendant1Model || 'N/A'}</p>
@@ -268,7 +268,7 @@ export default function IntakePreviewPage() {
                   <p className="text-black dark:text-gray-200"><strong>Name:</strong> {intake.autoName || 'N/A'}</p>
                   <p className="text-black dark:text-gray-200"><strong>Phone:</strong> {intake.autoPhone || 'N/A'}</p>
                   <p className="text-black dark:text-gray-200"><strong>Address:</strong> {intake.autoAddress || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Carrier:</strong> {intake.autoCarrier || 'N/A'}</p>
+                  {/* <p className="text-black dark:text-gray-200"><strong>Carrier:</strong> {intake.autoCarrier || 'N/A'}</p> */}
                   <p className="text-black dark:text-gray-200"><strong>Agent:</strong> {intake.autoAgent || 'N/A'}</p>
                   <p className="text-black dark:text-gray-200"><strong>Policy:</strong> {intake.autoPolicy || 'N/A'}</p>
                 </div>
@@ -278,11 +278,11 @@ export default function IntakePreviewPage() {
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <h3 className="text-lg font-bold mb-2 text-green-600">Health Insurance</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <p className="text-black dark:text-gray-200"><strong>Carrier:</strong> {intake.healthCarrier || 'N/A'}</p>
+                  <p className="text-black dark:text-gray-200"><strong>Carrier Name:</strong> {intake.healthCarrier || 'N/A'}</p>
                   <p className="text-black dark:text-gray-200"><strong>Phone:</strong> {intake.healthPhone || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Type:</strong> {intake.healthType || 'N/A'}</p>
+                  {/* <p className="text-black dark:text-gray-200"><strong>Type:</strong> {intake.healthType || 'N/A'}</p> */}
                   <p className="text-black dark:text-gray-200"><strong>Address:</strong> {intake.healthAddress || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Group:</strong> {intake.healthGroup || 'N/A'}</p>
+                  {/* <p className="text-black dark:text-gray-200"><strong>Group:</strong> {intake.healthGroup || 'N/A'}</p> */}
                   <p className="text-black dark:text-gray-200"><strong>Policy:</strong> {intake.healthPolicy || 'N/A'}</p>
                 </div>
               </div>
