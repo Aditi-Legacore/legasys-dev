@@ -89,7 +89,7 @@ model IntakeInfo {
   defendant1Address      String?
   defendant1Carrier      String?
   defendant1CarrierPhone String?
-  defendant1Policy       String?
+  // defendant1Policy       String?
   // defendant1Claim        String?
   // defendant1Adjuster     String?
   // defendant1Insured      String?
@@ -100,11 +100,11 @@ model IntakeInfo {
 
   // Defendant 2 / Owner
   defendant2Name         String?
-  defendant2Phone        String?
+  // defendant2Phone        String?
   defendant2Address      String?
   defendant2Carrier      String?
   defendant2CarrierPhone String?
-  defendant2Policy       String?
+  // defendant2Policy       String?
   // defendant2Claim        String?
   // defendant2Adjuster     String?
   // defendant2Insured      String?
@@ -117,7 +117,7 @@ model IntakeInfo {
   autoName     String?
   autoPhone    String?
   autoAddress  String?
-  autoCarrier  String?
+  // autoCarrier  String?
   autoAgent    String?
   autoPolicy   String?
   autoClaim    String?
@@ -128,9 +128,9 @@ model IntakeInfo {
   // Client Health Insurance
   healthCarrier String?
   healthPhone   String?
-  healthType    String?
+  // healthType    String?
   healthAddress String?
-  healthGroup   String?
+  // healthGroup   String?
   healthPolicy  String?
   healthClaim   String?
   healthAdjuster String?

@@ -26,7 +26,7 @@ export const intakeFormSchema = z.object({
   defendant1Address: z.string().optional(),
   defendant1Carrier: z.string().optional(),
   defendant1CarrierPhone: z.string().optional(),
-  defendant1Policy: z.string().optional(),
+  // defendant1Policy: z.string().optional(),
   defendant1Year: z.string().optional(),
   defendant1Make: z.string().optional(),
   defendant1Model: z.string().optional(),

@@ -106,14 +106,22 @@ export async function DELETE(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const data = await req.json();
 
     console.log("📝 PUT /api/intake ID:", id);
     console.log("📦 PUT body:", data);
+
+    // Validate userId if provided
+    if (data.userId) {
+      const user = await prisma.user.findUnique({ where: { id: data.userId } });
+      if (!user) {
+        data.userId = null; // Set to null if user doesn't exist
+      }
+    }
 
     const updated = await prisma.intakeInfo.update({
       where: { id },
