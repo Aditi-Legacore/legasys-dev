@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { renderToBuffer } from "@react-pdf/renderer";
+import IntakePDFDocument from "@/components/pdf/IntakePDFDocument";
 
 export async function POST(
   req: NextRequest,
@@ -16,10 +18,19 @@ export async function POST(
       return NextResponse.json({ error: "Intake not found" }, { status: 404 });
     }
 
-    return NextResponse.json(intake, { status: 200 });
+    // Generate PDF buffer
+    const pdfBuffer = await renderToBuffer(IntakePDFDocument({ intake }));
+
+    // Return PDF as response
+    return new NextResponse(new Uint8Array(pdfBuffer), {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename="intake-${id}.pdf"`,
+      },
+    });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Failed to fetch intake" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to generate PDF" }, { status: 500 });
   }
 }
 
