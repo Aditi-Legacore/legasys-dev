@@ -155,9 +155,17 @@ useEffect(() => {
   const router = useRouter();
 
   // ✅ Scroll to top whenever step changes
-  useEffect(() => {
+  // 👇 Add this effect for scrolling on step change
+useEffect(() => {
+  if (containerRef.current) {
+    containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [step]);
+  }
+}, [step]);
+
+
+
 
   // const onSubmit = async (data: IntakeFormData) => {
   //   console.log("🚀 Form submission attempted with data:", data);
@@ -206,7 +214,7 @@ useEffect(() => {
   // };
 
 
-  // new code for update
+  // new code for update field added to fetch data from database
 
   const onSubmit = async (data: IntakeFormData) => {
   console.log("🚀 Form submission attempted with data:", data);
@@ -219,13 +227,14 @@ useEffect(() => {
 
     console.log(`📡 Sending ${method} request to ${url}`);
 
-    const payload = {
+  const payload = {
   ...data,
-  phoneNumber: data.phone, // ✅ map the field correctly
-  dateOfBirth: data.dob, 
+  phoneNumber: data.phone,
+  dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null, // ✅ only convert if dob exists
   userId: session?.user?.id || null,
 };
-delete (payload as any).phone; // remove `phone` so Prisma doesn’t get confused
+
+delete (payload as any).phone;
 delete payload.dob;
 
 const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake`, {
@@ -366,7 +375,7 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
             <button
               type="button"
               onClick={prevStep}
-              className="px-5 py-2 bg-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 transition"
+              className="px-5 py-2 bg-gray-300 dark:border-gray-300 text-gray-800 dark:text-gray-900 rounded-lg hover:bg-gray-400 transition"
             >
               Back
             </button>

@@ -68,26 +68,16 @@ model IntakeInfo {
   city        String?
   zip         String?
   dateOfBirth DateTime?
-<<<<<<< HEAD
-  ssn         String?   // ✅ added this line
-=======
   ssn         String?
->>>>>>> 96f40b8dbd4727856e84dd515b99bfaa0f32434e
 
   // 🚗 Accident Information
   accidentDate        DateTime?
   accidentTime        String?
   accidentLocation    String?
   accidentDescription String?
-<<<<<<< HEAD
-  workAtAccident   String? 
-  passenger   String? 
-  passengerName   String? 
-=======
   passenger           String?
   passengerName       String?
   workAtAccident      String?
->>>>>>> 96f40b8dbd4727856e84dd515b99bfaa0f32434e
   // caseType            String?
   // policeCase          String?
   // seatBelt            String?
@@ -131,11 +121,8 @@ model IntakeInfo {
   autoAgent    String?
   autoPolicy   String?
   autoClaim    String?
-<<<<<<< HEAD
-  autoAdditionalinfo String?
-=======
+  autoAdditionalinfo    String?
   // autoAdjuster String?
->>>>>>> 96f40b8dbd4727856e84dd515b99bfaa0f32434e
   // autoInsured  String?
 
   // Client Health Insurance
@@ -145,15 +132,10 @@ model IntakeInfo {
   healthAddress String?
   healthGroup   String?
   healthPolicy  String?
-<<<<<<< HEAD
-  healthClaim  String?
-  healthAgent  String?
-  healthAdjuster  String?
-  healthAdditionalinfo  String?
-=======
   healthClaim   String?
   healthAdjuster String?
->>>>>>> 96f40b8dbd4727856e84dd515b99bfaa0f32434e
+  healthAgent String?
+  healthAdditionalinfo String?
 
   medicare       String? // "Yes" / "No"
   medicareNumber String?
@@ -192,24 +174,12 @@ model IntakeInfo {
   priorInsuranceClaims String?
   priorAttorneys       String?
 
-<<<<<<< HEAD
-  // current treatment
-  currentTreatment       String?
-  currentDoctorHospital       String?
-  currentHospitalAddressPhone       String?
-  currentTreatmentDetails       String?
-  currentTreatmentFrom        DateTime?
-  currentTreatmentTo        DateTime?
-  
-  hearAboutUs         String?
-  hearAboutUsDetail         String?
-=======
   // Additional fields from form
-  priorDoctorHospital        String?
-  priorHospitalAddressPhone  String?
-  priorTreatmentDetails      String?
-  priorTreatmentFrom         DateTime?
-  priorTreatmentTo           DateTime?
+  // priorDoctorHospital        String?
+  // priorHospitalAddressPhone  String?
+  // priorTreatmentDetails      String?
+  // priorTreatmentFrom         DateTime?
+  // priorTreatmentTo           DateTime?
   currentTreatment           String?
   currentDoctorHospital      String?
   currentHospitalAddressPhone String?
@@ -218,7 +188,6 @@ model IntakeInfo {
   currentTreatmentTo         DateTime?
   hearAboutUs                String?
   hearAboutUsDetail          String?
->>>>>>> 96f40b8dbd4727856e84dd515b99bfaa0f32434e
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
