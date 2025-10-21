@@ -37,11 +37,8 @@ export default function LineChart() {
       try {
         const response = await fetch('/api/intake');
         if (!response.ok) {
-<<<<<<< HEAD
           throw new Error(`HTTP error! status: ${response.status}`);
-=======
-          throw new Error('Failed to fetch intakes');
->>>>>>> 96f40b8dbd4727856e84dd515b99bfaa0f32434e
+         
         }
         const data = await response.json();
         if (Array.isArray(data)) {
