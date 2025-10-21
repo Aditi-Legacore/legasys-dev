@@ -22,7 +22,7 @@ export async function POST(
     const pdfBuffer = await renderToBuffer(IntakePDFDocument({ intake }));
 
     // Return PDF as response
-    return new NextResponse(new Uint8Array(pdfBuffer), {
+    return new NextResponse(pdfBuffer, {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `inline; filename="intake-${id}.pdf"`,
