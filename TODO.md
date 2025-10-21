@@ -1,8 +1,4 @@
-# TODO: Fix "Failed to save intake info" Error
+# TODO: Fix Next.js Dynamic API Routes Params Awaiting
 
-## Steps to Complete
-- [x] Update prisma/schema.prisma to add missing fields from form schema (e.g., ssn, passenger, autoClaim, medicare, priorDoctorHospital, currentTreatment, hearAboutUs, bodyPartsAffected, etc.)
-- [x] Update src/app/api/intake/route.ts to correctly map form data to database fields (fix field name mismatches like defendant1Phone vs defendant1CarrierPhone)
-- [x] Add missing fields to form components (e.g., add bodyPartsAffected to MedicalTreatmentStep, add phone fields to DefendantInfoStep)
-- [x] Run prisma generate and migrate to apply schema changes
-- [x] Test the form submission to ensure no more errors
+- [x] Update GET function in `src/app/api/intake/[id]/route.ts` to await `params` before accessing `id`
+- [x] Update POST function in `src/app/api/intake/[id]/pdf/route.tsx` to await `params` before accessing `id`
