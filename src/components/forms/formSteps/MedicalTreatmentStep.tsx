@@ -20,20 +20,20 @@ export default function MedicalTreatmentStep() {
       {/* 1. Ambulance Section */}
       <RadioGroup
         name="ambulance"
-        label="Transported by ambulance?"
+        label="Transported by ambulance? *"
         options={["Yes", "No"]}
       />
       {ambulance === "Yes" && (
         <InputField
           name="ambulanceCompany"
-          label="Name of Ambulance Company"
+          label="Name of Ambulance Company *"
         />
       )}
 
       {/* 2. Admitted Section */}
       <RadioGroup
         name="admitted"
-        label="Were you admitted?"
+        label="Were you admitted? *"
         options={["Yes", "No"]}
       />
       {admitted === "Yes" && (
@@ -43,7 +43,7 @@ export default function MedicalTreatmentStep() {
       {/* 3. Prior Injuries Section */}
       <RadioGroup
         name="priorInjuries"
-        label="Any Prior Injuries?"
+        label="Any Prior Injuries? *"
         options={["Yes", "No"]}
       />
       {priorInjuries === "Yes" && (
@@ -84,7 +84,7 @@ export default function MedicalTreatmentStep() {
       {/* 4. Current Treatment Section */}
       <RadioGroup
         name="currentTreatment"
-        label="Is There Any Current/On going Treatments Due to Accident?"
+        label="Is There Any Current/On going Treatments Due to Accident? *"
         options={["Yes", "No"]}
       />
       {currentTreatment === "Yes" && (

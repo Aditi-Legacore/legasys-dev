@@ -7,19 +7,29 @@ const toNullable = (value: string | undefined): string | null => (value === "" |
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
+    console.log("📥 POST /api/intake - Received data:", data);
+
+    // Validate userId if provided
+    if (data.userId) {
+      const user = await prisma.user.findUnique({ where: { id: data.userId } });
+      if (!user) {
+        data.userId = null; // Set to null if user doesn't exist
+      }
+    }
 
     const newIntake = await prisma.intakeInfo.create({
       data: {
         ...(data.userId && { user: { connect: { id: data.userId } } }),
         clientName: data.clientName,
         gender: data.gender ?? null,
-        phoneNumber: data.phone ?? null,
+        phoneNumber: data.phoneNumber ?? null,
         email: data.email,
         address: data.address ?? null,
         city: data.city ?? null,
         zip: data.zip ?? null,
-        
-        dateOfBirth: toNullable(data.dob) ? new Date(data.dob) : null,
+
+        dateOfBirth: toNullable(data.dateOfBirth) ? new Date(data.dateOfBirth) : null,
+        ssn: toNullable(data.ssn),
         accidentDate: toNullable(data.accidentDate) ? new Date(data.accidentDate) : null,
         accidentTime: toNullable(data.accidentTime),
         accidentLocation: toNullable(data.accidentLocation),
@@ -31,11 +41,11 @@ export async function POST(request: NextRequest) {
 
         // Defendant 1
         defendant1Name: toNullable(data.defendant1Name),
-        defendant1Phone: toNullable(data.defendant1Phone),
+        // defendant1Phone: toNullable(data.defendant1Phone),
         defendant1Address: toNullable(data.defendant1Address),
         defendant1Carrier: toNullable(data.defendant1Carrier),
         defendant1CarrierPhone: toNullable(data.defendant1CarrierPhone),
-        defendant1Policy: toNullable(data.defendant1Policy),
+        // defendant1Policy: toNullable(data.defendant1Policy),
         // defendant1Claim: toNullable(data.defendant1Claim),
         // defendant1Adjuster: toNullable(data.defendant1Adjuster),
         // defendant1Insured: toNullable(data.defendant1Insured),
@@ -46,11 +56,11 @@ export async function POST(request: NextRequest) {
 
         // Defendant 2
         defendant2Name: toNullable(data.defendant2Name),
-        defendant2Phone: toNullable(data.defendant2Phone),
+        // defendant2Phone: toNullable(data.defendant2Phone),
         defendant2Address: toNullable(data.defendant2Address),
         defendant2Carrier: toNullable(data.defendant2Carrier),
         defendant2CarrierPhone: toNullable(data.defendant2CarrierPhone),
-        defendant2Policy: toNullable(data.defendant2Policy),
+        // defendant2Policy: toNullable(data.defendant2Policy),
         // defendant2Claim: toNullable(data.defendant2Claim),
         // defendant2Adjuster: toNullable(data.defendant2Adjuster),
         // defendant2Insured: toNullable(data.defendant2Insured),
@@ -63,7 +73,7 @@ export async function POST(request: NextRequest) {
         autoName: toNullable(data.autoName),
         autoPhone: toNullable(data.autoPhone),
         autoAddress: toNullable(data.autoAddress),
-        autoCarrier: toNullable(data.autoCarrier),
+        // autoCarrier: toNullable(data.autoCarrier),
         autoAgent: toNullable(data.autoAgent),
         autoPolicy: toNullable(data.autoPolicy),
         // autoClaim: toNullable(data.autoClaim),
@@ -73,9 +83,9 @@ export async function POST(request: NextRequest) {
         // Health Insurance
         healthCarrier: toNullable(data.healthCarrier),
         healthPhone: toNullable(data.healthPhone),
-        healthType: toNullable(data.healthType),
+        // healthType: toNullable(data.healthType),
         healthAddress: toNullable(data.healthAddress),
-        healthGroup: toNullable(data.healthGroup),
+        // healthGroup: toNullable(data.healthGroup),
         healthPolicy: toNullable(data.healthPolicy),
         // medicare: toNullable(data.medicare),
         // medicareNumber: toNullable(data.medicareNumber),
@@ -89,9 +99,9 @@ export async function POST(request: NextRequest) {
         lengthOfStay: toNullable(data.lengthOfStay),
 
         // Doctor/Hospital
-        doctorHospital1: data.doctorHospital1,
-        address1: data.address1,
-        phone1: data.phone1,
+        doctorHospital1: toNullable(data.doctorHospital1),
+        address1: toNullable(data.address1),
+        phone1: toNullable(data.phone1),
         treatmentDate1: toNullable(data.treatmentDate1) ? new Date(data.treatmentDate1) : null,
 
         doctorHospital2: toNullable(data.doctorHospital2),
@@ -107,30 +117,37 @@ export async function POST(request: NextRequest) {
         // Injuries
         bodyPartsAffected: toNullable(data.bodyPartsAffected),
         priorInjuries: toNullable(data.priorInjuries),
-        priorInsuranceClaims: toNullable(data.priorInsuranceClaims),
-        priorAttorneys: toNullable(data.priorAttorneys),
-
-        // Additional fields
         priorDoctorHospital: toNullable(data.priorDoctorHospital),
         priorHospitalAddressPhone: toNullable(data.priorHospitalAddressPhone),
         priorTreatmentDetails: toNullable(data.priorTreatmentDetails),
         priorTreatmentFrom: toNullable(data.priorTreatmentFrom) ? new Date(data.priorTreatmentFrom) : null,
         priorTreatmentTo: toNullable(data.priorTreatmentTo) ? new Date(data.priorTreatmentTo) : null,
+        priorInsuranceClaims: toNullable(data.priorInsuranceClaims),
+        priorAttorneys: toNullable(data.priorAttorneys),
+
+        // current treatment
+        // Additional fields
+        // priorDoctorHospital: toNullable(data.priorDoctorHospital),
+        // priorHospitalAddressPhone: toNullable(data.priorHospitalAddressPhone),
+        // priorTreatmentDetails: toNullable(data.priorTreatmentDetails),
+        // priorTreatmentFrom: toNullable(data.priorTreatmentFrom) ? new Date(data.priorTreatmentFrom) : null,
+        // priorTreatmentTo: toNullable(data.priorTreatmentTo) ? new Date(data.priorTreatmentTo) : null,
         currentTreatment: toNullable(data.currentTreatment),
         currentDoctorHospital: toNullable(data.currentDoctorHospital),
         currentHospitalAddressPhone: toNullable(data.currentHospitalAddressPhone),
         currentTreatmentDetails: toNullable(data.currentTreatmentDetails),
         currentTreatmentFrom: toNullable(data.currentTreatmentFrom) ? new Date(data.currentTreatmentFrom) : null,
         currentTreatmentTo: toNullable(data.currentTreatmentTo) ? new Date(data.currentTreatmentTo) : null,
+
         hearAboutUs: toNullable(data.hearAboutUs),
         hearAboutUsDetail: toNullable(data.hearAboutUsDetail),
       },
     });
 
     return NextResponse.json(newIntake, { status: 201 });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Failed to save intake info" }, { status: 500 });
+  } catch (err: any) {
+    console.error("❌ POST /api/intake error:", err);
+    return NextResponse.json({ error: "Failed to save intake info", details: err.message }, { status: 500 });
   }
 }
 

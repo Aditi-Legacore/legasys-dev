@@ -68,6 +68,7 @@ export default function IntakeTable() {
       const res = await fetch(`/api/intake/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete intake');
       setIntakes(intakes.filter(i => i.id !== id));
+      alert("Data deleted successfully");
       toast.success('Intake deleted successfully.');
     } catch (error) {
       console.error(error);

@@ -44,7 +44,7 @@ export default function DefendantInfoStep() {
           {/* Basic Info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InputField name={`defendant${index + 1}Name`} label="Name *" />
-            <InputField name={`defendant${index + 1}Phone`} label="Phone" />
+            {/* <InputField name={`defendant${index + 1}Phone`} label="Phone" /> */}
             <InputField name={`defendant${index + 1}Address`} label="Address" />
             <InputField
               name={`defendant${index + 1}Carrier`}

@@ -13,6 +13,7 @@ import MedicalTreatmentStep from "./formSteps/MedicalTreatmentStep";
 // import InjuriesStep from "./formSteps/InjuriesStep";
 import SubmitStep from "./formSteps/SubmitStep";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 
 // Extend the session user type to include 'id'
 import type { DefaultUser } from "next-auth";
@@ -54,6 +55,9 @@ interface IntakeFormWizardProps {
 }
 
 export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps) {
+  const searchParams = useSearchParams();
+  const intakeId = searchParams.get("id");  // 👈 get ID from URL
+  const [isLoadingExistingData, setIsLoadingExistingData] = useState(false);
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -65,69 +69,201 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
+  // useEffect(() => {
     
-    if (session?.user) {
-      methods.setValue("clientName", session.user.name || "");
-      methods.setValue("email", session.user.email || "");
-    }
-    if (containerRef.current) {
-      containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }, [session, methods,step]);
+  //   if (session?.user) {
+  //     methods.setValue("clientName", session.user.name || "");
+  //     methods.setValue("email", session.user.email || "");
+  //   }
+  //   if (containerRef.current) {
+  //     containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+  //   } else {
+  //     window.scrollTo({ top: 0, behavior: "smooth" });
+  //   }
+  //   if (intakeId) {
+  //     const fetchIntake = async () => {
+  //       try {
+  //         setIsLoadingExistingData(true);
+  //         const res = await fetch(`/api/intake/${intakeId}`);
+  //         if (!res.ok) throw new Error("Failed to fetch intake data");
+  //         const data = await res.json();
+
+  //         // 👇 populate the form fields with existing values
+  //         Object.keys(data).forEach((key) => {
+  //           if (data[key] !== null && data[key] !== undefined) {
+  //             methods.setValue(key as keyof IntakeFormData, data[key]);
+  //           }
+  //         });
+  //       } catch (err) {
+  //         console.error(err);
+  //       } finally {
+  //         setIsLoadingExistingData(false);
+  //       }
+  //     };
+  //     fetchIntake();
+  //   }
+  // }, [session, intakeId,methods,step]);
+
+  // date-17/10/2025
+
+  // start code
+
+useEffect(() => {
+  if (session?.user) {
+    methods.setValue("clientName", session.user.name || "");
+    methods.setValue("email", session.user.email || "");
+  }
+  if (containerRef.current) {
+    containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  if (intakeId) {
+    const fetchIntake = async () => {
+      try {
+        setIsLoadingExistingData(true);
+        const res = await fetch(`/api/intake/${intakeId}`);
+        if (!res.ok) throw new Error("Failed to fetch intake data");
+        const data = await res.json();
+
+        // Map database fields back to form fields
+        const mappedData = {
+          ...data,
+          phone: data.phoneNumber || '',
+          dob: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
+          phoneNumber: data.phoneNumber || '',
+          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
+        };
+
+        Object.keys(mappedData).forEach((key) => {
+          if (mappedData[key] !== null && mappedData[key] !== undefined) {
+            methods.setValue(key as keyof IntakeFormData, mappedData[key]);
+          }
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoadingExistingData(false);
+      }
+    };
+    fetchIntake();
+  }
+}, [session, intakeId, methods]);  // ✅ Removed "step" here
+
   
 
   const router = useRouter();
 
   // ✅ Scroll to top whenever step changes
-  useEffect(() => {
+  // 👇 Add this effect for scrolling on step change
+useEffect(() => {
+  if (containerRef.current) {
+    containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [step]);
+  }
+}, [step]);
+
+
+
+
+  // const onSubmit = async (data: IntakeFormData) => {
+  //   console.log("🚀 Form submission attempted with data:", data);
+  //   console.log("Session user ID:", session?.user?.id);
+  //   setIsSubmitting(true);
+  //   try {
+  //     console.log("Making fetch request to /api/intake");
+  //     const method = intakeId ? "PUT" : "POST";
+  //     const url = intakeId ? `/api/intake/${intakeId}` : `/api/intake`;
+      
+  //     const response = await fetch("/api/intake", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         ...data,
+  //         userId: session?.user?.id || null,
+  //       }),
+  //     });
+
+  //     console.log("Response status:", response.status);
+  //     console.log("Response headers:", response.headers);
+
+  //     if (!response.ok) {
+  //       const errorDetails = await response.text();
+  //       console.error("❌ Server Error:", errorDetails);
+  //       throw new Error("Failed to submit form");
+  //     }
+
+  //     const savedData = await response.json();
+  //     console.log("✅ Intake form saved:", savedData);
+
+  //     toast.success("✅ Intake form saved successfully!");
+
+  //     setTimeout(() => {
+  //       router.push("/intake-list");
+  //     }, 1000);
+  //   } catch (error) {
+  //     console.error(
+  //       "❌ Form submission failed:",
+  //       error instanceof Error ? error.message : error
+  //     );
+  //     toast.error("⚠️ There was an error submitting the form. Please try again.");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+
+  // new code for update field added to fetch data from database
 
   const onSubmit = async (data: IntakeFormData) => {
-    console.log("🚀 Form submission attempted with data:", data);
-    console.log("Session user ID:", session?.user?.id);
-    setIsSubmitting(true);
-    try {
-      console.log("Making fetch request to /api/intake");
-      const response = await fetch("/api/intake", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...data,
-          userId: session?.user?.id || null,
-        }),
-      });
+  console.log("🚀 Form submission attempted with data:", data);
+  console.log("Session user ID:", session?.user?.id);
+  setIsSubmitting(true);
 
-      console.log("Response status:", response.status);
-      console.log("Response headers:", response.headers);
+  try {
+    const method = intakeId ? "PUT" : "POST";
+    const url = intakeId ? `/api/intake/${intakeId}` : `/api/intake`;
 
-      if (!response.ok) {
-        const errorDetails = await response.text();
-        console.error("❌ Server Error:", errorDetails);
-        throw new Error("Failed to submit form");
-      }
+    console.log(`📡 Sending ${method} request to ${url}`);
 
-      const savedData = await response.json();
-      console.log("✅ Intake form saved:", savedData);
+  const payload = {
+  ...data,
+  phoneNumber: data.phone,
+  dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null, // ✅ only convert if dob exists
+  userId: session?.user?.id || null,
+};
 
-      toast.success("✅ Intake form saved successfully!");
+delete (payload as any).phone;
+delete payload.dob;
 
-      setTimeout(() => {
-        router.push("/intake-list");
-      }, 1000);
-    } catch (error) {
-      console.error(
-        "❌ Form submission failed:",
-        error instanceof Error ? error.message : error
-      );
-      toast.error("⚠️ There was an error submitting the form. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake`, {
+  method: intakeId ? "PUT" : "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(payload),
+});
+
+
+    console.log("Response status:", response.status);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ Server error:", errorText);
+      throw new Error("Failed to save intake");
     }
-  };
+
+    const savedData = await response.json();
+    console.log("✅ Intake form saved:", savedData);
+
+    toast.success(intakeId ? "✅ Intake updated successfully!" : "✅ Intake created successfully!");
+    router.push("/intake-list");
+  } catch (error) {
+    console.error("❌ Error saving intake:", error);
+    toast.error("⚠️ There was an error saving the form.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   
   // ✅ Validate current step before moving to the next
@@ -171,6 +307,15 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
 
     methods.handleSubmit(onSubmit)();
   };
+
+  // 🌀 Show loader while data is loading
+  if (isLoadingExistingData) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <FormProvider {...methods}>
@@ -230,7 +375,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
             <button
               type="button"
               onClick={prevStep}
-              className="px-5 py-2 bg-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 transition"
+              className="px-5 py-2 bg-gray-300 dark:border-gray-300 text-gray-800 dark:text-gray-900 rounded-lg hover:bg-gray-400 transition"
             >
               Back
             </button>

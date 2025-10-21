@@ -229,7 +229,7 @@ export default function IntakePreviewPage() {
                   <h3 className="text-lg font-bold mb-2 text-green-600">Defendant 1 Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <p className="text-black dark:text-gray-200"><strong>Name:</strong> {intake.defendant1Name}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Phone:</strong> {intake.defendant1Phone || 'N/A'}</p>
+                    {/* <p className="text-black dark:text-gray-200"><strong>Phone:</strong> {intake.defendant1Phone || 'N/A'}</p> */}
                     <p className="text-black dark:text-gray-200"><strong>Address:</strong> {intake.defendant1Address || 'N/A'}</p>
                     <p className="text-black dark:text-gray-200"><strong>Carrier:</strong> {intake.defendant1Carrier || 'N/A'}</p>
                     <p className="text-black dark:text-gray-200"><strong>Carrier Phone:</strong> {intake.defendant1CarrierPhone || 'N/A'}</p>
@@ -248,7 +248,7 @@ export default function IntakePreviewPage() {
                   <h3 className="text-lg font-bold mb-2 text-green-600">Defendant 2 Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <p className="text-black dark:text-gray-200"><strong>Name:</strong> {intake.defendant2Name}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Phone:</strong> {intake.defendant2Phone || 'N/A'}</p>
+                    {/* <p className="text-black dark:text-gray-200"><strong>Phone:</strong> {intake.defendant2Phone || 'N/A'}</p> */}
                     <p className="text-black dark:text-gray-200"><strong>Address:</strong> {intake.defendant2Address || 'N/A'}</p>
                     <p className="text-black dark:text-gray-200"><strong>Carrier:</strong> {intake.defendant2Carrier || 'N/A'}</p>
                     <p className="text-black dark:text-gray-200"><strong>Carrier Phone:</strong> {intake.defendant2CarrierPhone || 'N/A'}</p>
