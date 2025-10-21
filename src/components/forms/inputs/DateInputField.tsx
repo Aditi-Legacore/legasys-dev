@@ -42,6 +42,7 @@ export default function DateInputField({
               focus:outline-none focus:ring-2
               focus:ring-indigo-500 dark:focus:ring-indigo-400
             "
+            maxDate={new Date()}
           />
         )}
       />
