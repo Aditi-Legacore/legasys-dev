@@ -83,6 +83,8 @@ export const intakeFormSchema = z.object({
   currentTreatmentFrom: z.string().optional(),
   currentTreatmentTo: z.string().optional(),
 
+  bodyPartsAffected: z.string().optional(),
+
   // Step 6 - Submit
   hearAboutUs: z.string().optional(),
   hearAboutUsDetail: z.string().optional(),

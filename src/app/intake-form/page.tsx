@@ -3,13 +3,31 @@
 // Update the import path below to the correct relative path based on your project structure.
 // For example, if IntakeForm.tsx is at src/components/forms/IntakeForm.tsx, use the following:
 import IntakeFormWizard from "../../components/forms/IntakeForm";
+import { useState } from "react";
+import UserAuth from "@/components/UserAuth";
 
-export default function Home() {
+
+export default function IntakePage() {
+  const [userAuthenticated, setUserAuthenticated] = useState(false);
+  const [userUniqueId, setUserUniqueId] = useState("");
+  const [draftData, setDraftData] = useState<any>(null);
+
+  const handleUserAuthenticated = (uniqueId: string, hasDraft?: boolean, draftData?: any) => {
+    setUserUniqueId(uniqueId);
+    setDraftData(draftData);
+    setUserAuthenticated(true);
+  };
+
+  if (!userAuthenticated) {
+    return <UserAuth onUserAuthenticated={handleUserAuthenticated} />;
+  }
+
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto min-h-screen flex flex-col items-center justify-center">
-        <IntakeFormWizard />
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <IntakeFormWizard 
+        userUniqueId={userUniqueId}
+        draftData={draftData}
+      />
     </div>
   );
 }

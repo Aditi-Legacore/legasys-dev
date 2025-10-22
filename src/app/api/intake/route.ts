@@ -20,6 +20,9 @@ export async function POST(request: NextRequest) {
     const newIntake = await prisma.intakeInfo.create({
   data: {
     ...(data.userId && { user: { connect: { id: data.userId } } }),
+    ...(data.userUniqueId && { 
+    userSession: { connect: { uniqueId: data.userUniqueId } } 
+  }),
 
     // Plaintiff Information
     clientName: data.clientName,
@@ -120,7 +123,6 @@ export async function POST(request: NextRequest) {
     hearAboutUsDetail: toNullable(data.hearAboutUsDetail),
   },
 });
-
 
     return NextResponse.json(newIntake, { status: 201 });
   } catch (err: any) {

@@ -7,6 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//implemeted for save draft validation
+model UserSession {
+  id          String   @id @default(cuid())
+  uniqueId    String   @unique
+  name        String?
+  dateOfBirth DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  intakes     IntakeInfo[]
+}
+
 model User {
   id            String       @id @default(cuid())
   name          String?
@@ -60,6 +71,7 @@ model IntakeInfo {
   userId String? // foreign key linking to User
 
   // 👤 Plaintiff Information
+  isDraft     Boolean      @default(true) // Add this field
   clientName  String
   gender      String?
   phoneNumber String?
@@ -173,4 +185,8 @@ model IntakeInfo {
   updatedAt DateTime @updatedAt
 
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Add this reverse relation field for fetch draft
+  userSession    UserSession? @relation(fields: [userSessionId], references: [id])
+  userSessionId  String?
 }

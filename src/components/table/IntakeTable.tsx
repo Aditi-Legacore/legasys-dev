@@ -100,7 +100,8 @@ export default function IntakeTable() {
     });
   };
 
-  const truncateText = (text: string, maxLength: number): string => {
+  const truncateText = (text: string | null | undefined, maxLength: number): string => {
+    if (!text) return '';
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
 

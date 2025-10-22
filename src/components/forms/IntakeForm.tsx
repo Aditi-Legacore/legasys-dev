@@ -29,8 +29,6 @@ declare module "next-auth" {
   }
 }
 
-
-
 const steps = [
   "PLAINTIFF INFORMATION",
   "ACCIDENT INFORMATION",
@@ -52,9 +50,15 @@ const stepFields: (keyof IntakeFormData)[][] = [
 
 interface IntakeFormWizardProps {
   onFormSubmit?: (data: IntakeFormData) => void;
+  userUniqueId?: string;
+  draftData?: any;
 }
 
-export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps) {
+export default function IntakeFormWizard({ 
+  onFormSubmit,
+  userUniqueId, 
+  draftData  
+}: IntakeFormWizardProps) {
   const searchParams = useSearchParams();
   const intakeId = searchParams.get("id");  // 👈 get ID from URL
   const [isLoadingExistingData, setIsLoadingExistingData] = useState(false);
@@ -69,41 +73,6 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // useEffect(() => {
-    
-  //   if (session?.user) {
-  //     methods.setValue("clientName", session.user.name || "");
-  //     methods.setValue("email", session.user.email || "");
-  //   }
-  //   if (containerRef.current) {
-  //     containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-  //   } else {
-  //     window.scrollTo({ top: 0, behavior: "smooth" });
-  //   }
-  //   if (intakeId) {
-  //     const fetchIntake = async () => {
-  //       try {
-  //         setIsLoadingExistingData(true);
-  //         const res = await fetch(`/api/intake/${intakeId}`);
-  //         if (!res.ok) throw new Error("Failed to fetch intake data");
-  //         const data = await res.json();
-
-  //         // 👇 populate the form fields with existing values
-  //         Object.keys(data).forEach((key) => {
-  //           if (data[key] !== null && data[key] !== undefined) {
-  //             methods.setValue(key as keyof IntakeFormData, data[key]);
-  //           }
-  //         });
-  //       } catch (err) {
-  //         console.error(err);
-  //       } finally {
-  //         setIsLoadingExistingData(false);
-  //       }
-  //     };
-  //     fetchIntake();
-  //   }
-  // }, [session, intakeId,methods,step]);
-
   // date-17/10/2025
 
   // start code
@@ -113,6 +82,24 @@ useEffect(() => {
     methods.setValue("clientName", session.user.name || "");
     methods.setValue("email", session.user.email || "");
   }
+   // Load draft data if available
+    if (draftData) {
+      console.log("📥 Loading draft data:", draftData);
+      const mappedData = {
+        ...draftData,
+        phone: draftData.phoneNumber || '',
+        dob: draftData.dateOfBirth ? new Date(draftData.dateOfBirth).toISOString().split('T')[0] : '',
+        phoneNumber: draftData.phoneNumber || '',
+        dateOfBirth: draftData.dateOfBirth ? new Date(draftData.dateOfBirth).toISOString().split('T')[0] : '',
+      };
+
+      Object.keys(mappedData).forEach((key) => {
+        if (mappedData[key] !== null && mappedData[key] !== undefined) {
+          methods.setValue(key as keyof IntakeFormData, mappedData[key]);
+        }
+      });
+    }
+
   if (containerRef.current) {
     containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
   } else {
@@ -150,8 +137,6 @@ useEffect(() => {
   }
 }, [session, intakeId, methods]);  // ✅ Removed "step" here
 
-  
-
   const router = useRouter();
 
   // ✅ Scroll to top whenever step changes
@@ -163,56 +148,6 @@ useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 }, [step]);
-
-
-
-
-  // const onSubmit = async (data: IntakeFormData) => {
-  //   console.log("🚀 Form submission attempted with data:", data);
-  //   console.log("Session user ID:", session?.user?.id);
-  //   setIsSubmitting(true);
-  //   try {
-  //     console.log("Making fetch request to /api/intake");
-  //     const method = intakeId ? "PUT" : "POST";
-  //     const url = intakeId ? `/api/intake/${intakeId}` : `/api/intake`;
-      
-  //     const response = await fetch("/api/intake", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         ...data,
-  //         userId: session?.user?.id || null,
-  //       }),
-  //     });
-
-  //     console.log("Response status:", response.status);
-  //     console.log("Response headers:", response.headers);
-
-  //     if (!response.ok) {
-  //       const errorDetails = await response.text();
-  //       console.error("❌ Server Error:", errorDetails);
-  //       throw new Error("Failed to submit form");
-  //     }
-
-  //     const savedData = await response.json();
-  //     console.log("✅ Intake form saved:", savedData);
-
-  //     toast.success("✅ Intake form saved successfully!");
-
-  //     setTimeout(() => {
-  //       router.push("/intake-list");
-  //     }, 1000);
-  //   } catch (error) {
-  //     console.error(
-  //       "❌ Form submission failed:",
-  //       error instanceof Error ? error.message : error
-  //     );
-  //     toast.error("⚠️ There was an error submitting the form. Please try again.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
 
   // new code for update field added to fetch data from database
 
@@ -262,10 +197,65 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
   } finally {
     setIsSubmitting(false);
   }
-};
+}; 
 
+// Add this function inside your IntakeFormWizard component, after the onSubmit function
 
+const handleSaveDraft = async () => {
+  console.log("💾 Saving draft...");
   
+  // Get current form values without validation
+  const formData = methods.getValues();
+  
+  setIsSubmitting(true);
+
+  try {
+    const payload = {
+      ...formData,
+      phoneNumber: formData.phone,
+      dateOfBirth: formData.dob ? new Date(formData.dob).toISOString() : null,
+      userId: session?.user?.id || null,
+      // We'll use the intakeId if it exists (for updating existing draft)
+      id: intakeId || undefined,
+    };
+
+    // Remove the temporary fields
+    delete (payload as any).phone;
+    delete payload.dob;
+
+    const url = intakeId ? `/api/intake/${intakeId}` : `/api/intake`;
+    const method = intakeId ? "PUT" : "POST";
+
+    console.log(`💾 Saving draft with ${method} to ${url}`);
+
+    const response = await fetch(url, {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ Draft save error:", errorText);
+      throw new Error("Failed to save draft");
+    }
+
+    const savedData = await response.json();
+    console.log("✅ Draft saved successfully:", savedData);
+    
+    // If this is a new draft (no intakeId), update the URL with the new ID
+    if (!intakeId && savedData.id) {
+      router.replace(`/intake?id=${savedData.id}`);
+    }
+    
+    toast.success("✅ Draft saved successfully!");
+  } catch (error) {
+    console.error("❌ Error saving draft:", error);
+    toast.error("⚠️ Failed to save draft. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   // ✅ Validate current step before moving to the next
   const nextStep = async () => {
     const fieldsToValidate = stepFields[step];
@@ -281,7 +271,6 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
     setStep((s) => s + 1);
   };
 
-
   // const nextStep = () => setStep((s) => s + 1);
   const prevStep = () => setStep((s) => s - 1);
 
@@ -292,7 +281,6 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
       case 2: return <DefendantInfoStep />;
       case 3: return <ClientInsuranceStep />;
       case 4: return <MedicalTreatmentStep />;
-      // case 5: return <InjuriesStep />;
       case 5: return <SubmitStep isSubmitting={isSubmitting} />;
       default: return null;
     }
@@ -370,6 +358,9 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
         </motion.div>
 
         {/* Buttons */}
+       
+
+{/* Buttons */}
         <div className="flex justify-between pt-4 border-t mt-4 dark:border-gray-700">
           {step > 0 && (
             <button
@@ -380,15 +371,30 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
               Back
             </button>
           )}
-          {step < steps.length - 1 && (
-            <button
-              type="button"
-              onClick={nextStep}
-              className="ml-auto  px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-            >
-              Next
-            </button>
-          )}
+          
+          <div className="ml-auto flex gap-2">
+            {/* Save Draft Button - Show on all steps except Submit */}
+            {step < steps.length - 1 && (
+              <button
+                type="button"
+                onClick={handleSaveDraft}
+                disabled={isSubmitting}
+                className="px-5 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition disabled:opacity-50"
+              >
+                {isSubmitting ? "Saving..." : "Save Draft"}
+              </button>
+            )}
+            
+            {step < steps.length - 1 && (
+              <button
+                type="button"
+                onClick={nextStep}
+                className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+              >
+                Next
+              </button>
+            )}
+          </div>
         </div>
       </form>
       </div>
