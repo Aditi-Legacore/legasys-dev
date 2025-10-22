@@ -55,8 +55,26 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// new code date-22/10/2025 for save draft
+
+model IntakeSession {
+  id            String   @id @default(cuid())
+  referenceId   String   @unique
+  name          String
+  dateOfBirth   DateTime
+  status        String   @default("draft") // draft | submitted
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  intakeInfo    IntakeInfo?
+}
+
+
 model IntakeInfo {
   id     String @id @default(cuid())
+
+  intakeSessionId String? @unique
+  intakeSession   IntakeSession? @relation(fields: [intakeSessionId], references: [id])
   userId String? // foreign key linking to User
 
   // 👤 Plaintiff Information
