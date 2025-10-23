@@ -56,10 +56,52 @@ interface IntakeFormWizardProps {
 
 export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps) {
   const searchParams = useSearchParams();
+  //code for fetch draft
+  //  const referenceId = searchParams.get("ref");
+  const [draft, setDraft] = useState(null);
+
   const intakeId = searchParams.get("id");  // 👈 get ID from URL
   const [isLoadingExistingData, setIsLoadingExistingData] = useState(false);
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({});
+const referenceId = localStorage.getItem("referenceId");
+
+// Prefill draft if exists
+  useEffect(() => {
+    const draftData = localStorage.getItem("draftData");
+    if (draftData) {
+      setFormData(JSON.parse(draftData));
+    }
+  }, []);
+
+const handleSaveDraft = async () => {
+    try {
+      if (!referenceId) {
+        toast.error("No reference ID found. Please start a new session.");
+        return;
+      }
+
+      const currentFormData = methods.getValues();
+
+      const res = await fetch("/api/intake/draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ referenceId, ...currentFormData }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error(`Failed to save draft: ${res.status} ${res.statusText}`, errorText);
+        throw new Error(`Failed to save draft: ${res.statusText}`);
+      }
+      toast.success("Draft saved successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error saving draft.");
+    }
+  };
+
 
   const methods = useForm<IntakeFormData>({
     resolver: zodResolver(intakeFormSchema),
@@ -69,45 +111,42 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // useEffect(() => {
-    
-  //   if (session?.user) {
-  //     methods.setValue("clientName", session.user.name || "");
-  //     methods.setValue("email", session.user.email || "");
-  //   }
-  //   if (containerRef.current) {
-  //     containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-  //   } else {
-  //     window.scrollTo({ top: 0, behavior: "smooth" });
-  //   }
-  //   if (intakeId) {
-  //     const fetchIntake = async () => {
-  //       try {
-  //         setIsLoadingExistingData(true);
-  //         const res = await fetch(`/api/intake/${intakeId}`);
-  //         if (!res.ok) throw new Error("Failed to fetch intake data");
-  //         const data = await res.json();
+  useEffect(() => {
+    if (referenceId) {
+      fetch("/api/session/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ referenceId }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.error) {
+            setDraft(data.intakeInfo); // or adjust based on your structure
+          }
+        });
+    }
+  }, [referenceId]);
 
-  //         // 👇 populate the form fields with existing values
-  //         Object.keys(data).forEach((key) => {
-  //           if (data[key] !== null && data[key] !== undefined) {
-  //             methods.setValue(key as keyof IntakeFormData, data[key]);
-  //           }
-  //         });
-  //       } catch (err) {
-  //         console.error(err);
-  //       } finally {
-  //         setIsLoadingExistingData(false);
-  //       }
-  //     };
-  //     fetchIntake();
-  //   }
-  // }, [session, intakeId,methods,step]);
+  // Populate form with draft data when draft is loaded
+  useEffect(() => {
+    if (draft) {
+      const mappedData = {
+        ...draft,
+        phone: draft.phoneNumber || '',
+        dob: draft.dateOfBirth ? new Date(draft.dateOfBirth).toISOString().split('T')[0] : '',
+        phoneNumber: draft.phoneNumber || '',
+        dateOfBirth: draft.dateOfBirth ? new Date(draft.dateOfBirth).toISOString().split('T')[0] : '',
+      };
 
-  // date-17/10/2025
+      Object.keys(mappedData).forEach((key) => {
+        if (mappedData[key] !== null && mappedData[key] !== undefined) {
+          methods.setValue(key as keyof IntakeFormData, mappedData[key]);
+        }
+      });
+    }
+  }, [draft, methods]);
 
-  // start code
-
+  
 useEffect(() => {
   if (session?.user) {
     methods.setValue("clientName", session.user.name || "");
@@ -164,55 +203,12 @@ useEffect(() => {
   }
 }, [step]);
 
-
-
-
-  // const onSubmit = async (data: IntakeFormData) => {
-  //   console.log("🚀 Form submission attempted with data:", data);
-  //   console.log("Session user ID:", session?.user?.id);
-  //   setIsSubmitting(true);
-  //   try {
-  //     console.log("Making fetch request to /api/intake");
-  //     const method = intakeId ? "PUT" : "POST";
-  //     const url = intakeId ? `/api/intake/${intakeId}` : `/api/intake`;
-      
-  //     const response = await fetch("/api/intake", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         ...data,
-  //         userId: session?.user?.id || null,
-  //       }),
-  //     });
-
-  //     console.log("Response status:", response.status);
-  //     console.log("Response headers:", response.headers);
-
-  //     if (!response.ok) {
-  //       const errorDetails = await response.text();
-  //       console.error("❌ Server Error:", errorDetails);
-  //       throw new Error("Failed to submit form");
-  //     }
-
-  //     const savedData = await response.json();
-  //     console.log("✅ Intake form saved:", savedData);
-
-  //     toast.success("✅ Intake form saved successfully!");
-
-  //     setTimeout(() => {
-  //       router.push("/intake-list");
-  //     }, 1000);
-  //   } catch (error) {
-  //     console.error(
-  //       "❌ Form submission failed:",
-  //       error instanceof Error ? error.message : error
-  //     );
-  //     toast.error("⚠️ There was an error submitting the form. Please try again.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
+useEffect(() => {
+  const draft = localStorage.getItem("draftData");
+  if (draft) {
+    setFormData(JSON.parse(draft));
+  }
+}, []);
 
   // new code for update field added to fetch data from database
 
@@ -389,6 +385,16 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
               Next
             </button>
           )}
+          {/* 💾 Save Draft Button */}
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={handleSaveDraft}
+          className="ml-auto  px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+        >
+          Save Draft
+        </button>
+      </div>
         </div>
       </form>
       </div>
