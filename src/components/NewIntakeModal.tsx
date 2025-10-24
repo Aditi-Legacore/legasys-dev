@@ -8,21 +8,28 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
   const [mode, setMode] = useState<"select" | "new" | "existing">("select");
   const [name, setName] = useState("");
   const [dob, setDob] = useState("");
+  const [caseType, setCaseType] = useState("");
   const [referenceId, setReferenceId] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
 
   const handleCreateSession = async () => {
+    if (!name || !dob || !caseType) {
+      setError("Please fill all required fields.");
+      return;
+    }
     try {
       const res = await fetch("/api/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, dateOfBirth: dob }),
+        body: JSON.stringify({ name, dateOfBirth: dob ,caseType }),
       });
       const data = await res.json();
       if (res.ok) {
         setReferenceId(data.referenceId);
         localStorage.setItem("referenceId", data.referenceId);
+        localStorage.setItem("caseType", caseType);
+        setError("");
       } else {
         setError(data.error || "Failed to create session");
       }
@@ -56,9 +63,12 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-black/50 z-50">
-      <div className="bg-white p-6 rounded-xl w-96 shadow-lg">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl w-96 shadow-lg">
         {mode === "select" && (
           <div className="space-y-4">
+            <button onClick={onClose} className="mt-4 text-sm text-gray-500">
+          ❌
+        </button>
             <h2 className="text-lg font-bold">Choose an option</h2>
             <button
               onClick={() => setMode("new")}
@@ -77,6 +87,8 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
 
         {mode === "new" && (
           <div className="space-y-3">
+              <button onClick={onClose} className="mt-4 text-sm text-gray-500">
+          ❌</button>
             <input
               type="text"
               placeholder="Enter Full Name"
@@ -90,6 +102,46 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
               onChange={(e) => setDob(e.target.value)}
               className="border w-full p-2 rounded"
             />
+
+            {/* Case Type Radio Buttons */}
+            <div className="border rounded p-3">
+              <p className="font-medium mb-2">Case Type:</p>
+              <div className="space-y-1">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="caseType"
+                    value="Automobile"
+                    checked={caseType === "Automobile"}
+                    onChange={(e) => setCaseType(e.target.value)}
+                  />
+                  <span>Automobile</span>
+                </label>
+
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="caseType"
+                    value="Premises Liabilities"
+                    checked={caseType === "Premises Liabilities"}
+                    onChange={(e) => setCaseType(e.target.value)}
+                  />
+                  <span>Premises Liabilities</span>
+                </label>
+
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="caseType"
+                    value="Dog Bite / Slip and Fall"
+                    checked={caseType === "Dog Bite / Slip and Fall"}
+                    onChange={(e) => setCaseType(e.target.value)}
+                  />
+                  <span>Dog Bite / Slip and Fall</span>
+                </label>
+              </div>
+            </div>
+
             {!referenceId && (
               <button
                 onClick={handleCreateSession}

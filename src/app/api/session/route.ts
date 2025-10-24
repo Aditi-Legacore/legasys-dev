@@ -3,15 +3,27 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, dateOfBirth } = await req.json();
-    const referenceId = `LEG-${Date.now().toString(36).toUpperCase()}`;
+    const { name, dateOfBirth, caseType } = await req.json();
+
+    if (!name || !dateOfBirth || !caseType) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    // Determine prefix based on caseType
+    let prefix = "LEG"; // default
+    if (caseType.toLowerCase().includes("auto")) prefix = "AUT";
+    else if (caseType.toLowerCase().includes("premises")) prefix = "PRE";
+    else if (caseType.toLowerCase().includes("dog")) prefix = "SLP";
+
+    const referenceId = `${prefix}-${Date.now().toString(36).toUpperCase()}`;
 
     const session = await prisma.intakeSession.create({
       data: {
         name,
         dateOfBirth: new Date(dateOfBirth),
-        referenceId
-      }
+        caseType,
+        referenceId,
+      },
     });
 
     return NextResponse.json({ referenceId: session.referenceId }, { status: 201 });

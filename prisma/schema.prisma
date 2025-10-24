@@ -62,6 +62,7 @@ model IntakeSession {
   referenceId   String   @unique
   name          String
   dateOfBirth   DateTime
+  caseType String? 
   status        String   @default("draft") // draft | submitted
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
