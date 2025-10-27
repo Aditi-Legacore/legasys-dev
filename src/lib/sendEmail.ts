@@ -1,4 +1,3 @@
-// /lib/mailer.ts
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
@@ -17,6 +16,8 @@ export async function sendIntakeReferenceEmail(to: string, name: string, caseTyp
       <p>Your reference ID is:</p>
       <p style="font-size: 18px; font-weight: bold; color: #0070f3;">${referenceId}</p>
       <p>Please keep this ID for future communication.</p>
+      <p>You can access your form using this link below!</p>
+      <p>http://localhost:3000/intake-list</p>
       <br/>
       <p>— The Legasys Team</p>
     </div>
