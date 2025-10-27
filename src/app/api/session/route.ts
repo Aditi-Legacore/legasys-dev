@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, dateOfBirth, caseType } = await req.json();
+    const { name, dateOfBirth, caseType,email } = await req.json();
 
     if (!name || !dateOfBirth || !caseType) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 
     // Determine prefix based on caseType
     let prefix = "LEG"; // default
-    if (caseType.toLowerCase().includes("auto")) prefix = "AUT";
+    if (caseType.toLowerCase().includes("auto")) prefix = "MVA";
     else if (caseType.toLowerCase().includes("premises")) prefix = "PRE";
     else if (caseType.toLowerCase().includes("dog")) prefix = "SLP";
 
@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
         name,
         dateOfBirth: new Date(dateOfBirth),
         caseType,
+        email,
         referenceId,
       },
     });

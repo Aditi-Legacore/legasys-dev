@@ -7,6 +7,7 @@ import { toast } from "sonner";
 export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
   const [mode, setMode] = useState<"select" | "new" | "existing">("select");
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [dob, setDob] = useState("");
   const [caseType, setCaseType] = useState("");
   const [referenceId, setReferenceId] = useState("");
@@ -100,6 +101,13 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
               type="date"
               value={dob}
               onChange={(e) => setDob(e.target.value)}
+              className="border w-full p-2 rounded"
+            />
+            <input
+              type="text"
+              placeholder="Enter Mail Id"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="border w-full p-2 rounded"
             />
 
