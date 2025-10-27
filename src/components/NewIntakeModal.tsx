@@ -23,13 +23,14 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
       const res = await fetch("/api/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, dateOfBirth: dob ,caseType }),
+        body: JSON.stringify({ name, dateOfBirth: dob ,caseType,email }),
       });
       const data = await res.json();
       if (res.ok) {
         setReferenceId(data.referenceId);
         localStorage.setItem("referenceId", data.referenceId);
         localStorage.setItem("caseType", caseType);
+        localStorage.setItem("caseType", email);
         setError("");
       } else {
         setError(data.error || "Failed to create session");
