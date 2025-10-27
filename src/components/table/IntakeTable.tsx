@@ -5,12 +5,13 @@ import { useRouter } from 'next/navigation';
 import { Edit, Trash2, Eye, Plus, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import Pagination from '@/components/ui/pagination';
+import NewIntakeModal from '../NewIntakeModal';
 
 interface CaseIntake {
   id: number | string;
-  clientName: string;
+  clientName: string | null | undefined;
   accidentDate: string;
-  accidentDescription: string;
+  accidentDescription: string | null | undefined;
 }
 
 export default function IntakeTable() {
@@ -24,6 +25,7 @@ export default function IntakeTable() {
   const [selectedIntake, setSelectedIntake] = useState<CaseIntake | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showIntakeModal, setShowIntakeModal] = useState(false);
   const itemsPerPage = 5;
 
   useEffect(() => {
@@ -78,15 +80,17 @@ export default function IntakeTable() {
     }
   };
 
-  const handleNewIntake = async () => {
-    setLoadingNew(true);
-    try {
-      router.push('/intake-form');
-    } finally {
-      setLoadingNew(false);
-    }
-  };
-
+  // const handleNewIntake = async () => {
+  //   setLoadingNew(true);
+  //   try {
+  //     router.push('/intake-form');
+  //   } finally {
+  //     setLoadingNew(false);
+  //   }
+  // };
+const handleNewIntake = () => {
+  setShowIntakeModal(true);
+};
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -100,7 +104,8 @@ export default function IntakeTable() {
     });
   };
 
-  const truncateText = (text: string, maxLength: number): string => {
+  const truncateText = (text: string | null | undefined, maxLength: number): string => {
+    if (!text) return '';
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
 
@@ -363,6 +368,9 @@ export default function IntakeTable() {
             </div>
           </div>
         )}
+
+        {/* New Intake Modal */}
+        {showIntakeModal && <NewIntakeModal onClose={() => setShowIntakeModal(false)} />}
       </div>
     </div>
   );
