@@ -298,8 +298,6 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
         throw new Error(`Failed to save draft: ${res.statusText}`);
       }
       console.log("Draft saved successfully!");
-      alert("Draft saved successfully!");
-      
       toast.success("Draft saved successfully!");
     } catch (err) {
       console.error(err);
