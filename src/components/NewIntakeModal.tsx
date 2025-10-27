@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 
 export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
   const [mode, setMode] = useState<"select" | "new" | "existing">("select");
@@ -13,6 +16,7 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
   const [referenceId, setReferenceId] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+  
 
   const handleCreateSession = async () => {
     if (!name || !dob || !caseType) {
@@ -98,12 +102,27 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
               onChange={(e) => setName(e.target.value)}
               className="border w-full p-2 rounded"
             />
-            <input
-              type="date"
-              value={dob}
-              onChange={(e) => setDob(e.target.value)}
-              className="border w-full p-2 rounded"
+            <div className="border w-full p-2 rounded">
+  
+              <DatePicker
+                selected={dob ? new Date(dob) : null}
+                onChange={(date) => {
+                  if (date) {
+                    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+                    const day = date.getDate().toString().padStart(2, "0");
+                    const year = date.getFullYear();
+                    const formattedDate = `${month}/${day}/${year}`;
+                    setDob(formattedDate);
+                  } else {
+                    setDob("");
+                  }
+                }}
+                dateFormat="MM/dd/yyyy"
+                placeholderText="mm/dd/yyyy"
+                className="border w-full p-2 rounded bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100"
             />
+            </div>
+
             <input
               type="text"
               placeholder="Enter Mail Id"
@@ -149,6 +168,7 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
                   <span>Dog Bite / Slip and Fall</span>
                 </label>
               </div>
+              .
             </div>
 
             {!referenceId && (

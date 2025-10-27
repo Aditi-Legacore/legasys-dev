@@ -278,33 +278,33 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
 
     setStep((s) => s + 1);
 
-    try {
-      if (!referenceId) {
-        toast.error("No reference ID found. Please start a new session.");
-        return;
-      }
+    // try {
+    //   if (!referenceId) {
+    //     toast.error("No reference ID found. Please start a new session.");
+    //     return;
+    //   }
 
-      const currentFormData = methods.getValues();
+    //   const currentFormData = methods.getValues();
 
-      const res = await fetch("/api/intake/draft", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ referenceId, ...currentFormData }),
-      });
+    //   const res = await fetch("/api/intake/draft", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({ referenceId, ...currentFormData }),
+    //   });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error(`Failed to save draft: ${res.status} ${res.statusText}`, errorText);
-        throw new Error(`Failed to save draft: ${res.statusText}`);
-      }
-      console.log("Draft saved successfully!");
-      alert("Draft saved successfully!");
+    //   if (!res.ok) {
+    //     const errorText = await res.text();
+    //     console.error(`Failed to save draft: ${res.status} ${res.statusText}`, errorText);
+    //     throw new Error(`Failed to save draft: ${res.statusText}`);
+    //   }
+    //   console.log("Draft saved successfully!");
+    //   // alert("Draft saved successfully!");
       
-      toast.success("Draft saved successfully!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Error saving draft.");
-    }
+    //   toast.success("Draft saved successfully!");
+    // } catch (err) {
+    //   console.error(err);
+    //   toast.error("Error saving draft.");
+    // }
   };
 
 
@@ -416,7 +416,7 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
             </button>
           )}
           {/* 💾 Save Draft Button */}
-      {/* <div className="flex justify-end">
+      <div className="flex justify-end">
         <button
           type="button"
           onClick={handleSaveDraft}
@@ -424,7 +424,7 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
         >
           Save Draft
         </button>
-      </div> */}
+      </div>
         </div>
       </form>
       </div>
