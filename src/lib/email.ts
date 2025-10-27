@@ -6,8 +6,8 @@ const createTransporter = (userEmail?: string) => nodemailer.createTransport({
   port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587,
   secure: false, // use true for port 465, false for 587
   auth: {
-    user: process.env.SMTP_USER || userEmail,
-    pass: process.env.SMTP_PASS, // ⚠️ App Password (not your Gmail password)
+    user: process.env.EMAIL_USER || userEmail,
+    pass: process.env.EMAIL_PASS, // ⚠️ App Password (not your Gmail password)
   },
 });
 
@@ -15,7 +15,7 @@ export const sendEmail = async (to: string, subject: string, html: string, from?
   try {
     const transporter = createTransporter(from);
     const info = await transporter.sendMail({
-      from: from || process.env.SMTP_FROM, // sender address
+      from: from || process.env.EMAIL_FROM, // sender address
       to, // list of receivers
       subject, // Subject line
       html, // html body
@@ -508,8 +508,8 @@ export const sendIntakeSubmissionEmail = async (formData: any) => {
   `;
 
   // Send to admin or specific email
-  const adminEmail = formData.email || process.env.ADMIN_EMAIL;
+  const adminEmail = formData.email;
   // Use the user's email as the sender
-  const fromEmail = formData.email || process.env.SMTP_FROM;
+  const fromEmail = process.env.EMAIL_FROM;
   return await sendEmail(adminEmail, subject, html, fromEmail);
 };
