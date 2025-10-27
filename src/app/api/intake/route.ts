@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendIntakeSubmissionEmail } from "@/lib/email";
 
 // Helper to convert empty strings to null
 const toNullable = (value: string | undefined): string | null => (value === "" || value === undefined ? null : value);
@@ -121,6 +122,14 @@ export async function POST(request: NextRequest) {
   },
 });
 
+
+    // Send email notification after successful submission
+    try {
+      await sendIntakeSubmissionEmail(data);
+    } catch (emailError) {
+      console.error("Failed to send email notification:", emailError);
+      // Don't fail the submission if email fails
+    }
 
     return NextResponse.json(newIntake, { status: 201 });
   } catch (err: any) {
