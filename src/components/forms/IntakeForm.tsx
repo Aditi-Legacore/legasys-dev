@@ -250,6 +250,8 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
     const savedData = await response.json();
     console.log("✅ Intake form saved:", savedData);
 
+    // Email notification is handled in the API route
+
     toast.success(intakeId ? "✅ Intake updated successfully!" : "✅ Intake created successfully!");
     router.push("/intake-list");
   } catch (error) {
