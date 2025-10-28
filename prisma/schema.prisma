@@ -7,11 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// model User {
+//   id            String       @id @default(cuid())
+//   name          String?
+//   email         String       @unique
+//   password      String?
+//   emailVerified DateTime?
+//   image         String?
+//   createdAt     DateTime     @default(now())
+//   updatedAt     DateTime     @updatedAt
+//   accounts      Account[]
+//   sessions      Session[]
+//   intakes       IntakeInfo[]
+// }
 model User {
   id            String       @id @default(cuid())
-  name          String?
+  salutation    String?
+  firstName     String?
+  lastName      String?
+  dob           DateTime?
   email         String       @unique
   password      String?
+  caseType      String?
+  uniqueUserId  String?      @unique
   emailVerified DateTime?
   image         String?
   createdAt     DateTime     @default(now())
@@ -20,6 +38,7 @@ model User {
   sessions      Session[]
   intakes       IntakeInfo[]
 }
+
 
 model Account {
   id                String  @id @default(cuid())
@@ -78,6 +97,8 @@ model IntakeInfo {
   intakeSessionId String? @unique
   intakeSession   IntakeSession? @relation(fields: [intakeSessionId], references: [id])
   userId String? // foreign key linking to User
+  isDraft String?
+  referenceId String?
 
   // 👤 Plaintiff Information
   clientName  String
