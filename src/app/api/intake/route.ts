@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
 
     // Validate userId if provided
     if (data.userId) {
-      const user = await prisma.user.findUnique({ where: { id: data.userId } });
-      if (!user) {
+      const userExists = await prisma.user.findUnique({ where: { id: data.userId }, select: { id: true } });
+      if (!userExists) {
         data.userId = null; // Set to null if user doesn't exist
       }
     }
