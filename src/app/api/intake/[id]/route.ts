@@ -75,17 +75,49 @@ export async function PUT(
     console.log("📝 PUT /api/intake ID:", id);
     // console.log("📦 PUT body:", data);
 
-    // Validate userId if provided
+    // Define allowed fields for IntakeInfo update
+    const allowedFields = [
+      'clientName', 'gender', 'phoneNumber', 'email', 'address', 'city', 'zip', 'dateOfBirth', 'ssn',
+      'accidentDate', 'accidentTime', 'accidentLocation', 'accidentDescription', 'passenger', 'passengerName', 'workAtAccident',
+      'defendant1Name', 'defendant1Address', 'defendant1Carrier', 'defendant1CarrierPhone', 'defendant1Year', 'defendant1Make', 'defendant1Model', 'defendant1Damage',
+      'defendant2Name', 'defendant2Address', 'defendant2Carrier', 'defendant2CarrierPhone', 'defendant2Year', 'defendant2Make', 'defendant2Model', 'defendant2Damage',
+      'autoName', 'autoPhone', 'autoAddress', 'autoAgent', 'autoPolicy', 'autoClaim', 'autoAdditionalinfo',
+      'healthCarrier', 'healthPhone', 'healthAddress', 'healthPolicy', 'healthClaim', 'healthAdjuster', 'healthAgent', 'healthAdditionalinfo',
+      'medicare', 'medicareNumber', 'medicaid', 'medicaidNumber',
+      'ambulance', 'ambulanceCompany', 'admitted', 'lengthOfStay',
+      'doctorHospital1', 'address1', 'phone1', 'treatmentDate1',
+      'doctorHospital2', 'address2', 'phone2', 'treatmentDate2',
+      'bodyPartsAffected', 'priorInjuries', 'priorDoctorHospital', 'priorHospitalAddressPhone', 'priorTreatmentDetails', 'priorTreatmentFrom', 'priorTreatmentTo', 'priorInsuranceClaims', 'priorAttorneys',
+      'currentTreatment', 'currentDoctorHospital', 'currentHospitalAddressPhone', 'currentTreatmentDetails', 'currentTreatmentFrom', 'currentTreatmentTo',
+      'hearAboutUs', 'hearAboutUsDetail', 'isDraft'
+    ];
+
+    // Filter data to only include allowed fields
+    const updateData: any = {};
+    for (const field of allowedFields) {
+      if (data[field] !== undefined) {
+        if (field === 'isDraft') {
+          updateData[field] = false;
+        } else {
+          updateData[field] = data[field];
+        }
+      }
+    }
+
+    // Always set isDraft to false on update to mark as no longer draft
+    updateData.isDraft = false;
+
+    // Handle user relation separately
     if (data.userId) {
       const user = await prisma.user.findUnique({ where: { id: data.userId } });
-      if (!user) {
-        data.userId = null; // Set to null if user doesn't exist
+      if (user) {
+        updateData.user = { connect: { id: data.userId } };
       }
     }
 
     const updated = await prisma.intakeInfo.update({
       where: { id },
-      data,
+      data: updateData,
     });
 
     return NextResponse.json(updated, { status: 200 });

@@ -227,14 +227,15 @@ useEffect(() => {
 
     console.log(`📡 Sending ${method} request to ${url}`);
 
-  const payload = {
+  const payload: any = {
   ...data,
   phoneNumber: data.phone,
   dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null, // ✅ only convert if dob exists
   userId: session?.user?.id || null,
+  referenceId: referenceId || null, // Include referenceId if exists
 };
 
-delete (payload as any).phone;
+delete payload.phone;
 delete payload.dob;
 
 const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake`, {

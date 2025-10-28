@@ -191,7 +191,7 @@ export default function IntakePreviewPage() {
                 {loadingPdf ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
-                  <Eye size={16} />
+                  <Download size={16} />
                 )}
               </button>
               <button

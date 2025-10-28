@@ -97,8 +97,6 @@ model IntakeInfo {
   intakeSessionId String? @unique
   intakeSession   IntakeSession? @relation(fields: [intakeSessionId], references: [id])
   userId String? // foreign key linking to User
-  referenceId                String?
-  isDraft                    Boolean @default(true)
 
   // 👤 Plaintiff Information
   clientName  String
@@ -213,5 +211,7 @@ model IntakeInfo {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  referenceId                String?
+  isDraft                    Boolean @default(true)
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
