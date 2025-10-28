@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
+  const serverSession = await getServerSession(authOptions);
+  if (!serverSession || !serverSession.user.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const data = await req.json();
   const { referenceId, ...draftFields } = data;
 
@@ -36,7 +43,7 @@ export async function POST(req: NextRequest) {
       'doctorHospital2', 'address2', 'phone2', 'treatmentDate2',
       'bodyPartsAffected', 'priorInjuries', 'priorDoctorHospital', 'priorHospitalAddressPhone', 'priorTreatmentDetails', 'priorTreatmentFrom', 'priorTreatmentTo', 'priorInsuranceClaims', 'priorAttorneys',
       'currentTreatment', 'currentDoctorHospital', 'currentHospitalAddressPhone', 'currentTreatmentDetails', 'currentTreatmentFrom', 'currentTreatmentTo',
-      'hearAboutUs', 'hearAboutUsDetail'
+      'hearAboutUs', 'hearAboutUsDetail', 'referenceId'
     ];
 
     // Date fields that need to be converted to Date objects
@@ -52,23 +59,34 @@ export async function POST(req: NextRequest) {
         transformedFields[field] = draftFields.phone;
       } else if (field === 'dateOfBirth') {
         transformedFields[field] = draftFields.dob ? new Date(draftFields.dob) : null;
-      } else if (dateFields.includes(field) && draftFields[field]) {
+      }
+      else if (field === 'referenceId') {
+        transformedFields[field] = referenceId
+      }
+      else if (dateFields.includes(field) && draftFields[field]) {
         transformedFields[field] = new Date(draftFields[field]);
       } else if (draftFields[field] !== undefined) {
         transformedFields[field] = draftFields[field];
       }
     }
 
+    console.log("transformedFields", transformedFields);
+    
+
     if (existingIntake) {
       await prisma.intakeInfo.update({
         where: { intakeSessionId: session.id },
-        data: transformedFields,
+        data: {
+          ...transformedFields,
+          user: { connect: { id: serverSession.user.id } },
+        },
       });
     } else {
       const { intakeSessionId, ...fields } = transformedFields;
       await prisma.intakeInfo.create({
         data: {
           ...fields,
+          user: { connect: { id: serverSession.user.id } },
           intakeSession: { connect: { id: session.id } },
         },
       });

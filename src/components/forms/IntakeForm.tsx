@@ -227,14 +227,15 @@ useEffect(() => {
 
     console.log(`📡 Sending ${method} request to ${url}`);
 
-  const payload = {
+  const payload: any = {
   ...data,
   phoneNumber: data.phone,
   dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null, // ✅ only convert if dob exists
   userId: session?.user?.id || null,
+  referenceId: referenceId || null, // Include referenceId if exists
 };
 
-delete (payload as any).phone;
+delete payload.phone;
 delete payload.dob;
 
 const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake`, {
@@ -282,31 +283,6 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
 
     setStep((s) => s + 1);
 
-    try {
-      if (!referenceId) {
-        toast.error("No reference ID found. Please start a new session.");
-        return;
-      }
-
-      const currentFormData = methods.getValues();
-
-      const res = await fetch("/api/intake/draft", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ referenceId, ...currentFormData }),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error(`Failed to save draft: ${res.status} ${res.statusText}`, errorText);
-        throw new Error(`Failed to save draft: ${res.statusText}`);
-      }
-      console.log("Draft saved successfully!");
-      toast.success("Draft saved successfully!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Error saving draft.");
-    }
     // try {
     //   if (!referenceId) {
     //     toast.error("No reference ID found. Please start a new session.");
@@ -327,13 +303,12 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
     //     throw new Error(`Failed to save draft: ${res.statusText}`);
     //   }
     //   console.log("Draft saved successfully!");
-    //   // alert("Draft saved successfully!");
-      
     //   toast.success("Draft saved successfully!");
     // } catch (err) {
     //   console.error(err);
     //   toast.error("Error saving draft.");
     // }
+    
   };
 
 
