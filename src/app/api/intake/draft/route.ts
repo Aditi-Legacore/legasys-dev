@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       'doctorHospital2', 'address2', 'phone2', 'treatmentDate2',
       'bodyPartsAffected', 'priorInjuries', 'priorDoctorHospital', 'priorHospitalAddressPhone', 'priorTreatmentDetails', 'priorTreatmentFrom', 'priorTreatmentTo', 'priorInsuranceClaims', 'priorAttorneys',
       'currentTreatment', 'currentDoctorHospital', 'currentHospitalAddressPhone', 'currentTreatmentDetails', 'currentTreatmentFrom', 'currentTreatmentTo',
-      'hearAboutUs', 'hearAboutUsDetail'
+      'hearAboutUs', 'hearAboutUsDetail', 'referenceId'
     ];
 
     // Date fields that need to be converted to Date objects
@@ -52,12 +52,19 @@ export async function POST(req: NextRequest) {
         transformedFields[field] = draftFields.phone;
       } else if (field === 'dateOfBirth') {
         transformedFields[field] = draftFields.dob ? new Date(draftFields.dob) : null;
-      } else if (dateFields.includes(field) && draftFields[field]) {
+      }
+      else if (field === 'referenceId') {
+        transformedFields[field] = referenceId
+      }
+      else if (dateFields.includes(field) && draftFields[field]) {
         transformedFields[field] = new Date(draftFields[field]);
       } else if (draftFields[field] !== undefined) {
         transformedFields[field] = draftFields[field];
       }
     }
+
+    console.log("transformedFields", transformedFields);
+    
 
     if (existingIntake) {
       await prisma.intakeInfo.update({
