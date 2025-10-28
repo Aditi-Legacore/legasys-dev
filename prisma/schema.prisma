@@ -7,38 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// model User {
-//   id            String       @id @default(cuid())
-//   name          String?
-//   email         String       @unique
-//   password      String?
-//   emailVerified DateTime?
-//   image         String?
-//   createdAt     DateTime     @default(now())
-//   updatedAt     DateTime     @updatedAt
-//   accounts      Account[]
-//   sessions      Session[]
-//   intakes       IntakeInfo[]
-// }
 model User {
   id            String       @id @default(cuid())
-  salutation    String?
-  firstName     String?
-  lastName      String?
-  dob           DateTime?
+  name          String?
   email         String       @unique
   password      String?
-  caseType      String?
-  uniqueUserId  String?      @unique
   emailVerified DateTime?
   image         String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   accounts      Account[]
-  sessions      Session[]
   intakes       IntakeInfo[]
+  sessions      Session[]
 }
-
 
 model Account {
   id                String  @id @default(cuid())
@@ -46,12 +27,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -74,144 +55,105 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// new code date-22/10/2025 for save draft
-
 model IntakeSession {
-  id            String   @id @default(cuid())
-  referenceId   String   @unique
-  name          String
-  dateOfBirth   DateTime
-  email         String
-  caseType String? 
-  status        String   @default("draft") // draft | submitted
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  intakeInfo    IntakeInfo?
+  id          String      @id @default(cuid())
+  referenceId String      @unique
+  name        String
+  dateOfBirth DateTime
+  status      String      @default("draft")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  caseType    String?
+  email       String
+  intakeInfo  IntakeInfo?
 }
 
-
 model IntakeInfo {
-  id     String @id @default(cuid())
-
-  intakeSessionId String? @unique
-  intakeSession   IntakeSession? @relation(fields: [intakeSessionId], references: [id])
-  userId String? // foreign key linking to User
-  isDraft String?
-  referenceId String?
-
-  // 👤 Plaintiff Information
-  clientName  String
-  gender      String?
-  phoneNumber String?
-  email       String?
-  address     String?
-  city        String?
-  zip         String?
-  dateOfBirth DateTime?
-  ssn         String?
-
-  // 🚗 Accident Information
-  accidentDate        DateTime?
-  accidentTime        String?
-  accidentLocation    String?
-  accidentDescription String?
-  passenger           String?
-  passengerName       String?
-  workAtAccident      String?
-  
-  // Defendant 1 / Driver
-  defendant1Name         String?
- 
-  defendant1Address      String?
-  defendant1Carrier      String?
-  defendant1CarrierPhone String?
-  
-  defendant1Year         String?
-  defendant1Make         String?
-  defendant1Model        String?
-  defendant1Damage       String?
-
-  // Defendant 2 / Owner
-  defendant2Name         String?
- 
-  defendant2Address      String?
-  defendant2Carrier      String?
-  defendant2CarrierPhone String?
- 
-  defendant2Year         String?
-  defendant2Make         String?
-  defendant2Model        String?
-  defendant2Damage       String?
-
-  // Client Automobile Insurance
-  autoName     String?
-  autoPhone    String?
-  autoAddress  String?
-  
-  autoAgent    String?
-  autoPolicy   String?
-  autoClaim    String?
-  autoAdditionalinfo    String?
- 
-
-  // Client Health Insurance
-  healthCarrier String?
-  healthPhone   String?
- 
-  healthAddress String?
-  
-  healthPolicy  String?
-  healthClaim   String?
-  healthAdjuster String?
-  healthAgent String?
-  healthAdditionalinfo String?
-
-  medicare       String? // "Yes" / "No"
-  medicareNumber String?
-  medicaid       String? // "Yes" / "No"
-  medicaidNumber String?
-
-  // Medical Treatment
-  ambulance        String? // "Yes" / "No"
-  ambulanceCompany String?
-  admitted         String? // "Yes" / "No"
-  lengthOfStay     String?
-
-  doctorHospital1 String?
-  address1        String?
-  phone1          String?
-  treatmentDate1  DateTime?
-
-  doctorHospital2 String?
-  address2        String?
-  phone2          String?
-  treatmentDate2  DateTime?
-
-
-  // Injuries
-  bodyPartsAffected    String?
-  priorInjuries        String?
-  priorDoctorHospital        String?
-  priorHospitalAddressPhone        String?
-  priorTreatmentDetails        String?
-  priorTreatmentFrom        DateTime?
-  priorTreatmentTo        DateTime?
-  priorInsuranceClaims String?
-  priorAttorneys       String?
-
-  
-  currentTreatment           String?
-  currentDoctorHospital      String?
+  id                          String         @id @default(cuid())
+  userId                      String?
+  clientName                  String
+  gender                      String?
+  phoneNumber                 String?
+  email                       String?
+  address                     String?
+  city                        String?
+  zip                         String?
+  dateOfBirth                 DateTime?
+  ssn                         String?
+  accidentDate                DateTime?
+  accidentTime                String?
+  accidentLocation            String?
+  accidentDescription         String?
+  passenger                   String?
+  passengerName               String?
+  workAtAccident              String?
+  defendant1Name              String?
+  defendant1Address           String?
+  defendant1Carrier           String?
+  defendant1CarrierPhone      String?
+  defendant1Year              String?
+  defendant1Make              String?
+  defendant1Model             String?
+  defendant1Damage            String?
+  defendant2Name              String?
+  defendant2Address           String?
+  defendant2Carrier           String?
+  defendant2CarrierPhone      String?
+  defendant2Year              String?
+  defendant2Make              String?
+  defendant2Model             String?
+  defendant2Damage            String?
+  autoName                    String?
+  autoPhone                   String?
+  autoAddress                 String?
+  autoAgent                   String?
+  autoPolicy                  String?
+  autoClaim                   String?
+  autoAdditionalinfo          String?
+  healthCarrier               String?
+  healthPhone                 String?
+  healthAddress               String?
+  healthPolicy                String?
+  healthClaim                 String?
+  healthAdjuster              String?
+  healthAgent                 String?
+  healthAdditionalinfo        String?
+  medicare                    String?
+  medicareNumber              String?
+  medicaid                    String?
+  medicaidNumber              String?
+  ambulance                   String?
+  ambulanceCompany            String?
+  admitted                    String?
+  lengthOfStay                String?
+  doctorHospital1             String?
+  address1                    String?
+  phone1                      String?
+  treatmentDate1              DateTime?
+  doctorHospital2             String?
+  address2                    String?
+  phone2                      String?
+  treatmentDate2              DateTime?
+  bodyPartsAffected           String?
+  priorInjuries               String?
+  priorDoctorHospital         String?
+  priorHospitalAddressPhone   String?
+  priorTreatmentDetails       String?
+  priorTreatmentFrom          DateTime?
+  priorTreatmentTo            DateTime?
+  priorInsuranceClaims        String?
+  priorAttorneys              String?
+  currentTreatment            String?
+  currentDoctorHospital       String?
   currentHospitalAddressPhone String?
-  currentTreatmentDetails    String?
-  currentTreatmentFrom       DateTime?
-  currentTreatmentTo         DateTime?
-  hearAboutUs                String?
-  hearAboutUsDetail          String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentTreatmentDetails     String?
+  currentTreatmentFrom        DateTime?
+  currentTreatmentTo          DateTime?
+  hearAboutUs                 String?
+  hearAboutUsDetail           String?
+  createdAt                   DateTime       @default(now())
+  updatedAt                   DateTime       @updatedAt
+  intakeSessionId             String?        @unique
+  intakeSession               IntakeSession? @relation(fields: [intakeSessionId], references: [id])
+  user                        User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
