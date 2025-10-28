@@ -167,7 +167,7 @@ export default function SignupForm() {
               /> */}
 
               {/* Salutation */}
-              <FormField
+              <FormField 
                 control={form.control}
                 name="salutation"
                 render={({ field }) => (
@@ -175,7 +175,7 @@ export default function SignupForm() {
                     <FormControl>
                       <select
                         {...field}
-                        className="w-full h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent px-3"
+                        className="h-12 border-gray-300 rounded-lg ring-2 ring-gray-300 focus:border-transparent"
                       >
                         <option value="">Select Salutation</option>
                         <option value="Mr.">Mr.</option>
@@ -244,7 +244,7 @@ export default function SignupForm() {
                         }}
                         dateFormat="MM/dd/yyyy"
                         placeholderText="MM/DD/YYYY"
-                        className="w-full h-12 border-gray-300 rounded-lg px-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full h-12 border-gray-300 rounded-lg px-3 ring-2 ring-gray-300 focus:border-transparent"
                       />
                     </FormControl>
                     <FormMessage />
@@ -315,7 +315,7 @@ export default function SignupForm() {
                     <FormControl>
                       <select
                         {...field}
-                        className="w-full h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent px-3"
+                        className="h-12 border-gray-300 rounded-lg ring-2 ring-gray-300 focus:border-transparent"
                       >
                         <option value="">Select Case Type</option>
                         <option value="Automobile">Automobile</option>
