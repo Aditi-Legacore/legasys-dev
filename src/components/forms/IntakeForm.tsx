@@ -58,14 +58,18 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   const searchParams = useSearchParams();
   //code for fetch draft
   //  const referenceId = searchParams.get("ref");
-  const [draft, setDraft] = useState(null);
+  const [draft, setDraft] = useState<any>(null);
 
   const intakeId = searchParams.get("id");  // 👈 get ID from URL
   const [isLoadingExistingData, setIsLoadingExistingData] = useState(false);
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({});
-const referenceId = localStorage.getItem("referenceId");
+  const [referenceId, setReferenceId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setReferenceId(localStorage.getItem("referenceId"));
+  }, []);
 
 // Prefill draft if exists
   useEffect(() => {
