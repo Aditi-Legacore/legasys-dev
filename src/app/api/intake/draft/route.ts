@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
         where: { intakeSessionId: session.id },
         data: {
           ...transformedFields,
-          userId: serverSession.user.id,
+          user: { connect: { id: serverSession.user.id } },
         },
       });
     } else {
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
       await prisma.intakeInfo.create({
         data: {
           ...fields,
-          userId: serverSession.user.id,
+          user: { connect: { id: serverSession.user.id } },
           intakeSession: { connect: { id: session.id } },
         },
       });
