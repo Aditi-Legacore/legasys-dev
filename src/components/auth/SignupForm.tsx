@@ -14,12 +14,25 @@ import { Button } from "@/components/ui/button";
 import { User, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import LoginBg from "../../../public/assets/images/auth/login-bg.png";
 import LoginLogoBg from "../../../public/assets/images/auth/logo.png";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
+
+// interface SignupFormData {
+//   name: string;
+//   email: string;
+//   password: string;
+// }
 interface SignupFormData {
-  name: string;
+  salutation: string;
+  firstName: string;
+  lastName: string;
+  dob: string;
   email: string;
   password: string;
+  caseType: string;
 }
+
 
 export default function SignupForm() {
   const router = useRouter();
@@ -27,39 +40,69 @@ export default function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { name: "", email: "", password: "" },
+    defaultValues: {
+    salutation: "",
+    firstName: "",
+    lastName: "",
+    dob: "",
+    email: "",
+    password: "",
+    caseType: "",
+  },
   });
 
+  // const onSubmit = async (values: SignupFormData) => {
+  //   setIsLoading(true);
+  //   try {
+  //     const res = await fetch("/api/signup", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(values),
+  //     });
+
+  //     if (res.ok) {
+  //       // Automatically sign in the user after successful signup
+  //       const signInRes = await signIn("credentials", {
+  //         email: values.email,
+  //         password: values.password,
+  //         redirect: false,
+  //       });
+
+  //       if (!signInRes?.error) {
+  //         router.push("/");
+  //         window.location.reload();
+  //       } else {
+  //         alert("Signup successful, but login failed. Please try logging in manually.");
+  //       }
+  //     } else {
+  //       alert("Signup failed");
+  //     }
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const onSubmit = async (values: SignupFormData) => {
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
+  setIsLoading(true);
+  try {
+    const res = await fetch("/api/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
 
-      if (res.ok) {
-        // Automatically sign in the user after successful signup
-        const signInRes = await signIn("credentials", {
-          email: values.email,
-          password: values.password,
-          redirect: false,
-        });
+    const data = await res.json();
 
-        if (!signInRes?.error) {
-          router.push("/");
-          window.location.reload();
-        } else {
-          alert("Signup successful, but login failed. Please try logging in manually.");
-        }
-      } else {
-        alert("Signup failed");
-      }
-    } finally {
-      setIsLoading(false);
+    if (res.ok) {
+      router.push(data.redirect);
+    } else {
+      alert(data.error || "Signup failed");
     }
-  };
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex flex-col justify-center md:flex-row bg-white">
@@ -102,7 +145,7 @@ export default function SignupForm() {
           {/* Form */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name="name"
                 render={({ field }: { field: any }) => (
@@ -121,8 +164,96 @@ export default function SignupForm() {
                     <FormMessage />
                   </FormItem>
                 )}
+              /> */}
+
+              {/* Salutation */}
+              <FormField 
+                control={form.control}
+                name="salutation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <select
+                        {...field}
+                        className="h-12 border-gray-300 rounded-lg ring-2 ring-gray-300 focus:border-transparent"
+                      >
+                        <option value="">Select Salutation</option>
+                        <option value="Mr.">Mr.</option>
+                        <option value="Ms.">Ms.</option>
+                        <option value="Mrs.">Mrs.</option>
+                        <option value="Dr.">Dr.</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
 
+              {/* First Name */}
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="First Name"
+                        className="h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Last Name */}
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="Last Name"
+                        className="h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* DOB */}
+              <FormField
+                control={form.control}
+                name="dob"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <DatePicker
+                        selected={field.value ? new Date(field.value) : null}
+                        onChange={(date) => {
+                          if (date) {
+                            const month = (date.getMonth() + 1).toString().padStart(2, "0");
+                            const day = date.getDate().toString().padStart(2, "0");
+                            const year = date.getFullYear();
+                            const formatted = `${month}/${day}/${year}`;
+                            field.onChange(formatted);
+                          }
+                        }}
+                        dateFormat="MM/dd/yyyy"
+                        placeholderText="MM/DD/YYYY"
+                        className="w-full h-12 border-gray-300 rounded-lg px-3 ring-2 ring-gray-300 focus:border-transparent"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+
+              {/* email */}
               <FormField
                 control={form.control}
                 name="email"
@@ -143,7 +274,7 @@ export default function SignupForm() {
                   </FormItem>
                 )}
               />
-
+              {/* Password */}
               <FormField
                 control={form.control}
                 name="password"
@@ -175,6 +306,28 @@ export default function SignupForm() {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="caseType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <select
+                        {...field}
+                        className="h-12 border-gray-300 rounded-lg ring-2 ring-gray-300 focus:border-transparent"
+                      >
+                        <option value="">Select Case Type</option>
+                        <option value="Automobile">Automobile</option>
+                        <option value="Premises Liabilities">Premises Liabilities</option>
+                        <option value="Dog Bite / Slip and Fall">Dog Bite / Slip and Fall</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
 
 
               <Button
