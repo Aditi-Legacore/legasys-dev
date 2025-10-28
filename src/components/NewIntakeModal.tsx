@@ -80,13 +80,13 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
               onClick={() => setMode("new")}
               className="w-full bg-blue-600 text-white py-2 rounded-lg"
             >
-              New User
+              New Intake
             </button>
             <button
               onClick={() => setMode("existing")}
               className="w-full bg-gray-600 text-white py-2 rounded-lg"
             >
-              Existing User
+              Existing Intake
             </button>
           </div>
         )}

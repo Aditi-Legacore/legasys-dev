@@ -12,6 +12,7 @@ interface CaseIntake {
   clientName: string | null | undefined;
   accidentDate: string;
   accidentDescription: string | null | undefined;
+  isDraft: boolean;
 }
 
 export default function IntakeTable() {
@@ -165,6 +166,9 @@ const handleNewIntake = () => {
                   <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
                     Accident Description
                   </th>
+                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                    Status
+                  </th>
                   <th className="px-4 lg:px-6 py-3 lg:py-4 text-center text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
                     Actions
                   </th>
@@ -188,6 +192,11 @@ const handleNewIntake = () => {
                     <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm">
                       <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 lg:px-3 py-1 rounded-full text-xs font-medium">
                         {intake.accidentDescription}
+                      </span>
+                    </td>
+                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm">
+                      <span className={`inline-block px-2 lg:px-3 py-1 rounded-full text-xs font-medium ${intake.isDraft ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200' : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'}`}>
+                        {intake.isDraft ? 'Draft' : 'Complete'}
                       </span>
                     </td>
                     <td className="px-4 lg:px-6 py-3 lg:py-4">
@@ -259,9 +268,14 @@ const handleNewIntake = () => {
                       {truncateText(intake.clientName, 20)}
                     </h3>
                   </div>
-                  <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-medium max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                    {truncateText(intake.accidentDescription, 20)}
-                  </span>
+                  <div className="flex gap-2 mt-1">
+                    <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-medium max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                      {truncateText(intake.accidentDescription, 20)}
+                    </span>
+                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${intake.isDraft ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200' : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'}`}>
+                      {intake.isDraft ? 'Draft' : 'Complete'}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex gap-1">
                   <button

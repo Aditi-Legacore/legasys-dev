@@ -97,8 +97,6 @@ model IntakeInfo {
   intakeSessionId String? @unique
   intakeSession   IntakeSession? @relation(fields: [intakeSessionId], references: [id])
   userId String? // foreign key linking to User
-  isDraft String?
-  referenceId String?
 
   // 👤 Plaintiff Information
   clientName  String

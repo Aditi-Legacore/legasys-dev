@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
+  const serverSession = await getServerSession(authOptions);
+  if (!serverSession || !serverSession.user.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const data = await req.json();
   const { referenceId, ...draftFields } = data;
 
@@ -69,13 +76,17 @@ export async function POST(req: NextRequest) {
     if (existingIntake) {
       await prisma.intakeInfo.update({
         where: { intakeSessionId: session.id },
-        data: transformedFields,
+        data: {
+          ...transformedFields,
+          userId: serverSession.user.id,
+        },
       });
     } else {
       const { intakeSessionId, ...fields } = transformedFields;
       await prisma.intakeInfo.create({
         data: {
           ...fields,
+          userId: serverSession.user.id,
           intakeSession: { connect: { id: session.id } },
         },
       });

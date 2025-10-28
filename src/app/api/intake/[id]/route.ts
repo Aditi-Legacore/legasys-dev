@@ -96,9 +96,16 @@ export async function PUT(
     const updateData: any = {};
     for (const field of allowedFields) {
       if (data[field] !== undefined) {
-        updateData[field] = data[field];
+        if (field === 'isDraft') {
+          updateData[field] = false;
+        } else {
+          updateData[field] = data[field];
+        }
       }
     }
+
+    // Always set isDraft to false on update to mark as no longer draft
+    updateData.isDraft = false;
 
     // Handle user relation separately
     if (data.userId) {
