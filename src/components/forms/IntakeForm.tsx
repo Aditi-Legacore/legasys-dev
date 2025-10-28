@@ -58,14 +58,18 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   const searchParams = useSearchParams();
   //code for fetch draft
   //  const referenceId = searchParams.get("ref");
-  const [draft, setDraft] = useState(null);
+  const [draft, setDraft] = useState<any>(null);
 
   const intakeId = searchParams.get("id");  // 👈 get ID from URL
   const [isLoadingExistingData, setIsLoadingExistingData] = useState(false);
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({});
-const referenceId = localStorage.getItem("referenceId");
+  const [referenceId, setReferenceId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setReferenceId(localStorage.getItem("referenceId"));
+  }, []);
 
 // Prefill draft if exists
   useEffect(() => {
@@ -223,14 +227,15 @@ useEffect(() => {
 
     console.log(`📡 Sending ${method} request to ${url}`);
 
-  const payload = {
+  const payload: any = {
   ...data,
   phoneNumber: data.phone,
   dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null, // ✅ only convert if dob exists
   userId: session?.user?.id || null,
+  referenceId: referenceId || null, // Include referenceId if exists
 };
 
-delete (payload as any).phone;
+delete payload.phone;
 delete payload.dob;
 
 const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake`, {
