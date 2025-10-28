@@ -7,19 +7,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// model User {
+//   id            String       @id @default(cuid())
+//   name          String?
+//   email         String       @unique
+//   password      String?
+//   emailVerified DateTime?
+//   image         String?
+//   createdAt     DateTime     @default(now())
+//   updatedAt     DateTime     @updatedAt
+//   accounts      Account[]
+//   sessions      Session[]
+//   intakes       IntakeInfo[]
+// }
 model User {
   id            String       @id @default(cuid())
-  name          String?
+  salutation    String?
+  firstName     String?
+  lastName      String?
+  dob           DateTime?
   email         String       @unique
   password      String?
+  caseType      String?
+  uniqueUserId  String?      @unique
   emailVerified DateTime?
   image         String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   accounts      Account[]
-  intakes       IntakeInfo[]
   sessions      Session[]
+  intakes       IntakeInfo[]
 }
+
 
 model Account {
   id                String  @id @default(cuid())
@@ -27,12 +46,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -55,18 +74,22 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// new code date-22/10/2025 for save draft
+
 model IntakeSession {
-  id          String      @id @default(cuid())
-  referenceId String      @unique
-  name        String
-  dateOfBirth DateTime
-  status      String      @default("draft")
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  caseType    String?
-  email       String
-  intakeInfo  IntakeInfo?
+  id            String   @id @default(cuid())
+  referenceId   String   @unique
+  name          String
+  dateOfBirth   DateTime
+  email         String
+  caseType String? 
+  status        String   @default("draft") // draft | submitted
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  intakeInfo    IntakeInfo?
 }
+
 
 model IntakeInfo {
   id     String @id @default(cuid())
@@ -74,8 +97,8 @@ model IntakeInfo {
   intakeSessionId String? @unique
   intakeSession   IntakeSession? @relation(fields: [intakeSessionId], references: [id])
   userId String? // foreign key linking to User
-  isDraft String?
-  referenceId String?
+  referenceId                String?
+  isDraft                    Boolean @default(true)
 
   // 👤 Plaintiff Information
   clientName  String
@@ -181,14 +204,14 @@ model IntakeInfo {
   currentTreatment           String?
   currentDoctorHospital      String?
   currentHospitalAddressPhone String?
-  currentTreatmentDetails     String?
-  currentTreatmentFrom        DateTime?
-  currentTreatmentTo          DateTime?
-  hearAboutUs                 String?
-  hearAboutUsDetail           String?
-  createdAt                   DateTime       @default(now())
-  updatedAt                   DateTime       @updatedAt
-  intakeSessionId             String?        @unique
-  intakeSession               IntakeSession? @relation(fields: [intakeSessionId], references: [id])
-  user                        User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentTreatmentDetails    String?
+  currentTreatmentFrom       DateTime?
+  currentTreatmentTo         DateTime?
+  hearAboutUs                String?
+  hearAboutUsDetail          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
