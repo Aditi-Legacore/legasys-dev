@@ -116,6 +116,14 @@ model IntakeInfo {
   accidentDescription String?
   passenger           String?
   passengerName       String?
+  passengerAge       String?
+  relationshipToYou       String?
+  injuryDescription       String?
+  hospitalized       String?
+  hospitalName       String?
+  treatmentDetails       String?
+  seatbeltUsed       String?
+
   workAtAccident      String?
   
   // Defendant 1 / Driver
@@ -176,15 +184,15 @@ model IntakeInfo {
   admitted         String? // "Yes" / "No"
   lengthOfStay     String?
 
-  doctorHospital1 String?
-  address1        String?
-  phone1          String?
-  treatmentDate1  DateTime?
+  // doctorHospital1 String?
+  // address1        String?
+  // phone1          String?
+  // treatmentDate1  DateTime?
 
-  doctorHospital2 String?
-  address2        String?
-  phone2          String?
-  treatmentDate2  DateTime?
+  // doctorHospital2 String?
+  // address2        String?
+  // phone2          String?
+  // treatmentDate2  DateTime?
 
 
   // Injuries
@@ -198,6 +206,22 @@ model IntakeInfo {
   priorInsuranceClaims String?
   priorAttorneys       String?
 
+  priorDoctorHospital2        String?
+  priorHospitalAddressPhone2        String?
+  priorTreatmentDetails2        String?
+  priorTreatmentFrom2        DateTime?
+  priorTreatmentTo2        DateTime?
+  priorInsuranceClaims2 String?
+  priorAttorneys2       String?
+
+  priorDoctorHospital3        String?
+  priorHospitalAddressPhone3        String?
+  priorTreatmentDetails3        String?
+  priorTreatmentFrom3        DateTime?
+  priorTreatmentTo3        DateTime?
+  priorInsuranceClaims3 String?
+  priorAttorneys3       String?
+
   
   currentTreatment           String?
   currentDoctorHospital      String?
@@ -205,6 +229,18 @@ model IntakeInfo {
   currentTreatmentDetails    String?
   currentTreatmentFrom       DateTime?
   currentTreatmentTo         DateTime?
+
+  currentDoctorHospital2      String?
+  currentHospitalAddressPhone2 String?
+  currentTreatmentDetails2    String?
+  currentTreatmentFrom2      DateTime?
+  currentTreatmentTo2         DateTime?
+
+  currentDoctorHospital3      String?
+  currentHospitalAddressPhone3 String?
+  currentTreatmentDetails3    String?
+  currentTreatmentFrom3       DateTime?
+  currentTreatmentTo3         DateTime?
   hearAboutUs                String?
   hearAboutUsDetail          String?
 

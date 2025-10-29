@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import InputField from "../inputs/InputField";
 import RadioGroup from "../inputs/RadioGroup";
@@ -7,17 +8,70 @@ import TextareaField from "../inputs/TextareaField";
 import DateInputField from "../inputs/DateInputField";
 
 export default function MedicalTreatmentStep() {
-  const { watch } = useFormContext();
+  const { watch, setValue } = useFormContext();
 
-  // 👀 Watch field values
+  // States for controlling add/remove
+  const [treatmentCount, setTreatmentCount] = useState(1);
+  const [priorInjuryCount, setPriorInjuryCount] = useState(1);
+
+  // Watching form values
   const ambulance = watch("ambulance");
   const admitted = watch("admitted");
-  const priorInjuries = watch("priorInjuries");
   const currentTreatment = watch("currentTreatment");
+  const priorInjuries = watch("priorInjuries");
+
+  // Helper: get suffix for DB field names (none, 2, 3)
+  const getSuffix = (index: number) => (index === 1 ? "" : index.toString());
+
+  /** ---------------------------
+   *   CURRENT TREATMENT HANDLERS
+   * --------------------------- */
+  const handleAddTreatment = () => {
+    if (treatmentCount < 3) setTreatmentCount((prev) => prev + 1);
+  };
+
+  const handleRemoveTreatment = () => {
+    if (treatmentCount > 1) {
+      const suffix = getSuffix(treatmentCount);
+      const fieldsToClear = [
+        `currentDoctorHospital${suffix}`,
+        `currentHospitalAddressPhone${suffix}`,
+        `currentTreatmentDetails${suffix}`,
+        `currentTreatmentFrom${suffix}`,
+        `currentTreatmentTo${suffix}`,
+      ];
+      fieldsToClear.forEach((field) => setValue(field, null));
+      setTreatmentCount((prev) => prev - 1);
+    }
+  };
+
+  /** ---------------------------
+   *   PRIOR INJURY HANDLERS
+   * --------------------------- */
+  const handleAddPriorInjury = () => {
+    if (priorInjuryCount < 3) setPriorInjuryCount((prev) => prev + 1);
+  };
+
+  const handleRemovePriorInjury = () => {
+    if (priorInjuryCount > 1) {
+      const suffix = getSuffix(priorInjuryCount);
+      const fieldsToClear = [
+        `priorDoctorHospital${suffix}`,
+        `priorHospitalAddressPhone${suffix}`,
+        `priorTreatmentDetails${suffix}`,
+        `priorTreatmentFrom${suffix}`,
+        `priorTreatmentTo${suffix}`,
+        `priorInsuranceClaims${suffix}`,
+        `priorAttorneys${suffix}`,
+      ];
+      fieldsToClear.forEach((field) => setValue(field, null));
+      setPriorInjuryCount((prev) => prev - 1);
+    }
+  };
 
   return (
     <div className="space-y-6 w-full">
-      {/* 1. Ambulance Section */}
+      {/* 🚑 Ambulance Section */}
       <RadioGroup
         name="ambulance"
         label="Transported by ambulance? *"
@@ -30,7 +84,7 @@ export default function MedicalTreatmentStep() {
         />
       )}
 
-      {/* 2. Admitted Section */}
+      {/* 🏥 Admitted Section */}
       <RadioGroup
         name="admitted"
         label="Were you admitted? *"
@@ -40,89 +94,158 @@ export default function MedicalTreatmentStep() {
         <InputField name="lengthOfStay" label="Length of stay" />
       )}
 
-      {/* 4. Current Treatment Section */}
+      {/* 💊 Current Treatments */}
       <RadioGroup
         name="currentTreatment"
         label="Is There Any Current/On going Treatments Due to Accident? *"
         options={["Yes", "No"]}
       />
       {currentTreatment === "Yes" && (
-        <div className="p-4 rounded-2xl border border-gray-300 dark:border-gray-700">
+        <div className="p-4 rounded-2xl border border-gray-300 dark:border-gray-700 space-y-6">
           <h3 className="font-semibold text-lg mb-2 text-gray-700 dark:text-gray-200">
             Current Treatment Details
           </h3>
-          <InputField
-            name="currentDoctorHospital"
-            label="Doctor/Hospital Name"
-          />
-          <InputField
-            name="currentHospitalAddressPhone"
-            label="Hospital Address & Phone No."
-          />
-          <TextareaField
-            name="currentTreatmentDetails"
-            label="Treatment Details"
-          />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <DateInputField
-              name="currentTreatmentFrom"
-              label="Treatment Date (From)"
-            />
-            <DateInputField
-              name="currentTreatmentTo"
-              label="Treatment Date (To)"
-            />
+
+          {[...Array(treatmentCount)].map((_, index) => {
+            const suffix = getSuffix(index + 1);
+            return (
+              <div
+                key={index}
+                className="p-4 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+              >
+                <h4 className="font-semibold text-md mb-3 text-gray-700 dark:text-gray-300">
+                  Treatment {index + 1}
+                </h4>
+                <InputField
+                  name={`currentDoctorHospital${suffix}`}
+                  label="Doctor/Hospital Name"
+                />
+                <InputField
+                  name={`currentHospitalAddressPhone${suffix}`}
+                  label="Hospital Address & Phone No."
+                />
+                <TextareaField
+                  name={`currentTreatmentDetails${suffix}`}
+                  label="Treatment Details"
+                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <DateInputField
+                    name={`currentTreatmentFrom${suffix}`}
+                    label="Treatment Date (From)"
+                  />
+                  <DateInputField
+                    name={`currentTreatmentTo${suffix}`}
+                    label="Treatment Date (To)"
+                  />
+                </div>
+              </div>
+            );
+          })}
+
+          <div className="flex gap-3">
+            {treatmentCount < 3 && (
+              <button
+                type="button"
+                onClick={handleAddTreatment}
+                className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+              >
+                + Add More
+              </button>
+            )}
+            {treatmentCount > 1 && (
+              <button
+                type="button"
+                onClick={handleRemoveTreatment}
+                className="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700"
+              >
+                − Remove
+              </button>
+            )}
           </div>
         </div>
       )}
 
-      {/* Body Parts Affected */}
-      <TextareaField
-        name="bodyPartsAffected"
-        label="Body Parts Affected"
-      />
+      {/* 🧍 Body Parts Affected */}
+      <TextareaField name="bodyPartsAffected" label="Body Parts Affected" />
 
-       {/* 3. Prior Injuries Section */}
+      {/* 🩹 Prior Injuries */}
       <RadioGroup
         name="priorInjuries"
         label="Any Prior Injuries? *"
         options={["Yes", "No"]}
       />
       {priorInjuries === "Yes" && (
-        <div className="p-4 rounded-2xl border border-gray-300 dark:border-gray-700">
+        <div className="p-4 rounded-2xl border border-gray-300 dark:border-gray-700 space-y-6">
           <h3 className="font-semibold text-lg mb-2 text-gray-700 dark:text-gray-200">
             Prior Injuries Details
           </h3>
-          <InputField name="priorDoctorHospital" label="Doctor/Hospital Name" />
-          <InputField
-            name="priorHospitalAddressPhone"
-            label="Hospital Address & Phone No."
-          />
-          <TextareaField
-            name="priorTreatmentDetails"
-            label="Treatment Details"
-          />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <DateInputField
-              name="priorTreatmentFrom"
-              label="Treatment Date (From)"
-            />
-            <DateInputField
-              name="priorTreatmentTo"
-              label="Treatment Date (To)"
-            />
+
+          {[...Array(priorInjuryCount)].map((_, index) => {
+            const suffix = getSuffix(index + 1);
+            return (
+              <div
+                key={index}
+                className="p-4 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+              >
+                <h4 className="font-semibold text-md mb-3 text-gray-700 dark:text-gray-300">
+                  Prior Injury {index + 1}
+                </h4>
+                <InputField
+                  name={`priorDoctorHospital${suffix}`}
+                  label="Doctor/Hospital Name"
+                />
+                <InputField
+                  name={`priorHospitalAddressPhone${suffix}`}
+                  label="Hospital Address & Phone No."
+                />
+                <TextareaField
+                  name={`priorTreatmentDetails${suffix}`}
+                  label="Treatment Details"
+                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <DateInputField
+                    name={`priorTreatmentFrom${suffix}`}
+                    label="Treatment Date (From)"
+                  />
+                  <DateInputField
+                    name={`priorTreatmentTo${suffix}`}
+                    label="Treatment Date (To)"
+                  />
+                </div>
+                <InputField
+                  name={`priorInsuranceClaims${suffix}`}
+                  label="Prior Insurance Claim #"
+                />
+                <InputField
+                  name={`priorAttorneys${suffix}`}
+                  label="Prior Attorneys for PI / WC Injuries"
+                />
+              </div>
+            );
+          })}
+
+          <div className="flex gap-3">
+            {priorInjuryCount < 3 && (
+              <button
+                type="button"
+                onClick={handleAddPriorInjury}
+                className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+              >
+                + Add More
+              </button>
+            )}
+            {priorInjuryCount > 1 && (
+              <button
+                type="button"
+                onClick={handleRemovePriorInjury}
+                className="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700"
+              >
+                − Remove
+              </button>
+            )}
           </div>
-          <InputField
-            name="priorInsuranceClaims"
-            label="Prior Insurance Claim #"
-          />
-          <InputField
-            name="priorAttorneys"
-            label="Prior Attorneys for PI / WC Injuries"
-          />
         </div>
       )}
-      
     </div>
   );
 }
