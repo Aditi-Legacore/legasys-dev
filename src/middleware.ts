@@ -8,16 +8,17 @@ export default withAuth(
 
     // If the user has a valid session token
     if (token) {
-      // Prevent logged-in users from visiting login or signup
-      if (pathname === "/login" || pathname === "/signup") {
+      // Prevent logged-in users from visiting auth pages
+      if (pathname === "/auth-choice" || pathname === "/login" || pathname === "/signup") {
         return NextResponse.redirect(new URL("/", req.url));
       }
       return NextResponse.next();
     }
 
     // 🚫 No valid token (session expired or not logged in)
-    // Redirect to login page if accessing a protected route
+    // Redirect to auth-choice page if accessing a protected route
     if (
+      pathname !== "/auth-choice" &&
       pathname !== "/login" &&
       pathname !== "/signup" &&
       !pathname.startsWith("/api") &&
@@ -27,7 +28,7 @@ export default withAuth(
       return NextResponse.redirect(new URL("/login", req.url));
     }
 
-    // Allow unauthenticated users to access login/signup pages
+    // Allow unauthenticated users to access auth pages
     return NextResponse.next();
   },
   {
@@ -35,8 +36,8 @@ export default withAuth(
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
 
-        // Allow access to login and signup pages
-        if (pathname === "/login" || pathname === "/signup") {
+        // Allow access to auth pages
+        if (pathname === "/auth-choice" || pathname === "/login" || pathname === "/signup") {
           return true;
         }
 

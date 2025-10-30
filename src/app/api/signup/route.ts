@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       console.error("Email sending failed:", emailErr);
     }
 
-    return NextResponse.json({ user, redirect: "/intake-form" });
+    return NextResponse.json({ user, redirect: "/" });
   } catch (error) {
     console.error("Signup Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
