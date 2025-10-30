@@ -17,8 +17,17 @@ export const intakeFormSchema = z.object({
   accidentTime: z.string().optional(),
   accidentLocation: z.string().min(1, "Accident location required"),
   accidentDescription: z.string().min(10, "Description required"),
+
   passenger: z.enum(["Yes", "No"]).optional(),
   passengerName: z.string().optional(),
+  passengerAge: z.string().optional(),
+  relationshipToYou: z.string().optional(),
+  injuryDescription: z.string().optional(),
+  hospitalized: z.string().optional(),
+  hospitalName: z.string().optional(),
+  treatmentDetails: z.string().optional(),
+  seatbeltUsed: z.string().optional(),
+
   workAtAccident: z.string().optional(),
 
   // Step 3 - Defendant Information (optional)
@@ -68,6 +77,7 @@ export const intakeFormSchema = z.object({
   admitted: z.enum(["Yes", "No"]).optional(),
   ambulanceCompany: z.string().optional(),
   lengthOfStay: z.string().optional(),
+
   priorInjuries: z.enum(["Yes", "No"]).optional(),
   priorDoctorHospital: z.string().optional(),
   priorHospitalAddressPhone: z.string().optional(),
@@ -76,12 +86,42 @@ export const intakeFormSchema = z.object({
   priorTreatmentTo: z.string().optional(),
   priorInsuranceClaims: z.string().optional(),
   priorAttorneys: z.string().optional(),
+
+  priorDoctorHospital2: z.string().optional(),
+  priorHospitalAddressPhone2: z.string().optional(),
+  priorTreatmentDetails2: z.string().optional(),
+  priorTreatmentFrom2: z.string().optional(),
+  priorTreatmentTo2: z.string().optional(),
+  priorInsuranceClaims2: z.string().optional(),
+  priorAttorneys2: z.string().optional(),
+
+  priorDoctorHospital3: z.string().optional(),
+  priorHospitalAddressPhone3: z.string().optional(),
+  priorTreatmentDetails3: z.string().optional(),
+  priorTreatmentFrom3: z.string().optional(),
+  priorTreatmentTo3: z.string().optional(),
+  priorInsuranceClaims3: z.string().optional(),
+  priorAttorneys3: z.string().optional(),
+
   currentTreatment: z.enum(["Yes", "No"]).optional(),
+
   currentDoctorHospital: z.string().optional(),
   currentHospitalAddressPhone: z.string().optional(),
   currentTreatmentDetails: z.string().optional(),
   currentTreatmentFrom: z.string().optional(),
   currentTreatmentTo: z.string().optional(),
+
+  currentDoctorHospital2: z.string().optional(),
+  currentHospitalAddressPhone2: z.string().optional(),
+  currentTreatmentDetails2: z.string().optional(),
+  currentTreatmentFrom2: z.string().optional(),
+  currentTreatmentTo2: z.string().optional(),
+
+  currentDoctorHospital3: z.string().optional(),
+  currentHospitalAddressPhone3: z.string().optional(),
+  currentTreatmentDetails3: z.string().optional(),
+  currentTreatmentFrom3: z.string().optional(),
+  currentTreatmentTo3: z.string().optional(),
 
   // Step 6 - Submit
   hearAboutUs: z.string().optional(),

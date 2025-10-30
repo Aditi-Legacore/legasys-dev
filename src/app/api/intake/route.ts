@@ -29,6 +29,14 @@ const buildIntakeData = (data: any) => ({
   accidentDescription: toNullable(data.accidentDescription),
   passenger: toNullable(data.passenger),
   passengerName: toNullable(data.passengerName),
+  passengerAge: toNullable(data.passengerName),
+  relationshipToYou: toNullable(data.passengerName),
+  injuryDescription: toNullable(data.passengerName),
+  hospitalized: toNullable(data.passengerName),
+  hospitalName: toNullable(data.passengerName),
+  treatmentDetails: toNullable(data.passengerName),
+  seatbeltUsed: toNullable(data.passengerName),
+
   workAtAccident: toNullable(data.workAtAccident),
 
   // Defendant 1
@@ -50,6 +58,16 @@ const buildIntakeData = (data: any) => ({
   defendant2Make: toNullable(data.defendant2Make),
   defendant2Model: toNullable(data.defendant2Model),
   defendant2Damage: toNullable(data.defendant2Damage),
+
+  // Defendant 3
+  defendant3Name: toNullable(data.defendant3Name),
+  defendant3Address: toNullable(data.defendant3Address),
+  defendant3Carrier: toNullable(data.defendant3Carrier),
+  defendant3CarrierPhone: toNullable(data.defendant3CarrierPhone),
+  defendant3Year: toNullable(data.defendant3Year),
+  defendant3Make: toNullable(data.defendant3Make),
+  defendant3Model: toNullable(data.defendant3Model),
+  defendant3Damage: toNullable(data.defendant3Damage),
 
   // Auto Insurance
   autoName: toNullable(data.autoName),
@@ -88,7 +106,7 @@ const buildIntakeData = (data: any) => ({
   phone2: toNullable(data.phone2),
   treatmentDate2: toNullable(data.treatmentDate2) ? new Date(data.treatmentDate2) : null,
 
-  // Injuries
+  // Prior Injuries
   priorInjuries: toNullable(data.priorInjuries),
   priorDoctorHospital: toNullable(data.priorDoctorHospital),
   priorHospitalAddressPhone: toNullable(data.priorHospitalAddressPhone),
@@ -97,12 +115,44 @@ const buildIntakeData = (data: any) => ({
   priorTreatmentTo: toNullable(data.priorTreatmentTo) ? new Date(data.priorTreatmentTo) : null,
   priorInsuranceClaims: toNullable(data.priorInsuranceClaims),
   priorAttorneys: toNullable(data.priorAttorneys),
+
+  
+  priorDoctorHospital2: toNullable(data.priorDoctorHospital2),
+  priorHospitalAddressPhone2: toNullable(data.priorHospitalAddressPhone2),
+  priorTreatmentDetails2: toNullable(data.priorTreatmentDetails2),
+  priorTreatmentFrom2: toNullable(data.priorTreatmentFrom2) ? new Date(data.priorTreatmentFrom2) : null,
+  priorTreatmentTo2: toNullable(data.priorTreatmentTo2) ? new Date(data.priorTreatmentTo2) : null,
+  priorInsuranceClaims2: toNullable(data.priorInsuranceClaims2),
+  priorAttorneys2: toNullable(data.priorAttorneys2),
+
+  priorDoctorHospital3: toNullable(data.priorDoctorHospital3),
+  priorHospitalAddressPhone3: toNullable(data.priorHospitalAddressPhone3),
+  priorTreatmentDetails3: toNullable(data.priorTreatmentDetails3),
+  priorTreatmentFrom3: toNullable(data.priorTreatmentFrom3) ? new Date(data.priorTreatmentFrom3) : null,
+  priorTreatmentTo3: toNullable(data.priorTreatmentTo3) ? new Date(data.priorTreatmentTo3) : null,
+  priorInsuranceClaims3: toNullable(data.priorInsuranceClaims3),
+  priorAttorneys3: toNullable(data.priorAttorneys3),
+
+  // Current/OnGoing Injuries
   currentTreatment: toNullable(data.currentTreatment),
   currentDoctorHospital: toNullable(data.currentDoctorHospital),
   currentHospitalAddressPhone: toNullable(data.currentHospitalAddressPhone),
   currentTreatmentDetails: toNullable(data.currentTreatmentDetails),
   currentTreatmentFrom: toNullable(data.currentTreatmentFrom) ? new Date(data.currentTreatmentFrom) : null,
   currentTreatmentTo: toNullable(data.currentTreatmentTo) ? new Date(data.currentTreatmentTo) : null,
+
+  currentDoctorHospital2: toNullable(data.currentDoctorHospital),
+  currentHospitalAddressPhone2: toNullable(data.currentHospitalAddressPhone),
+  currentTreatmentDetails2: toNullable(data.currentTreatmentDetails),
+  currentTreatmentFrom2: toNullable(data.currentTreatmentFrom) ? new Date(data.currentTreatmentFrom) : null,
+  currentTreatmentTo2: toNullable(data.currentTreatmentTo) ? new Date(data.currentTreatmentTo) : null,
+
+  currentDoctorHospital3: toNullable(data.currentDoctorHospital),
+  currentHospitalAddressPhone3: toNullable(data.currentHospitalAddressPhone),
+  currentTreatmentDetails3: toNullable(data.currentTreatmentDetails),
+  currentTreatmentFrom3: toNullable(data.currentTreatmentFrom) ? new Date(data.currentTreatmentFrom) : null,
+  currentTreatmentTo3: toNullable(data.currentTreatmentTo) ? new Date(data.currentTreatmentTo) : null,
+
   bodyPartsAffected: toNullable(data.bodyPartsAffected),
 
   // Referral / Info

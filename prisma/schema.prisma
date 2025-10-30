@@ -150,6 +150,18 @@ model IntakeInfo {
   defendant2Model        String?
   defendant2Damage       String?
 
+  // Defendant 3 / Owner
+  defendant3Name         String?
+ 
+  defendant3Address      String?
+  defendant3Carrier      String?
+  defendant3CarrierPhone String?
+ 
+  defendant3Year         String?
+  defendant3Make         String?
+  defendant3Model        String?
+  defendant3Damage       String?
+
   // Client Automobile Insurance
   autoName     String?
   autoPhone    String?
