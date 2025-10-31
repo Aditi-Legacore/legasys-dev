@@ -68,7 +68,7 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center md:flex-row bg-white">
+    <div className="min-h-screen flex flex-col justify-center md:flex-row bg-white dark:bg-gray-900">
       {/* Left side: Illustration */}
       <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center bg-gradient-to-br">
         <div className="relative w-full h-[70vh] lg:h-[80vh] xl:h-[90vh]"> {/* adjust height as needed */}

@@ -105,7 +105,7 @@ export default function SignupForm() {
 
 
   return (
-    <div className="min-h-screen flex flex-col justify-center md:flex-row bg-white">
+    <div className="min-h-screen flex flex-col justify-center md:flex-row bg-white dark:bg-gray-900">
       {/* Left side: Illustration */}
       <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center bg-gradient-to-br">
         <div className="relative w-full h-[70vh] lg:h-[80vh] xl:h-[90vh]"> {/* adjust height as needed */}
@@ -175,7 +175,7 @@ export default function SignupForm() {
                     <FormControl>
                       <select
                         {...field}
-                        className="h-12 border-gray-300 rounded-lg ring-2 ring-gray-300 focus:border-transparent"
+                        className="h-12 border-gray-300 rounded-lg ring-2 ring-gray-300 focus:border-transparent bg-white dark:bg-gray-900"
                       >
                         <option value="">Select Salutation</option>
                         <option value="Mr.">Mr.</option>
