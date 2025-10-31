@@ -17,7 +17,7 @@ export default function InputField({ name, label, type = "text", placeholder }: 
   return (
     <div>
       {/* Label */}
-      <label className="block font-medium text-gray-900 dark:text-gray-100 mb-1">
+      <label className="block text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
         {label}
       </label>
 
@@ -27,13 +27,13 @@ export default function InputField({ name, label, type = "text", placeholder }: 
         type={type}
         placeholder={placeholder}
         className="
-          w-full rounded-lg border 
+          w-full rounded-lg border text-base
           text-gray-900 dark:text-gray-100
           bg-white dark:bg-gray-800
           border-gray-300 dark:border-gray-600
-          px-3 py-2 
-          focus:outline-none focus:ring-2 
-          focus:ring-indigo-500 dark:focus:ring-indigo-400 
+          px-3 py-2
+          focus:outline-none focus:ring-2
+          focus:ring-indigo-500 dark:focus:ring-indigo-400
           transition
         "
       />

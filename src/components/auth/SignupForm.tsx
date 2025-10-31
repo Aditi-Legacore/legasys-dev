@@ -150,7 +150,7 @@ export default function SignupForm() {
               </div>
               <span className="text-xl font-semibold text-gray-900">Legasys</span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Create your Account</h1>
+            <h1 className="font-bold text-gray-900">Create your Account</h1>
             <p className="text-gray-600">Sign up to get started with Legasys.</p>
           </div>
 

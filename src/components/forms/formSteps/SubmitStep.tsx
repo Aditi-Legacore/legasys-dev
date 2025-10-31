@@ -103,7 +103,7 @@ export default function SubmitStep({ isSubmitting = false }: SubmitStepProps) {
       </div>
 
       {/* Consent Checkbox */}
-      <div className="flex items-start space-x-2">
+      <div className="flex items-start space-x-2 text-left">
         <input
           type="checkbox"
           id="consent"
@@ -113,7 +113,7 @@ export default function SubmitStep({ isSubmitting = false }: SubmitStepProps) {
         />
         <label
           htmlFor="consent"
-          className="text-gray-700 dark:text-gray-300 text-sm"
+          className="text-gray-700 dark:text-gray-300 text-sm text-left"
         >
           I hereby confirm that all the information I have provided is true and correct to the best of my knowledge.
         </label>

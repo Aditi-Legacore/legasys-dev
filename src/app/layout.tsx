@@ -7,6 +7,11 @@ import Sidebar from "../components/Sidebar";
 import { Providers } from "../components/ThemeProvider";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../lib/auth";
+import { Inter } from "next/font/google";
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

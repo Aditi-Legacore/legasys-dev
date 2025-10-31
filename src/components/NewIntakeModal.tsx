@@ -73,9 +73,9 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
         {mode === "select" && (
           <div className="space-y-4">
             <button onClick={onClose} className="mt-4 text-sm text-gray-500">
-          ❌
-        </button>
-            <h2 className="text-lg font-bold">Choose an option</h2>
+              ❌
+            </button>
+            <h2 className="font-bold text-center text-xl">Choose an option</h2>
             <button
               onClick={() => setMode("new")}
               className="w-full bg-blue-600 text-white py-2 rounded-lg"
@@ -93,8 +93,9 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
 
         {mode === "new" && (
           <div className="space-y-3">
-              <button onClick={onClose} className="mt-4 text-sm text-gray-500">
-          ❌</button>
+            <button onClick={onClose} className="mt-4 text-sm text-gray-500">
+              ❌
+            </button>
             <input
               type="text"
               placeholder="Enter Full Name"
@@ -102,8 +103,8 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
               onChange={(e) => setName(e.target.value)}
               className="border w-full p-2 rounded"
             />
-            <div className="border w-full p-2 rounded">
-  
+            <div className="w-full p-2 rounded">
+
               <DatePicker
                 selected={dob ? new Date(dob) : null}
                 onChange={(date) => {
@@ -134,7 +135,7 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
             {/* Case Type Radio Buttons */}
             <div className="border rounded p-3">
               <p className="font-medium mb-2">Case Type:</p>
-              <div className="space-y-1">
+              <div className="space-y-1 pl-4">
                 <label className="flex items-center gap-2">
                   <input
                     type="radio"
@@ -168,7 +169,6 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
                   <span>Dog Bite / Slip and Fall</span>
                 </label>
               </div>
-              .
             </div>
 
             {!referenceId && (
