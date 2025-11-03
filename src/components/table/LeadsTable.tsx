@@ -23,6 +23,7 @@ const statusConfig = {
   form_sent: { label: "Form Sent", color: "bg-primary-light text-primary" },
   in_progress: { label: "In Progress", color: "bg-warning-light text-warning" },
   completed: { label: "Completed", color: "bg-success-light text-success" },
+  default: { label: "Unknown", color: "bg-muted text-muted-foreground" },
 };
 
 export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
@@ -120,8 +121,8 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
                   {lead.caseType ? lead.caseType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '-'}
                 </td>
                 <td className="px-6 py-4">
-                  <Badge className={statusConfig[lead.status].color}>
-                    {statusConfig[lead.status].label}
+                  <Badge className={statusConfig[lead.status]?.color || statusConfig.default.color}>
+                    {statusConfig[lead.status]?.label || statusConfig.default.label}
                   </Badge>
                 </td>
                 <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">
