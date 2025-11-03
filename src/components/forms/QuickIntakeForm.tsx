@@ -86,126 +86,125 @@ export default function IntakeForm({ onClose }: { onClose: () => void }) {
 
   return (
     <FormProvider {...methods}>
-      <div className="bg-secondary p-6">
-        <Card className="w-full max-w-2xl p-8 card-shadow animate-scale-in">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden">
-                <Image
-                  src={LoginLogoBg}
-                  alt="Logo"
-                  width={48}
-                  height={48}
-                  className="object-contain"
-                  priority
+      <Card className="w-full max-w-3xl p-4 card-shadow animate-scale-in max-h-[70vh] overflow-y-auto">
+        {/* Header */}
+        <div className="text-center mb-4">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
+              <Image
+                src={LoginLogoBg}
+                alt="Logo"
+                width={32}
+                height={32}
+                className="object-contain"
+                priority
+              />
+            </div>
+            <h1 className="text-lg font-bold text-foreground">Lega<span className="font-semibold text-green-300">sys</span></h1>
+          </div>
+          <h2 className="text-xl font-bold text-foreground mb-1">Let's Get Started</h2>
+          <p className="text-sm text-muted-foreground">Tell us about your case — takes 2 minutes</p>
+        </div>
+
+        {!referenceId ? (
+          <>
+            {/* Form */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+              <InputField
+                name="fullName"
+                label="Full Name *"
+                placeholder="John Doe"
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <InputField
+                  name="phone"
+                  label="Phone Number *"
+                  type="tel"
+                  placeholder="(555) 123-4567"
+                />
+                <InputField
+                  name="email"
+                  label="Email Address *"
+                  type="email"
+                  placeholder="john@example.com"
                 />
               </div>
-              <h1 className="text-2xl font-bold text-foreground">Lega<span className="font-semibold text-green-300">sys</span></h1>
-            </div>
-            <h2 className="text-3xl font-bold text-foreground mb-2">Let's Get Started</h2>
-            <p className="text-muted-foreground">Tell us about your case — takes 2 minutes</p>
-          </div>
 
-          {!referenceId ? (
-            <>
-              {/* Form */}
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <InputField
-                  name="fullName"
-                  label="Full Name *"
-                  placeholder="John Doe"
+              <InputField
+                name="dateOfLoss"
+                label="Date of Loss *"
+                type="date"
+              />
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  Case Type *
+                </label>
+                <Controller
+                  name="caseType"
+                  control={methods.control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select Case Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {caseTypes.map((c) => (
+                          <SelectItem key={c.value} value={c.value}>
+                            {c.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <InputField
-                    name="phone"
-                    label="Phone Number *"
-                    type="tel"
-                    placeholder="(555) 123-4567"
-                  />
-                  <InputField
-                    name="email"
-                    label="Email Address *"
-                    type="email"
-                    placeholder="john@example.com"
-                  />
-                </div>
+              <TextareaField
+                name="description"
+                label="Brief Description *"
+              />
+              <p className="text-xs text-muted-foreground mt-1 text-right">{charCount}/500 characters</p>
 
-                <InputField
-                  name="dateOfLoss"
-                  label="Date of Loss *"
-                  type="date"
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  How did you hear about us? (Optional)
+                </label>
+                <Controller
+                  name="referralSource"
+                  control={methods.control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select Source" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {referralSources.map((r) => (
+                          <SelectItem key={r.value} value={r.value}>
+                            {r.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
+              </div>
 
-                <div>
-                  <label className="block text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                    Case Type *
-                  </label>
-                  <Controller
-                    name="caseType"
-                    control={methods.control}
-                    render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Case Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {caseTypes.map((c) => (
-                            <SelectItem key={c.value} value={c.value}>
-                              {c.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
+              <Button type="submit" size="lg" className="w-full h-10 text-base">
+                Generate Reference ID
+              </Button>
 
-                <TextareaField
-                  name="description"
-                  label="Brief Description *"
-                />
-                <p className="text-xs text-muted-foreground mt-1 text-right">{charCount}/500 characters</p>
-
-                <div>
-                  <label className="block text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                    How did you hear about us? (Optional)
-                  </label>
-                  <Controller
-                    name="referralSource"
-                    control={methods.control}
-                    render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Source" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {referralSources.map((r) => (
-                            <SelectItem key={r.value} value={r.value}>
-                              {r.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
-
-                <Button type="submit" size="lg" className="w-full h-12 text-lg">
-                  Generate Reference ID
-                </Button>
-
-                <div className="text-center pt-4">
-                  <p className="text-xs text-muted-foreground">
-                    By submitting this form, you agree to our{' '}
-                    <a href="#" className="text-primary hover:underline">
-                      Privacy Policy
-                    </a>
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-2">🔒 Secured by Legasys</p>
-                </div>
-              </form>
+              <div className="text-center pt-2">
+                <p className="text-xs text-muted-foreground">
+                  By submitting this form, you agree to our{' '}
+                  <a href="#" className="text-primary hover:underline">
+                    Privacy Policy
+                  </a>
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">🔒 Secured by Legasys</p>
+              </div>
+            </form>
               {error && <p className="text-red-600 text-sm text-center mt-4">{error}</p>}
             </>
           ) : (
@@ -224,7 +223,6 @@ export default function IntakeForm({ onClose }: { onClose: () => void }) {
             </div>
           )}
         </Card>
-      </div>
     </FormProvider>
   );
 }

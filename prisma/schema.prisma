@@ -60,201 +60,142 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-
-
-
 model IntakeInfo {
-  id     String @id @default(cuid())
-
-  // intakeSessionId String? @unique
-  // intakeSession   IntakeSession? @relation(fields: [intakeSessionId], references: [id])
-
-  userId String? // foreign key linking to User
-
-  // 👤 Plaintiff Information
-  clientName  String
-  gender      String?
-  phoneNumber String?
-  email       String?
-  address     String?
-  city        String?
-  zip         String?
-  dateOfBirth DateTime?
-  ssn         String?
-
-  // 🚗 Accident Information
-  accidentDate        DateTime?
-  accidentTime        String?
-  accidentLocation    String?
-  accidentDescription String?
-  passenger           String?
-  passengerName       String?
-  passengerAge       String?
-  relationshipToYou       String?
-  injuryDescription       String?
-  hospitalized       String?
-  hospitalName       String?
-  treatmentDetails       String?
-  seatbeltUsed       String?
-
-  workAtAccident      String?
-  
-  // Defendant 1 / Driver
-  defendant1Name         String?
- 
-  defendant1Address      String?
-  defendant1Carrier      String?
-  defendant1CarrierPhone String?
-  
-  defendant1Year         String?
-  defendant1Make         String?
-  defendant1Model        String?
-  defendant1Damage       String?
-
-  // Defendant 2 / Owner
-  defendant2Name         String?
- 
-  defendant2Address      String?
-  defendant2Carrier      String?
-  defendant2CarrierPhone String?
- 
-  defendant2Year         String?
-  defendant2Make         String?
-  defendant2Model        String?
-  defendant2Damage       String?
-
-  // Defendant 3 / Owner
-  defendant3Name         String?
- 
-  defendant3Address      String?
-  defendant3Carrier      String?
-  defendant3CarrierPhone String?
- 
-  defendant3Year         String?
-  defendant3Make         String?
-  defendant3Model        String?
-  defendant3Damage       String?
-
-  // Client Automobile Insurance
-  autoName     String?
-  autoPhone    String?
-  autoAddress  String?
-  
-  autoAgent    String?
-  autoPolicy   String?
-  autoClaim    String?
-  autoAdditionalinfo    String?
- 
-
-  // Client Health Insurance
-  healthCarrier String?
-  healthPhone   String?
- 
-  healthAddress String?
-  
-  healthPolicy  String?
-  healthClaim   String?
-  healthAdjuster String?
-  healthAgent String?
-  healthAdditionalinfo String?
-
-  medicare       String? // "Yes" / "No"
-  medicareNumber String?
-  medicaid       String? // "Yes" / "No"
-  medicaidNumber String?
-
-  // Medical Treatment
-  ambulance        String? // "Yes" / "No"
-  ambulanceCompany String?
-  admitted         String? // "Yes" / "No"
-  lengthOfStay     String?
-
-  // doctorHospital1 String?
-  // address1        String?
-  // phone1          String?
-  // treatmentDate1  DateTime?
-
-  // doctorHospital2 String?
-  // address2        String?
-  // phone2          String?
-  // treatmentDate2  DateTime?
-
-
-  // Injuries
-  bodyPartsAffected    String?
-  priorInjuries        String?
-  priorDoctorHospital        String?
-  priorHospitalAddressPhone        String?
+  id                           String         @id @default(cuid())
+  userId                       String?
+  clientName                   String
+  gender                       String?
+  phoneNumber                  String?
+  email                        String?
+  address                      String?
+  city                         String?
+  zip                          String?
+  dateOfBirth                  DateTime?
+  ssn                          String?
+  accidentDate                 DateTime?
+  accidentTime                 String?
+  accidentLocation             String?
+  accidentDescription          String?
+  passenger                    String?
+  passengerName                String?
+  workAtAccident               String?
+  defendant1Name               String?
+  defendant1Address            String?
+  defendant1Carrier            String?
+  defendant1CarrierPhone       String?
+  defendant1Year               String?
+  defendant1Make               String?
+  defendant1Model              String?
+  defendant1Damage             String?
+  defendant2Name               String?
+  defendant2Address            String?
+  defendant2Carrier            String?
+  defendant2CarrierPhone       String?
+  defendant2Year               String?
+  defendant2Make               String?
+  defendant2Model              String?
+  defendant2Damage             String?
+  autoName                     String?
+  autoPhone                    String?
+  autoAddress                  String?
+  autoAgent                    String?
+  autoPolicy                   String?
+  autoClaim                    String?
+  autoAdditionalinfo           String?
+  healthCarrier                String?
+  healthPhone                  String?
+  healthAddress                String?
+  healthPolicy                 String?
+  healthClaim                  String?
+  healthAdjuster               String?
+  healthAgent                  String?
+  healthAdditionalinfo         String?
+  medicare                     String?
+  medicareNumber               String?
+  medicaid                     String?
+  medicaidNumber               String?
+  ambulance                    String?
+  ambulanceCompany             String?
+  admitted                     String?
+  lengthOfStay                 String?
+  bodyPartsAffected            String?
+  priorInjuries                String?
+  priorDoctorHospital          String?
+  priorHospitalAddressPhone    String?
   priorTreatmentDetails        String?
-  priorTreatmentFrom        DateTime?
-  priorTreatmentTo        DateTime?
-  priorInsuranceClaims String?
-  priorAttorneys       String?
-
-  priorDoctorHospital2        String?
-  priorHospitalAddressPhone2        String?
-  priorTreatmentDetails2        String?
-  priorTreatmentFrom2        DateTime?
-  priorTreatmentTo2        DateTime?
-  priorInsuranceClaims2 String?
-  priorAttorneys2       String?
-
-  priorDoctorHospital3        String?
-  priorHospitalAddressPhone3        String?
-  priorTreatmentDetails3        String?
-  priorTreatmentFrom3        DateTime?
-  priorTreatmentTo3        DateTime?
-  priorInsuranceClaims3 String?
-  priorAttorneys3       String?
-
-  
-  currentTreatment           String?
-  currentDoctorHospital      String?
-  currentHospitalAddressPhone String?
-  currentTreatmentDetails    String?
-  currentTreatmentFrom       DateTime?
-  currentTreatmentTo         DateTime?
-
-  currentDoctorHospital2      String?
+  priorTreatmentFrom           DateTime?
+  priorTreatmentTo             DateTime?
+  priorInsuranceClaims         String?
+  priorAttorneys               String?
+  currentTreatment             String?
+  currentDoctorHospital        String?
+  currentHospitalAddressPhone  String?
+  currentTreatmentDetails      String?
+  currentTreatmentFrom         DateTime?
+  currentTreatmentTo           DateTime?
+  hearAboutUs                  String?
+  hearAboutUsDetail            String?
+  createdAt                    DateTime       @default(now())
+  updatedAt                    DateTime       @updatedAt
+  isDraft                      Boolean        @default(true)
+  referenceId                  String?
+  currentDoctorHospital2       String?
+  currentDoctorHospital3       String?
   currentHospitalAddressPhone2 String?
-  currentTreatmentDetails2    String?
-  currentTreatmentFrom2      DateTime?
-  currentTreatmentTo2         DateTime?
-
-  currentDoctorHospital3      String?
   currentHospitalAddressPhone3 String?
-  currentTreatmentDetails3    String?
-  currentTreatmentFrom3       DateTime?
-  currentTreatmentTo3         DateTime?
-  hearAboutUs                String?
-  hearAboutUsDetail          String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  referenceId                String?
-  isDraft                    Boolean @default(true)
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentTreatmentDetails2     String?
+  currentTreatmentDetails3     String?
+  currentTreatmentFrom2        DateTime?
+  currentTreatmentFrom3        DateTime?
+  currentTreatmentTo2          DateTime?
+  currentTreatmentTo3          DateTime?
+  defendant3Address            String?
+  defendant3Carrier            String?
+  defendant3CarrierPhone       String?
+  defendant3Damage             String?
+  defendant3Make               String?
+  defendant3Model              String?
+  defendant3Name               String?
+  defendant3Year               String?
+  hospitalName                 String?
+  hospitalized                 String?
+  injuryDescription            String?
+  passengerAge                 String?
+  priorAttorneys2              String?
+  priorAttorneys3              String?
+  priorDoctorHospital2         String?
+  priorDoctorHospital3         String?
+  priorHospitalAddressPhone2   String?
+  priorHospitalAddressPhone3   String?
+  priorInsuranceClaims2        String?
+  priorInsuranceClaims3        String?
+  priorTreatmentDetails2       String?
+  priorTreatmentDetails3       String?
+  priorTreatmentFrom2          DateTime?
+  priorTreatmentFrom3          DateTime?
+  priorTreatmentTo2            DateTime?
+  priorTreatmentTo3            DateTime?
+  relationshipToYou            String?
+  seatbeltUsed                 String?
+  treatmentDetails             String?
+  leadId                       String?        @unique
+  lead                         Lead?          @relation(fields: [leadId], references: [id])
+  user                         User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Lead {
-  id            String   @id @default(cuid())
-  referenceId String      @unique
+  id            String      @id @default(cuid())
   dueDate       DateTime
   name          String
   caseType      String
-  status        String   @default("new")
+  status        String      @default("new")
   contact       String
   phone         String
   email         String
-  matter        String   @default("-")
+  matter        String      @default("-")
   description   String?
   referralSource String?
-  // referenceId   String?  @unique
-  dateOfBirth   DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  // intakeInfo  IntakeInfo?
-  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  intakeInfo    IntakeInfo?
 }
-

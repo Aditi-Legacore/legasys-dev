@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
         status: "new",
         matter: "-",
         referenceId,
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+        // dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
       },
     });
 

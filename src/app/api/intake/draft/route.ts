@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     }
 
     const existingIntake = await prisma.intakeInfo.findFirst({
-      where: { referenceId },
+      where: { leadId: lead.id },
     });
 
     // Define allowed fields based on Prisma schema
@@ -85,6 +85,7 @@ export async function POST(req: NextRequest) {
       await prisma.intakeInfo.create({
         data: {
           ...transformedFields,
+          leadId: lead.id,
           user: { connect: { id: serverSession.user.id } },
         },
       });
