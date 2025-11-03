@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ListChecks, Menu, X } from "lucide-react";
 import Link from "next/link";
+import { menuItems } from "@/lib/menuItems";
 
 const Sidebar: React.FC = () => {
   const [activeItem, setActiveItem] = useState("intake-list");
@@ -71,24 +72,32 @@ const Sidebar: React.FC = () => {
         {/* Menu Section */}
         <nav className="flex-1">
           <ul className="space-y-2">
-            <li>
-              <Link
-                href="/intake-list"
-                onClick={() => {
-                  setActiveItem("intake-list");
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  activeItem === "intake-list"
-                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`}
-              >
-                <ListChecks className="w-5 h-5" />
-                <span className="font-medium">Intake List</span>
-              </Link>
-            </li>
-          </ul>
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeItem === item.path.replace("/", "");
+
+            return (
+              <li key={item.path}>
+                <Link
+                  href={item.path}
+                  onClick={() => {
+                    setActiveItem(item.path.replace("/", ""));
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    isActive
+                      ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
         </nav>
       </aside>
     </>
