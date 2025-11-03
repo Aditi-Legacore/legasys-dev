@@ -65,36 +65,6 @@ const Navbar: React.FC = () => {
 
       {/* Desktop Actions - Hidden on Mobile/Tablet */}
       <div className="hidden lg:flex items-center gap-1 xl:gap-2">
-        {/* Quick Intake Button */}
-        <div className="relative mr-2" ref={quickIntakeRef}>
-          <button
-            onClick={() => setQuickIntakeOpen(!quickIntakeOpen)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
-            aria-label="Quick Intake"
-          >
-            Quick Intake
-            <ChevronDown className="w-4 h-4" />
-          </button>
-
-          {quickIntakeOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-50">
-              <button
-                onClick={handleQuickForm}
-                className="w-full px-4 py-2.5 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300"
-              >
-                <FileText className="w-4 h-4 text-blue-600" />
-                Quick Form
-              </button>
-              <button
-                onClick={handleQuickAppointment}
-                className="w-full px-4 py-2.5 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300"
-              >
-                <Calendar className="w-4 h-4 text-blue-600" />
-                Quick Appointment
-              </button>
-            </div>
-          )}
-        </div>
 
         {/* Theme Toggle */}
         <button
@@ -205,37 +175,6 @@ const Navbar: React.FC = () => {
 
       {/* Mobile/Tablet Actions */}
       <div className="flex lg:hidden items-center gap-1 sm:gap-2">
-        {/* Quick Intake Button - Mobile */}
-        <div className="relative" ref={quickIntakeRef}>
-          <button
-            onClick={() => setQuickIntakeOpen(!quickIntakeOpen)}
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors flex items-center gap-1"
-            aria-label="Quick Intake"
-          >
-            <span className="hidden sm:inline">Quick</span>
-            <FileText className="w-4 h-4 sm:hidden" />
-            <ChevronDown className="w-3 h-3" />
-          </button>
-
-          {quickIntakeOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-50">
-              <button
-                onClick={handleQuickForm}
-                className="w-full px-4 py-2.5 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300"
-              >
-                <FileText className="w-4 h-4 text-blue-600" />
-                Quick Form
-              </button>
-              <button
-                onClick={handleQuickAppointment}
-                className="w-full px-4 py-2.5 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300"
-              >
-                <Calendar className="w-4 h-4 text-blue-600" />
-                Quick Appointment
-              </button>
-            </div>
-          )}
-        </div>
 
         {/* Theme Toggle - Always visible */}
         <button
