@@ -106,7 +106,7 @@ CREATE TABLE "IntakeInfo" (
     "ambulanceCompany" TEXT,
     "admitted" TEXT,
     "lengthOfStay" TEXT,
-    "doctorHospital1" TEXT,
+    -- "doctorHospital1" TEXT,
     "address1" TEXT,
     "phone1" TEXT,
     "treatmentDate1" TIMESTAMP(3),

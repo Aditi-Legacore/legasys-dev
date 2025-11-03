@@ -144,7 +144,7 @@ const handleNewIntake = () => {
             ) : (
               <Plus size={16} />
             )}
-            {loadingNew ? 'Loading...' : 'New Intake'}
+            {loadingNew ? 'Loading...' : 'Intake'}
           </button>
         </div>
 

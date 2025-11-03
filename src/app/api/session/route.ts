@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     let prefix = "LEG";
     if (caseType.toLowerCase().includes("auto")) prefix = "MVA";
     else if (caseType.toLowerCase().includes("premises")) prefix = "PRE";
-    else if (caseType.toLowerCase().includes("dog")) prefix = "SLP";
+    else if (caseType.toLowerCase().includes("dog")) prefix = "SLF";
 
     const referenceId = `${prefix}-${Date.now().toString(36).toUpperCase()}`;
 
