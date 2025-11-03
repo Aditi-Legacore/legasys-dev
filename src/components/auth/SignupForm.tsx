@@ -83,25 +83,37 @@ export default function SignupForm() {
   // };
 
   const onSubmit = async (values: SignupFormData) => {
-  setIsLoading(true);
-  try {
-    const res = await fetch("/api/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (res.ok) {
-      router.push(data.redirect);
-    } else {
-      alert(data.error || "Signup failed");
+      if (res.ok) {
+        // Automatically sign in the user after successful signup
+        const signInRes = await signIn("credentials", {
+          email: values.email,
+          password: values.password,
+          redirect: false,
+        });
+
+        if (!signInRes?.error) {
+          router.push("/");
+          window.location.reload();
+        } else {
+          alert("Signup successful, but login failed. Please try logging in manually.");
+        }
+      } else {
+        alert(data.error || "Signup failed");
+      }
+    } finally {
+      setIsLoading(false);
     }
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
 
   return (
@@ -138,7 +150,7 @@ export default function SignupForm() {
               </div>
               <span className="text-xl font-semibold text-gray-900">Legasys</span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Create your Account</h1>
+            <h1 className="font-bold text-gray-900">Create your Account</h1>
             <p className="text-gray-600">Sign up to get started with Legasys.</p>
           </div>
 
@@ -166,64 +178,67 @@ export default function SignupForm() {
                 )}
               /> */}
 
-              {/* Salutation */}
-              <FormField 
-                control={form.control}
-                name="salutation"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <select
-                        {...field}
-                        className="h-12 border-gray-300 rounded-lg ring-2 ring-gray-300 focus:border-transparent bg-white dark:bg-gray-900"
-                      >
-                        <option value="">Select Salutation</option>
-                        <option value="Mr.">Mr.</option>
-                        <option value="Ms.">Ms.</option>
-                        <option value="Mrs.">Mrs.</option>
-                        <option value="Dr.">Dr.</option>
-                      </select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Salutation, First Name, Last Name in one row on tablet and laptop */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Salutation */}
+                <FormField
+                  control={form.control}
+                  name="salutation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <select
+                          {...field}
+                          className="h-12 border-gray-300 rounded-lg ring-2 ring-gray-300 focus:border-transparent"
+                        >
+                          <option value="">Select Salutation</option>
+                          <option value="Mr.">Mr.</option>
+                          <option value="Ms.">Ms.</option>
+                          <option value="Mrs.">Mrs.</option>
+                          <option value="Dr.">Dr.</option>
+                        </select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* First Name */}
-              <FormField
-                control={form.control}
-                name="firstName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="First Name"
-                        className="h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                {/* First Name */}
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="First Name"
+                          className="h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {/* Last Name */}
-              <FormField
-                control={form.control}
-                name="lastName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Last Name"
-                        className="h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                {/* Last Name */}
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Last Name"
+                          className="h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               {/* DOB */}
               <FormField
                 control={form.control}

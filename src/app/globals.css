@@ -116,12 +116,263 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background  text-foreground;
+    @apply bg-background text-foreground;
+    font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    letter-spacing: -0.011em;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 }
+
+/* Reset css Start */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold text-foreground;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  h1,
+  .h1 {
+    font-size: clamp(1rem, 1rem + 1vw, 4.5rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  h2,
+  .h2 {
+    font-size: clamp(0.8rem, 0.8rem + 0.8vw, 2.5rem);
+    font-weight: 700;
+  }
+
+  h3,
+  .h3 {
+    font-size: clamp(1.5rem, 1.02rem + 2.4vw, 3rem);
+    font-weight: 600;
+  }
+
+  h4,
+  .h4 {
+    font-size: clamp(1.375rem, 1.095rem + 1.4vw, 2.25rem);
+    font-weight: 600;
+  }
+
+  h5,
+  .h5 {
+    font-size: clamp(1.25rem, 1.05rem + 1vw, 1.875rem);
+    font-weight: 600;
+  }
+
+  h6,
+  .h6 {
+    font-size: clamp(1.125rem, 1.005rem + 0.6vw, 1.5rem);
+    font-weight: 600;
+  }
+  
+  a {
+    @apply active:scale-[.95];
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  
+  span {
+    @apply inline-block;
+  }
+  
+  /* Table specific styling */
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+  
+  th {
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.01em;
+    text-transform: none;
+  }
+  
+  td {
+    font-size: 0.9375rem;
+    font-weight: 400;
+  }
+  
+  /* Button and badge styling */
+  button {
+    font-weight: 500;
+    letter-spacing: -0.006em;
+  }
+  
+  .badge,
+  [class*="badge"] {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  
+  /* Input styling */
+  input,
+  textarea,
+  select {
+    letter-spacing: -.006em;
+    /* width: 100%; */
+    font-size: .9375rem;
+    font-weight: 400;
+  }
+  
+  input::placeholder,
+  textarea::placeholder {
+    color: oklch(0.556 0 0);
+    opacity: 0.7;
+  }
+  
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: oklch(0.708 0 0);
+    opacity: 0.6;
+  }
+  
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2.5rem;
+  }
+  
+  /* Code and monospace */
+  code,
+  pre {
+    font-family: var(--font-geist-mono), 'SF Mono', 'Consolas', 'Monaco', monospace;
+    font-size: 0.875em;
+    letter-spacing: 0;
+  }
+  
+  /* Small text */
+  small,
+  .text-small {
+    font-size: 0.875rem;
+    letter-spacing: 0;
+  }
+  
+  /* Muted text */
+  .text-muted {
+    font-weight: 400;
+    opacity: 0.7;
+  }
+  
+  /* Modal styling */
+  .modal-overlay {
+    backdrop-filter: blur(4px);
+  }
+  
+  /* Form validation messages */
+  .form-error {
+    font-size: 0.8125rem;
+    color: oklch(0.577 0.245 27.325);
+    font-weight: 500;
+  }
+  
+  .dark .form-error {
+    color: oklch(0.704 0.191 22.216);
+  }
+  
+  /* Status badges */
+  .status-badge {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+  }
+  
+  /* Card hover effects */
+  .card-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dark .card-hover:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Date picker styling */
+  .react-datepicker-wrapper {
+    width: 100%;
+  }
+  
+  .react-datepicker__input-container input {
+    font-size: 0.9375rem;
+  }
+  
+  /* Radio button styling */
+  input[type="radio"] {
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    flex-shrink: 0;
+    cursor: pointer;
+    accent-color: oklch(0.205 0 0);
+  }
+  
+  .dark input[type="radio"] {
+    accent-color: oklch(0.488 0.243 264.376);
+  }
+  
+  input[type="radio"]:checked {
+    background-color: currentColor;
+  }
+  
+  /* Radio label alignment */
+  label:has(input[type="radio"]) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    user-select: none;
+  }
+  
+  label:has(input[type="radio"]) span {
+    display: inline;
+    line-height: 1;
+  }
+  
+  label:has(input[type="radio"]):hover {
+    opacity: 0.8;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Focus visible styles */
+  *:focus-visible {
+    outline: 2px solid oklch(0.708 0 0);
+    outline-offset: 2px;
+  }
+  
+  .dark *:focus-visible {
+    outline-color: oklch(0.556 0 0);
+  }
+  /* Reset css End */
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
 }

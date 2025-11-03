@@ -1,0 +1,230 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { Scale, Car, Heart, AlertTriangle, Briefcase } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useForm, FormProvider, Controller } from 'react-hook-form';
+import Image from 'next/image';
+import LoginLogoBg from '../../../public/assets/images/auth/logo.png';
+import InputField from './inputs/InputField';
+import TextareaField from './inputs/TextareaField';
+
+const caseTypes = [
+  { value: 'personal_injury', label: 'Personal Injury', icon: AlertTriangle },
+  { value: 'auto_accident', label: 'Auto Accident', icon: Car },
+  { value: 'medical_malpractice', label: 'Medical Malpractice', icon: Heart },
+  { value: 'workers_comp', label: 'Workers Compensation', icon: Briefcase },
+];
+
+const referralSources = [
+  { value: 'google', label: 'Google Search' },
+  { value: 'referral', label: 'Friend/Family Referral' },
+  { value: 'social', label: 'Social Media' },
+  { value: 'advertisement', label: 'Advertisement' },
+  { value: 'other', label: 'Other' },
+];
+
+export default function IntakeForm({ onClose }: { onClose: () => void }) {
+  const [referenceId, setReferenceId] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
+  const methods = useForm({
+    defaultValues: {
+      fullName: '',
+      phone: '',
+      email: '',
+      dateOfLoss: '',
+      caseType: '',
+      description: '',
+      referralSource: '',
+    },
+  });
+
+  const { handleSubmit, watch } = methods;
+  const description = watch('description');
+  const charCount = description ? description.length : 0;
+
+  const onSubmit = async (data: any) => {
+    if (!data.fullName || !data.dateOfLoss || !data.caseType || !data.email) {
+      setError("Please fill all required fields.");
+      return;
+    }
+    try {
+      // Create lead with reference ID and date of birth
+      const leadRes = await fetch('/api/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          dateOfBirth: data.dateOfLoss,
+        }),
+      });
+      const leadData = await leadRes.json();
+      if (!leadRes.ok) {
+        setError(leadData.error || "Failed to create lead");
+        return;
+      }
+
+      setReferenceId(leadData.referenceId);
+      localStorage.setItem("referenceId", leadData.referenceId);
+      localStorage.setItem("caseType", data.caseType);
+      setError("");
+    } catch (err) {
+      setError("Something went wrong");
+    }
+  };
+
+  const handleNext = () => {
+    router.push(`/intake-form?ref=${referenceId}`);
+  };
+
+  return (
+    <FormProvider {...methods}>
+      <div className="bg-secondary p-6">
+        <Card className="w-full max-w-2xl p-8 card-shadow animate-scale-in">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden">
+                <Image
+                  src={LoginLogoBg}
+                  alt="Logo"
+                  width={48}
+                  height={48}
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <h1 className="text-2xl font-bold text-foreground">Lega<span className="font-semibold text-green-300">sys</span></h1>
+            </div>
+            <h2 className="text-3xl font-bold text-foreground mb-2">Let's Get Started</h2>
+            <p className="text-muted-foreground">Tell us about your case — takes 2 minutes</p>
+          </div>
+
+          {!referenceId ? (
+            <>
+              {/* Form */}
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <InputField
+                  name="fullName"
+                  label="Full Name *"
+                  placeholder="John Doe"
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InputField
+                    name="phone"
+                    label="Phone Number *"
+                    type="tel"
+                    placeholder="(555) 123-4567"
+                  />
+                  <InputField
+                    name="email"
+                    label="Email Address *"
+                    type="email"
+                    placeholder="john@example.com"
+                  />
+                </div>
+
+                <InputField
+                  name="dateOfLoss"
+                  label="Date of Loss *"
+                  type="date"
+                />
+
+                <div>
+                  <label className="block text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                    Case Type *
+                  </label>
+                  <Controller
+                    name="caseType"
+                    control={methods.control}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select Case Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {caseTypes.map((c) => (
+                            <SelectItem key={c.value} value={c.value}>
+                              {c.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+
+                <TextareaField
+                  name="description"
+                  label="Brief Description *"
+                />
+                <p className="text-xs text-muted-foreground mt-1 text-right">{charCount}/500 characters</p>
+
+                <div>
+                  <label className="block text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                    How did you hear about us? (Optional)
+                  </label>
+                  <Controller
+                    name="referralSource"
+                    control={methods.control}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select Source" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {referralSources.map((r) => (
+                            <SelectItem key={r.value} value={r.value}>
+                              {r.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+
+                <Button type="submit" size="lg" className="w-full h-12 text-lg">
+                  Generate Reference ID
+                </Button>
+
+                <div className="text-center pt-4">
+                  <p className="text-xs text-muted-foreground">
+                    By submitting this form, you agree to our{' '}
+                    <a href="#" className="text-primary hover:underline">
+                      Privacy Policy
+                    </a>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">🔒 Secured by Legasys</p>
+                </div>
+              </form>
+              {error && <p className="text-red-600 text-sm text-center mt-4">{error}</p>}
+            </>
+          ) : (
+            <div className="text-center">
+              <p className="font-bold text-lg text-blue-700">Your Reference ID:</p>
+              <p className="text-2xl font-extrabold mt-2">{referenceId}</p>
+              <p className="text-sm text-gray-500">
+                ⚠️ Please save this ID for later access.
+              </p>
+              <Button
+                onClick={handleNext}
+                className="mt-3 bg-blue-600 text-white py-2 px-4 rounded-lg"
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </Card>
+      </div>
+    </FormProvider>
+  );
+}

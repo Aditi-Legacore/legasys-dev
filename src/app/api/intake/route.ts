@@ -168,8 +168,8 @@ export async function POST(request: NextRequest) {
 
     // Validate userId if provided
     if (data.userId) {
-      const user = await prisma.user.findUnique({ where: { id: data.userId } });
-      if (!user) {
+      const userExists = await prisma.user.findUnique({ where: { id: data.userId }, select: { id: true } });
+      if (!userExists) {
         data.userId = null; // Set to null if user doesn't exist
       }
     }
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
       });
 
       console.log("existingIntake", existingIntake);
-      
+
       if (existingIntake) {
         intake = await prisma.intakeInfo.update({
           where: { id: existingIntake.id },
@@ -201,18 +201,6 @@ export async function POST(request: NextRequest) {
       } else {
         intake = await prisma.intakeInfo.create({
           data: buildIntakeData(data),
-        });
-      }
-
-       const session = await prisma.intakeSession.findUnique({
-        where: { referenceId: data.referenceId },
-      });
-
-      console.log("session", session);
-
-      if (session) {
-        await prisma.intakeSession.delete({
-          where: { id: session.id },
         });
       }
     }

@@ -248,7 +248,7 @@ export default function DefendantInfoStep() {
         >
           {/* Header with remove button */}
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200">
+            <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-200">
               Defendant #{index + 1}
             </h2>
 
@@ -280,9 +280,6 @@ export default function DefendantInfoStep() {
 
           {/* Vehicle Info with Dropdowns */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Vehicle Info
-            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <SelectField
                 name={`defendant${index + 1}Year`}

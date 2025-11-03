@@ -342,7 +342,7 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
         <input type="hidden" {...methods.register("hearAboutUsDetail")} />
 
         {/* Header */}
-        <h2 className="text-2xl font-bold text-center dark:text-white text-gray-800 mb-8">
+        <h2 className="text-center mb-8">
           Step {step + 1}: {steps[step]}
         </h2>
 
@@ -352,7 +352,7 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
             <div
               key={label}
               onClick={() => setStep(index)}
-              className={`flex-1 text-center text-xs sm:text-sm font-semibold cursor-pointer transition
+              className={`flex-1 text-center text-sm font-semibold cursor-pointer transition
                 ${index === step ? "block" : "hidden sm:block"}
                 ${index <= step ? "text-indigo-500 dark:text-indigo-400" : "text-gray-400"}`}
             >

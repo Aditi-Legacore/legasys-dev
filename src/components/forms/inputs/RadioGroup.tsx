@@ -16,7 +16,7 @@ export default function RadioGroup({ name, label, options }: RadioProps) {
   return (
     <div>
       {/* Label */}
-      <p className="block font-medium text-gray-900 dark:text-gray-100 mb-1">
+      <p className="block text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
         {label}
       </p>
 
@@ -29,7 +29,7 @@ export default function RadioGroup({ name, label, options }: RadioProps) {
             {options.map((opt) => (
               <label
                 key={opt}
-                className="flex items-center gap-2 text-gray-800 dark:text-gray-200"
+                className="flex items-center gap-2 text-base text-gray-800 dark:text-gray-200"
               >
                 <input
                   type="radio"
