@@ -67,7 +67,7 @@ export default function ContactSection({ contact, index, onUpdate, onRemove, sho
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Prefix */}
           <div>
             <Label htmlFor={`prefix-${contact.id}`}>Prefix</Label>
@@ -112,7 +112,7 @@ export default function ContactSection({ contact, index, onUpdate, onRemove, sho
           </div>
 
           {/* Last Name */}
-          <div className="md:col-span-2">
+          <div>
             <Label htmlFor={`lastName-${contact.id}`}>Last Name{showValidation ? ' *' : ''}</Label>
             <Input
               id={`lastName-${contact.id}`}
@@ -125,7 +125,7 @@ export default function ContactSection({ contact, index, onUpdate, onRemove, sho
 
           {/* Email (conditional) */}
           {showEmail && (
-            <div>
+            <div className="md:col-span-4">
               <Label htmlFor={`email-${contact.id}`}>Email{showValidation ? ' *' : ''}</Label>
               <Input
                 id={`email-${contact.id}`}

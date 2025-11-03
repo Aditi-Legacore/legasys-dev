@@ -318,27 +318,11 @@ export default function FillFormPage() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold">{submission.template.title}</h1>
         <p className="text-gray-600 mt-2">
-          Matter: {submission.matter?.title || 'N/A'}
+          {/* Matter: {submission.matter?.title || 'N/A'} */}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {(Array.isArray(submission.template.fields) ? submission.template.fields : (submission.template.fields.fields || [])).map((field) => (
-          <Card key={field.id}>
-            <CardHeader>
-              <CardTitle className="text-lg">
-                {field.label}
-                {field.required && <span className="text-red-500 ml-1">*</span>}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {renderField(field)}
-            </CardContent>
-          </Card>
-        ))}
-
-
-
         {/* Contacts Section */}
         {contacts.length > 0 && (
           <div className="space-y-4">
@@ -357,6 +341,20 @@ export default function FillFormPage() {
             ))}
           </div>
         )}
+
+        {(Array.isArray(submission.template.fields) ? submission.template.fields : (submission.template.fields.fields || [])).map((field) => (
+          <Card key={field.id}>
+            <CardHeader>
+              <CardTitle className="text-lg">
+                {field.label}
+                {field.required && <span className="text-red-500 ml-1">*</span>}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {renderField(field)}
+            </CardContent>
+          </Card>
+        ))}
 
         <div className="flex justify-end gap-4">
           <Button

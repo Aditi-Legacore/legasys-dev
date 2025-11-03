@@ -12,7 +12,7 @@ export async function GET() {
     // }
 
     const templates = await prisma.formTemplate.findMany({
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: 'asc' },
     });
 
     return NextResponse.json(templates);
@@ -24,11 +24,10 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    // Temporarily skip auth for testing
-    // const session = await getServerSession(authOptions);
-    // if (!session) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const { title, language, fields } = await request.json();
 
@@ -40,8 +39,8 @@ export async function POST(request: NextRequest) {
       data: {
         title,
         language: language || 'English',
-        fields: fields
-        // createdBy: session.user.id,
+        fields: fields,
+        createdBy: session.user.id
       },
     });
 

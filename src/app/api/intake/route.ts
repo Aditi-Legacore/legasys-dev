@@ -161,8 +161,9 @@ export async function POST(request: NextRequest) {
       console.log("session", session);
 
       if (session) {
-        await prisma.intakeSession.delete({
+        await prisma.intakeSession.update({
           where: { id: session.id },
+          data: { status: "Submitted" },
         });
       }
     }

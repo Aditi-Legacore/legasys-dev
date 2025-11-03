@@ -23,7 +23,7 @@ export async function GET() {
         },
         matter: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: 'asc' },
     });
 
     return NextResponse.json(submissions);

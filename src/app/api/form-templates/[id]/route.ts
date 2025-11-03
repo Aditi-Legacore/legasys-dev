@@ -46,6 +46,7 @@ export async function PUT(
         title,
         language,
         fields,
+        createdBy: session.user.id,
       },
     });
 

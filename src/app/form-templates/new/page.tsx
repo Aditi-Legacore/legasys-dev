@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, GripVertical, UserPlus, ChevronDown, ChevronRight } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Plus, Trash2, GripVertical, UserPlus, ChevronDown, ChevronRight, Eye } from 'lucide-react';
 import { FormField, ContactField, ContactData } from '@/types/form';
 import { useRouter } from 'next/navigation';
 import ContactSection from '@/components/FormBuilder/ContactSection';
@@ -20,6 +21,7 @@ export default function NewFormTemplatePage() {
   const [fields, setFields] = useState<FormField[]>([]);
   const [contacts, setContacts] = useState<{ id: string; name: string; isOpen: boolean; selectedFields: { dateOfBirth: boolean; company: boolean; phone: boolean; address: boolean }; data: ContactData }[]>([]);
   const [loading, setLoading] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const router = useRouter();
 
   const addField = (type: FormField['type']) => {
@@ -362,12 +364,167 @@ const handleSubmit = async (e: React.FormEvent) => {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end">
-          <Button type="submit" >
+        <div className="flex justify-end gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setPreviewOpen(true)}
+            disabled={loading}
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            Preview Form
+          </Button>
+          <Button type="submit" disabled={loading}>
             {loading ? 'Creating...' : 'Create Template'}
           </Button>
         </div>
       </form>
+
+      {/* Preview Modal */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Form Preview: {title || 'Untitled Template'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            {/* Contacts Section */}
+            {contacts.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Contacts</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {contacts.map((contact, index) => (
+                      <div key={contact.id} className="border rounded-lg p-4">
+                        <h4 className="font-medium mb-4">{contact.name}</h4>
+                        <ContactSection
+                          contact={{ id: contact.id, data: contact.data }}
+                          index={index}
+                          onUpdate={() => {}} // Read-only
+                          onRemove={() => {}} // Read-only
+                          showEmail={true}
+                          selectedFields={contact.selectedFields}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Form Fields Section */}
+            {fields.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Form Fields</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {fields.map((field, index) => (
+                      <div key={field.id} className="border rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-sm font-medium text-gray-500">Field {index + 1}</span>
+                          <Badge variant="outline">{field.type.replace('_', ' ')}</Badge>
+                          {field.required && <Badge variant="destructive">Required</Badge>}
+                        </div>
+                        <h4 className="font-medium mb-2">{field.label || 'Untitled Field'}</h4>
+
+                        {/* Render field preview based on type */}
+                        {field.type === 'text' && (
+                          <input
+                            type="text"
+                            className="w-full p-2 border rounded-md bg-gray-50"
+                            placeholder="Text input"
+                            disabled
+                          />
+                        )}
+
+                        {field.type === 'textarea' && (
+                          <textarea
+                            className="w-full p-2 border rounded-md bg-gray-50"
+                            placeholder="Paragraph text"
+                            rows={3}
+                            disabled
+                          />
+                        )}
+
+                        {field.type === 'multiple_choice' && field.options && (
+                          <div className="space-y-2">
+                            {field.options.filter(opt => opt.trim()).map((option, optIndex) => (
+                              <div key={optIndex} className="flex items-center gap-2">
+                                <input type="radio" disabled />
+                                <label>{option}</label>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {field.type === 'multi_select' && field.options && (
+                          <div className="space-y-2">
+                            {field.options.filter(opt => opt.trim()).map((option, optIndex) => (
+                              <div key={optIndex} className="flex items-center gap-2">
+                                <input type="checkbox" disabled />
+                                <label>{option}</label>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {field.type === 'dropdown' && field.options && (
+                          <select className="w-full p-2 border rounded-md bg-gray-50" disabled>
+                            <option>Select an option</option>
+                            {field.options.filter(opt => opt.trim()).map((option, optIndex) => (
+                              <option key={optIndex}>{option}</option>
+                            ))}
+                          </select>
+                        )}
+
+                        {field.type === 'section_break' && (
+                          <hr className="border-t-2 border-gray-300" />
+                        )}
+
+                        {field.type === 'file' && (
+                          <div className="p-4 border-2 border-dashed border-gray-300 rounded-md bg-gray-50">
+                            <p className="text-gray-500">File upload area</p>
+                          </div>
+                        )}
+
+                        {field.type === 'date' && (
+                          <input
+                            type="date"
+                            className="w-full p-2 border rounded-md bg-gray-50"
+                            disabled
+                          />
+                        )}
+
+                        {field.type === 'yes_no' && (
+                          <div className="flex gap-4">
+                            <label className="flex items-center gap-2">
+                              <input type="radio" name={`yes_no_${field.id}`} disabled />
+                              Yes
+                            </label>
+                            <label className="flex items-center gap-2">
+                              <input type="radio" name={`yes_no_${field.id}`} disabled />
+                              No
+                            </label>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {contacts.length === 0 && fields.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                No contacts or fields added yet. Add some to see the preview.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
