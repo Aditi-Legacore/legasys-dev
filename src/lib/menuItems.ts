@@ -25,24 +25,25 @@ export const menuItems: MenuItem[] = [
     icon: LayoutDashboard,
   },
   {
+    label: "Leads",
+    path: "/leads",
+    icon: ClipboardList,
+  },
+  {
     label: "Intake",
     path: "/intake-list",
     icon: ListChecks,
   },
-  {
-    label: "Reports",
-    path: "/reports",
-    icon: BarChart2,
-  },
+  
   {
     label: "Stages",
     path: "/stages",
     icon: FolderTree,
   },
   {
-    label: "Leads",
-    path: "/leads",
-    icon: ClipboardList,
+    label: "Reports",
+    path: "/reports",
+    icon: BarChart2,
   },
   {
     label: "Forms",
