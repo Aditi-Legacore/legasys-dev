@@ -6,6 +6,14 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     console.log("📥 POST /api/leads - Received data:", data);
 
+    // Determine prefix based on caseType
+    let prefix = "LEG";
+    if (data.caseType.toLowerCase().includes("auto")) prefix = "MVA";
+    else if (data.caseType.toLowerCase().includes("premises")) prefix = "PRE";
+    else if (data.caseType.toLowerCase().includes("dog")) prefix = "SLP";
+
+    const referenceId = `${prefix}-${Date.now().toString(36).toUpperCase()}`;
+
     const lead = await prisma.lead.create({
       data: {
         name: data.fullName,
@@ -18,11 +26,22 @@ export async function POST(request: NextRequest) {
         referralSource: data.referralSource,
         status: "new",
         matter: "-",
+        referenceId,
+        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
       },
     });
 
+    // Send email (optional, skip if email fails)
+    try {
+      const { sendIntakeReferenceEmail } = await import("@/lib/sendEmail");
+      await sendIntakeReferenceEmail(data.email, data.fullName, data.caseType, referenceId);
+    } catch (emailError) {
+      console.warn("Email sending failed:", emailError);
+      // Continue without failing the lead creation
+    }
+
     console.log("✅ Lead created:", lead);
-    return NextResponse.json(lead, { status: 201 });
+    return NextResponse.json({ ...lead, referenceId }, { status: 201 });
   } catch (err: any) {
     console.error("❌ POST /api/leads error:", err);
     return NextResponse.json({ error: "Failed to create lead", details: err.message }, { status: 500 });

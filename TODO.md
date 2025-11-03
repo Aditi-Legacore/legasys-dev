@@ -1,45 +1,20 @@
-# Leads Implementation Plan
+# Consolidation of IntakeSession into Lead Model
 
-## Information Gathered
-- QuickIntakeForm has fields: fullName, phone, email, dateOfLoss, caseType, description, referralSource
-- Prisma schema pulled from DB, has IntakeInfo/IntakeSession but no Lead model
-- Lead type: id, dueDate, name, caseType, status, contact, phone, matter
-- Leads page uses hardcoded data
-- LeadsTable displays leads
-- Intake API example exists
+## Overview
+Consolidate IntakeSession functionality into Lead model, remove IntakeSession entirely, and move resend email logic to reuse existing sendmail functionality.
 
-## Plan
-1. ✅ Add Lead model to prisma/schema.prisma
-   - Map form fields: fullName->name, email->contact, phone->phone, caseType->caseType
-   - Add description, referralSource fields
-   - Set dueDate to dateOfLoss, status default "new", matter default "-"
+## Completed Tasks
+- [x] Update Prisma schema: Add referenceId and dateOfBirth to Lead, remove IntakeSession
+- [x] Generate and run migration
 
-2. ✅ Create src/app/api/leads/route.ts
-   - POST: Create new lead from form data
-   - GET: Fetch all leads
+## Completed Tasks
+- [x] Update QuickIntakeForm to set referenceId and dateOfBirth on Lead
+- [x] Modify /api/session to create/update Lead instead of IntakeSession
+- [x] Update /api/session/validate to query Lead
+- [x] Update /api/intake/draft to work with Lead
+- [x] Remove IntakeSession deletion from /api/intake
+- [x] Update LeadsTable to use existing sendIntakeReferenceEmail and lead.referenceId
+- [x] Update types and any other references
 
-3. ✅ Update QuickIntakeForm.tsx
-   - Change onSubmit to POST to /api/leads
-   - Handle success/error responses
-
-4. ✅ Update src/app/leads/page.tsx
-   - Replace hardcoded leadsData with API fetch
-   - Add loading state
-
-5. ✅ Update src/types/leads.ts if needed
-   - Add description, referralSource to Lead interface
-
-6. ✅ Run Prisma migration and generate
-
-## Dependent Files
-- prisma/schema.prisma
-- src/app/api/leads/route.ts (new)
-- src/components/forms/QuickIntakeForm.tsx
-- src/app/leads/page.tsx
-- src/types/leads.ts
-
-## Followup Steps
-- ✅ Run `npx prisma migrate dev --name add_lead_model`
-- ✅ Run `npx prisma generate`
-- Test form submission
-- Test leads display
+## Pending Tasks
+- [ ] Test the changes

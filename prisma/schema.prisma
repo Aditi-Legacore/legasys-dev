@@ -60,19 +60,6 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model IntakeSession {
-  id          String      @id @default(cuid())
-  referenceId String      @unique
-  name        String
-  dateOfBirth DateTime
-  status      String      @default("draft")
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  caseType    String?
-  email       String
-  intakeInfo  IntakeInfo?
-}
-
 model IntakeInfo {
   id                           String         @id @default(cuid())
   userId                       String?
@@ -150,7 +137,6 @@ model IntakeInfo {
   hearAboutUsDetail            String?
   createdAt                    DateTime       @default(now())
   updatedAt                    DateTime       @updatedAt
-  intakeSessionId              String?        @unique
   isDraft                      Boolean        @default(true)
   referenceId                  String?
   currentDoctorHospital2       String?
@@ -192,7 +178,6 @@ model IntakeInfo {
   relationshipToYou            String?
   seatbeltUsed                 String?
   treatmentDetails             String?
-  intakeSession                IntakeSession? @relation(fields: [intakeSessionId], references: [id])
   user                         User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -208,6 +193,8 @@ model Lead {
   matter        String   @default("-")
   description   String?
   referralSource String?
+  referenceId   String?  @unique
+  dateOfBirth   DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }

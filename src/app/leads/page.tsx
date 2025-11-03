@@ -70,31 +70,31 @@ export default function LeadsPage() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="bg-white dark:bg-gray-800">
+          <Card className="bg-blue-300 dark:bg-gray-800">
             <CardHeader>
-              <CardTitle>Completed Leads</CardTitle>
+              <CardTitle className="text-white">Completed Leads</CardTitle>
               <CardDescription>{completedCount} completed</CardDescription>
             </CardHeader>
             <CardContent>
-              <Badge className="bg-success-light text-success">Completed</Badge>
+              <Badge className="bg-green-400 text-success">Completed</Badge>
             </CardContent>
           </Card>
-          <Card className="bg-white dark:bg-gray-800">
+          <Card className="bg-emerald-300 dark:bg-gray-800">
             <CardHeader>
               <CardTitle>In Progress Leads</CardTitle>
               <CardDescription>{inProgressCount} in progress</CardDescription>
             </CardHeader>
             <CardContent>
-              <Badge className="bg-warning-light text-warning">In Progress</Badge>
+              <Badge className="bg-yellow-300 text-warning">In Progress</Badge>
             </CardContent>
           </Card>
-          <Card className="bg-white dark:bg-gray-800">
+          <Card className="bg-yellow-300 dark:bg-gray-800">
             <CardHeader>
               <CardTitle>New Leads</CardTitle>
               <CardDescription>{newCount} new</CardDescription>
             </CardHeader>
             <CardContent>
-              <Badge className="bg-muted text-muted-foreground">New</Badge>
+              <Badge className="bg-red-400 text-success">New</Badge>
             </CardContent>
           </Card>
         </div>
@@ -124,12 +124,12 @@ export default function LeadsPage() {
                   <SelectItem value="completed">Completed</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" className="w-full md:w-auto">
+              <Button variant="outline" className="w-full md:w-auto bg-blue-400">
                 <Filter className="w-4 h-4 mr-2" />
                 More Filters
               </Button>
               <Button
-                className="bg-success hover:bg-success/90 text-success-foreground w-full md:w-auto"
+                className="bg-green-400 hover:bg-success/90 text-success-foreground w-full md:w-auto"
                 onClick={() => setShowQuickIntake(true)}
               >
                 <Plus className="w-4 h-4 mr-2" />

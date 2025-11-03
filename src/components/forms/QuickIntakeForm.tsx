@@ -54,34 +54,25 @@ export default function IntakeForm({ onClose }: { onClose: () => void }) {
       return;
     }
     try {
-      // Create session for reference ID and email
-      const sessionRes = await fetch("/api/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: data.fullName, dateOfBirth: data.dateOfLoss, caseType: data.caseType, email: data.email }),
-      });
-      const sessionData = await sessionRes.json();
-      if (!sessionRes.ok) {
-        setError(sessionData.error || "Failed to create session");
-        return;
-      }
-
-      // Create lead
+      // Create lead with reference ID and date of birth
       const leadRes = await fetch('/api/leads', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          dateOfBirth: data.dateOfLoss,
+        }),
       });
+      const leadData = await leadRes.json();
       if (!leadRes.ok) {
-        const leadError = await leadRes.json();
-        setError(leadError.error || "Failed to create lead");
+        setError(leadData.error || "Failed to create lead");
         return;
       }
 
-      setReferenceId(sessionData.referenceId);
-      localStorage.setItem("referenceId", sessionData.referenceId);
+      setReferenceId(leadData.referenceId);
+      localStorage.setItem("referenceId", leadData.referenceId);
       localStorage.setItem("caseType", data.caseType);
       setError("");
     } catch (err) {

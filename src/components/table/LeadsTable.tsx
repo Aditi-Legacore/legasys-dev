@@ -28,15 +28,6 @@ const statusConfig = {
 export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
   const handleResendEmail = async (lead: Lead) => {
     try {
-      // Generate the same reference ID that was used for the original email
-      let prefix = "LEG";
-      if (lead.caseType.toLowerCase().includes("auto")) prefix = "MVA";
-      else if (lead.caseType.toLowerCase().includes("premises")) prefix = "PRE";
-      else if (lead.caseType.toLowerCase().includes("dog")) prefix = "SLP";
-
-      // Use the lead's ID to generate a consistent reference ID
-      const referenceId = `${prefix}-${lead.id.slice(-8).toUpperCase()}`;
-
       const response = await fetch('/api/resend-email', {
         method: 'POST',
         headers: {
@@ -46,7 +37,7 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
           email: lead.email,
           name: lead.name,
           caseType: lead.caseType,
-          referenceId,
+          referenceId: lead.referenceId,
         }),
       });
 

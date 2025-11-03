@@ -4,15 +4,14 @@ import { prisma } from "@/lib/prisma";
 export async function POST(req: NextRequest) {
   const { referenceId } = await req.json();
 
-  const session = await prisma.intakeSession.findUnique({
+  const lead = await prisma.lead.findUnique({
     where: { referenceId },
-    include: { intakeInfo: true },
   });
 
-  if (!session) {
+  if (!lead) {
     return NextResponse.json({ error: "Invalid reference ID" }, { status: 404 });
   }
 
-  return NextResponse.json(session, { status: 200 });
+  return NextResponse.json(lead, { status: 200 });
 }
 

@@ -79,14 +79,13 @@ const buildIntakeData = (data: any) => ({
   ambulanceCompany: toNullable(data.ambulanceCompany),
   admitted: toNullable(data.admitted),
   lengthOfStay: toNullable(data.lengthOfStay),
-  doctorHospital1: toNullable(data.doctorHospital1),
-  address1: toNullable(data.address1),
-  phone1: toNullable(data.phone1),
-  treatmentDate1: toNullable(data.treatmentDate1) ? new Date(data.treatmentDate1) : null,
-  doctorHospital2: toNullable(data.doctorHospital2),
-  address2: toNullable(data.address2),
-  phone2: toNullable(data.phone2),
-  treatmentDate2: toNullable(data.treatmentDate2) ? new Date(data.treatmentDate2) : null,
+  hospitalName: toNullable(data.hospitalName),
+  hospitalized: toNullable(data.hospitalized),
+  injuryDescription: toNullable(data.injuryDescription),
+  passengerAge: toNullable(data.passengerAge),
+  relationshipToYou: toNullable(data.relationshipToYou),
+  seatbeltUsed: toNullable(data.seatbeltUsed),
+  treatmentDetails: toNullable(data.treatmentDetails),
 
   // Injuries
   priorInjuries: toNullable(data.priorInjuries),
@@ -142,7 +141,7 @@ export async function POST(request: NextRequest) {
       });
 
       console.log("existingIntake", existingIntake);
-      
+
       if (existingIntake) {
         intake = await prisma.intakeInfo.update({
           where: { id: existingIntake.id },
@@ -151,18 +150,6 @@ export async function POST(request: NextRequest) {
       } else {
         intake = await prisma.intakeInfo.create({
           data: buildIntakeData(data),
-        });
-      }
-
-       const session = await prisma.intakeSession.findUnique({
-        where: { referenceId: data.referenceId },
-      });
-
-      console.log("session", session);
-
-      if (session) {
-        await prisma.intakeSession.delete({
-          where: { id: session.id },
         });
       }
     }

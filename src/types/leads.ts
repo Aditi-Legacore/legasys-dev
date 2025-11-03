@@ -10,6 +10,8 @@ export interface Lead {
   matter: string;
   description?: string;
   referralSource?: string;
+  referenceId?: string;
+  dateOfBirth?: string;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -17,16 +17,16 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const session = await prisma.intakeSession.findUnique({
+    const lead = await prisma.lead.findUnique({
       where: { referenceId },
     });
 
-    if (!session) {
+    if (!lead) {
       return NextResponse.json({ error: "Invalid reference ID" }, { status: 404 });
     }
 
-    const existingIntake = await prisma.intakeInfo.findUnique({
-      where: { intakeSessionId: session.id },
+    const existingIntake = await prisma.intakeInfo.findFirst({
+      where: { referenceId },
     });
 
     // Define allowed fields based on Prisma schema
@@ -71,23 +71,21 @@ export async function POST(req: NextRequest) {
     }
 
     console.log("transformedFields", transformedFields);
-    
+
 
     if (existingIntake) {
       await prisma.intakeInfo.update({
-        where: { intakeSessionId: session.id },
+        where: { id: existingIntake.id },
         data: {
           ...transformedFields,
           user: { connect: { id: serverSession.user.id } },
         },
       });
     } else {
-      const { intakeSessionId, ...fields } = transformedFields;
       await prisma.intakeInfo.create({
         data: {
-          ...fields,
+          ...transformedFields,
           user: { connect: { id: serverSession.user.id } },
-          intakeSession: { connect: { id: session.id } },
         },
       });
     }
