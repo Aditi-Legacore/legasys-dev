@@ -6,5 +6,10 @@ export interface Lead {
   status: "new" | "form_sent" | "in_progress" | "completed";
   contact: string;
   phone: string;
+  email: string;
   matter: string;
+  description?: string;
+  referralSource?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }

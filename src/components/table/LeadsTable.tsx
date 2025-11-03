@@ -11,9 +11,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Lead } from "@/types/leads";
-``
+import { toast } from "sonner";
+
 interface LeadsTableProps {
   leads: Lead[];
+  onLeadUpdate?: () => void;
 }
 
 const statusConfig = {
@@ -23,7 +25,70 @@ const statusConfig = {
   completed: { label: "Completed", color: "bg-success-light text-success" },
 };
 
-export default function LeadsTable({ leads }: LeadsTableProps) {
+export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
+  const handleResendEmail = async (lead: Lead) => {
+    try {
+      // Generate the same reference ID that was used for the original email
+      let prefix = "LEG";
+      if (lead.caseType.toLowerCase().includes("auto")) prefix = "MVA";
+      else if (lead.caseType.toLowerCase().includes("premises")) prefix = "PRE";
+      else if (lead.caseType.toLowerCase().includes("dog")) prefix = "SLP";
+
+      // Use the lead's ID to generate a consistent reference ID
+      const referenceId = `${prefix}-${lead.id.slice(-8).toUpperCase()}`;
+
+      const response = await fetch('/api/resend-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: lead.email,
+          name: lead.name,
+          caseType: lead.caseType,
+          referenceId,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Email resent successfully!");
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to resend email");
+      }
+    } catch (error) {
+      console.error("Failed to resend email:", error);
+      toast.error("Failed to resend email");
+    }
+  };
+
+  const handleConvertToMatter = async (lead: Lead) => {
+    try {
+      await fetch(`/api/leads/${lead.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matter: lead.name, status: "in_progress" }),
+      });
+      toast.success("Lead converted to matter!");
+      onLeadUpdate?.();
+    } catch (error) {
+      console.error("Failed to convert to matter:", error);
+      toast.error("Failed to convert to matter");
+    }
+  };
+
+  const handleArchive = async (lead: Lead) => {
+    try {
+      await fetch(`/api/leads/${lead.id}`, {
+        method: "DELETE",
+      });
+      toast.success("Lead archived!");
+      onLeadUpdate?.();
+    } catch (error) {
+      console.error("Failed to archive lead:", error);
+      toast.error("Failed to archive lead");
+    }
+  };
   return (
     <Card className="card-shadow overflow-hidden hidden md:block bg-white dark:bg-gray-800">
       <div className="overflow-x-auto">
@@ -32,7 +97,6 @@ export default function LeadsTable({ leads }: LeadsTableProps) {
             <tr>
               {[
                 "Due Date",
-                "Lead ID",
                 "Client Name",
                 "Case Type",
                 "Status",
@@ -56,16 +120,13 @@ export default function LeadsTable({ leads }: LeadsTableProps) {
                 className="hover:bg-primary-light/50 dark:hover:bg-gray-700 transition-fast cursor-pointer group"
               >
                 <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">
-                  {new Date(lead.dueDate).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 text-sm font-medium text-primary dark:text-blue-400">
-                  {lead.id}
+                  {new Date(lead.dueDate).toLocaleDateString('en-US')}
                 </td>
                 <td className="px-6 py-4 text-sm font-medium text-foreground dark:text-white">
                   {lead.name}
                 </td>
                 <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">
-                  {lead.caseType}
+                  {lead.caseType ? lead.caseType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '-'}
                 </td>
                 <td className="px-6 py-4">
                   <Badge className={statusConfig[lead.status].color}>
@@ -96,13 +157,13 @@ export default function LeadsTable({ leads }: LeadsTableProps) {
                       <DropdownMenuItem>
                         <Eye className="w-4 h-4 mr-2" /> View Details
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleResendEmail(lead)}>
                         <Mail className="w-4 h-4 mr-2" /> Resend Email
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleConvertToMatter(lead)}>
                         <FileCheck className="w-4 h-4 mr-2" /> Convert to Matter
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleArchive(lead)}>
                         <Archive className="w-4 h-4 mr-2" /> Archive
                       </DropdownMenuItem>
                     </DropdownMenuContent>

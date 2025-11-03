@@ -5,6 +5,7 @@ import RadioGroup from "../inputs/RadioGroup";
 export default function PlaintiffInfoStep() {
   return (
     <div className="space-y-4 w-full">
+
       <InputField name="clientName" label="Client Name *" />
       <RadioGroup name="gender" label="Gender *" options={["Male", "Female"]} />
       <DateInputField name="dob" label="Date of Birth" />
