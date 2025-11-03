@@ -70,16 +70,16 @@ export default function LeadsPage() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="bg-blue-300 dark:bg-gray-800">
+          <Card className="bg-white dark:bg-gray-800">
             <CardHeader>
-              <CardTitle className="text-white">Completed Leads</CardTitle>
+              <CardTitle>Completed Leads</CardTitle>
               <CardDescription>{completedCount} completed</CardDescription>
             </CardHeader>
             <CardContent>
               <Badge className="bg-green-400 text-success">Completed</Badge>
             </CardContent>
           </Card>
-          <Card className="bg-emerald-300 dark:bg-gray-800">
+          <Card className="bg-white dark:bg-gray-800">
             <CardHeader>
               <CardTitle>In Progress Leads</CardTitle>
               <CardDescription>{inProgressCount} in progress</CardDescription>
@@ -88,7 +88,7 @@ export default function LeadsPage() {
               <Badge className="bg-yellow-300 text-warning">In Progress</Badge>
             </CardContent>
           </Card>
-          <Card className="bg-yellow-300 dark:bg-gray-800">
+          <Card className="bg-white dark:bg-gray-800">
             <CardHeader>
               <CardTitle>New Leads</CardTitle>
               <CardDescription>{newCount} new</CardDescription>
