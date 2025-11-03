@@ -258,7 +258,8 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
     // Email notification is handled in the API route
 
     toast.success(intakeId ? "✅ Intake updated successfully!" : "✅ Intake created successfully!");
-    router.push("/intake-list");
+    // router.push("/intake-list");
+    router.push("/forms");
   } catch (error) {
     console.error("❌ Error saving intake:", error);
     toast.error("⚠️ There was an error saving the form.");

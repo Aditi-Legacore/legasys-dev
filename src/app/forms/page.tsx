@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Plus, Search, Filter, Loader2 } from 'lucide-react';
 import PrepareFormModal from '@/components/forms/PrepareFormModal';
+import NewIntakeModal from '@/components/NewIntakeModal';
 import { FormSubmission } from '@/types/form';
 
 export default function FormsPage() {
@@ -18,6 +19,7 @@ export default function FormsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showIntakeModal, setShowIntakeModal] = useState(false);
 
   useEffect(() => {
     fetchSubmissions();
@@ -68,11 +70,21 @@ export default function FormsPage() {
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Forms</h1>
-        <Button onClick={() => setIsModalOpen(true)}>
+        <div>
+          <h1 className="text-3xl font-bold">Case Intake Management</h1>
+          <p>Manage and review all case intakes</p>
+        </div>
+        {/* <Button onClick={() => setIsModalOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Prepare Form
-        </Button>
+        </Button> */}
+        <button
+          onClick={() => setShowIntakeModal(true)}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+        >
+          <Plus size={16} />
+          New Intake
+        </button>
       </div>
 
       <div className="flex gap-4 mb-6">
@@ -124,6 +136,8 @@ export default function FormsPage() {
         onSubmit={fetchSubmissions}
         templates={templates}
       />
+
+      {showIntakeModal && <NewIntakeModal onClose={() => setShowIntakeModal(false)} />}
     </div>
   );
 }
