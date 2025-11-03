@@ -56,8 +56,7 @@ interface IntakeFormWizardProps {
 
 export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps) {
   const searchParams = useSearchParams();
-  //code for fetch draft
-  //  const referenceId = searchParams.get("ref");
+  const referenceId = searchParams.get("ref") || localStorage.getItem("referenceId");
   const [draft, setDraft] = useState<any>(null);
 
   const intakeId = searchParams.get("id");  // 👈 get ID from URL
@@ -65,11 +64,6 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({});
-  const [referenceId, setReferenceId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setReferenceId(localStorage.getItem("referenceId"));
-  }, []);
 
 // Prefill draft if exists
   useEffect(() => {
@@ -117,17 +111,14 @@ const handleSaveDraft = async () => {
 
   useEffect(() => {
     if (referenceId) {
-      fetch("/api/session/validate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ referenceId }),
-      })
+      fetch(`/api/intake/draft?referenceId=${referenceId}`)
         .then((res) => res.json())
         .then((data) => {
-          if (!data.error) {
-            setDraft(data.intakeInfo); // or adjust based on your structure
+          if (data.draft) {
+            setDraft(data.draft);
           }
-        });
+        })
+        .catch((err) => console.error("Failed to fetch draft:", err));
     }
   }, [referenceId]);
 

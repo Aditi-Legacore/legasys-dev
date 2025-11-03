@@ -178,24 +178,23 @@ model IntakeInfo {
   relationshipToYou            String?
   seatbeltUsed                 String?
   treatmentDetails             String?
-  leadId                       String?        @unique
-  lead                         Lead?          @relation(fields: [leadId], references: [id])
   user                         User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Lead {
-  id            String      @id @default(cuid())
+  id            String   @id @default(cuid())
   dueDate       DateTime
   name          String
   caseType      String
-  status        String      @default("new")
+  status        String   @default("new")
   contact       String
   phone         String
   email         String
-  matter        String      @default("-")
+  matter        String   @default("-")
   description   String?
   referralSource String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  intakeInfo    IntakeInfo?
+  referenceId   String?  @unique
+  dateOfBirth   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
