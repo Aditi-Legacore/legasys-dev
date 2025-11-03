@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ListChecks, Menu, X } from "lucide-react";
+import { ListChecks, Menu, X, FileText } from "lucide-react";
 import Link from "next/link";
 
 const Sidebar: React.FC = () => {
@@ -86,6 +86,23 @@ const Sidebar: React.FC = () => {
               >
                 <ListChecks className="w-5 h-5" />
                 <span className="font-medium">Intake List</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/form-templates"
+                onClick={() => {
+                  setActiveItem("form-templates");
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  activeItem === "form-templates"
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}
+              >
+                <FileText className="w-5 h-5" />
+                <span className="font-medium">Form Templates</span>
               </Link>
             </li>
           </ul>

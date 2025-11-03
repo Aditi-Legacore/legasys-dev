@@ -37,6 +37,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   intakes       IntakeInfo[]
+  formSubmissions FormSubmission[]
 }
 
 
@@ -117,14 +118,14 @@ model IntakeInfo {
   passenger           String?
   passengerName       String?
   workAtAccident      String?
-  
+
   // Defendant 1 / Driver
   defendant1Name         String?
- 
+
   defendant1Address      String?
   defendant1Carrier      String?
   defendant1CarrierPhone String?
-  
+
   defendant1Year         String?
   defendant1Make         String?
   defendant1Model        String?
@@ -132,11 +133,11 @@ model IntakeInfo {
 
   // Defendant 2 / Owner
   defendant2Name         String?
- 
+
   defendant2Address      String?
   defendant2Carrier      String?
   defendant2CarrierPhone String?
- 
+
   defendant2Year         String?
   defendant2Make         String?
   defendant2Model        String?
@@ -146,19 +147,19 @@ model IntakeInfo {
   autoName     String?
   autoPhone    String?
   autoAddress  String?
-  
+
   autoAgent    String?
   autoPolicy   String?
   autoClaim    String?
   autoAdditionalinfo    String?
- 
+
 
   // Client Health Insurance
   healthCarrier String?
   healthPhone   String?
- 
+
   healthAddress String?
-  
+
   healthPolicy  String?
   healthClaim   String?
   healthAdjuster String?
@@ -198,7 +199,7 @@ model IntakeInfo {
   priorInsuranceClaims String?
   priorAttorneys       String?
 
-  
+
   currentTreatment           String?
   currentDoctorHospital      String?
   currentHospitalAddressPhone String?
@@ -214,4 +215,42 @@ model IntakeInfo {
   referenceId                String?
   isDraft                    Boolean @default(true)
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Matter {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("Open")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  formSubmissions FormSubmission[]
+}
+
+model FormTemplate {
+  id        String   @id @default(cuid())
+  title     String
+  language  String   @default("English")
+  fields    Json
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  submissions FormSubmission[]
+}
+
+model FormSubmission {
+  id         String   @id @default(cuid())
+  templateId String
+  userId     String?
+  matterId   String?
+  status     String   @default("Pending")
+  data       Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  template FormTemplate @relation(fields: [templateId], references: [id])
+  user     User?        @relation(fields: [userId], references: [id])
+  matter   Matter?      @relation(fields: [matterId], references: [id])
 }
