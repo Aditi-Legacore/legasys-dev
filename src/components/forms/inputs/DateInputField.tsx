@@ -30,7 +30,7 @@ export default function DateInputField({
           <DatePicker
             selected={field.value ? new Date(field.value) : null}
             onChange={(date) =>
-              setValue(name, date ? date.toISOString().split("T")[0] : "")
+              setValue(name, date ? date.toISOString() : "")
             }
             dateFormat="MM/dd/yyyy"
             placeholderText="mm/dd/yyyy"
