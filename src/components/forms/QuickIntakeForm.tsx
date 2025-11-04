@@ -16,6 +16,7 @@ import TextareaField from './inputs/TextareaField';
 const caseTypes = [
   { value: 'personal_injury', label: 'Personal Injury', icon: AlertTriangle },
   { value: 'auto_accident', label: 'Auto Accident', icon: Car },
+  { value: 'premises_liability', label: 'Premises Liabilities', icon: Car },
   { value: 'medical_malpractice', label: 'Medical Malpractice', icon: Heart },
   { value: 'workers_comp', label: 'Workers Compensation', icon: Briefcase },
 ];
