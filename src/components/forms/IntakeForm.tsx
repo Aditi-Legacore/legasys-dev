@@ -17,8 +17,8 @@ import { useSearchParams } from "next/navigation";
 
 // Extend the session user type to include 'id'
 import type { DefaultUser } from "next-auth";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import IntakeDocuments from "./intakeDocuments/intakeDocuments";
 
 declare module "next-auth" {
   interface Session {
@@ -64,6 +64,8 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({});
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submittedIntakeId, setSubmittedIntakeId] = useState<string | null>(null);
 
 // Prefill draft if exists
   useEffect(() => {
@@ -186,7 +188,7 @@ useEffect(() => {
 
   
 
-  const router = useRouter();
+
 
   // ✅ Scroll to top whenever step changes
   // 👇 Add this effect for scrolling on step change
@@ -249,7 +251,8 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
     // Email notification is handled in the API route
 
     toast.success(intakeId ? "✅ Intake updated successfully!" : "✅ Intake created successfully!");
-    router.push("/intake-list");
+    setIsSubmitted(true);
+    setSubmittedIntakeId(savedData.id);
   } catch (error) {
     console.error("❌ Error saving intake:", error);
     toast.error("⚠️ There was an error saving the form.");
@@ -312,90 +315,130 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
     );
   }
 
+  // Document upload 04-11-2025
+
+  const handleFileUpload = async (file: File) => {
+    if (!submittedIntakeId) {
+      toast.error("No intake ID available for upload.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(`/api/intake/${submittedIntakeId}/documents`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload document");
+      }
+
+      toast.success("Document uploaded successfully!");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload document.");
+    }
+  };
+
   return (
     <FormProvider {...methods}>
       <div
         ref={containerRef}
         className="w-full mx-auto max-h-[80vh] overflow-auto"
       >
-        <form
-          onSubmit={(e) => {
-            console.log("Form onSubmit triggered");
-            e.preventDefault();
-            console.log("Calling methods.handleSubmit(onSubmit)");
-            methods.handleSubmit(onSubmit, (errors) => {
-              console.log("❌ Validation failed:", errors);
-            })();
-          }}
-          className="bg-white dark:bg-gray-900 p-4 sm:p-6 lg:p-8 rounded-xl shadow-xl transition-all duration-300"
-        >
-        <input type="hidden" {...methods.register("hearAboutUs")} />
-        <input type="hidden" {...methods.register("hearAboutUsDetail")} />
-
-        {/* Header */}
-        <h2 className="text-center mb-8">
-          Step {step + 1}: {steps[step]}
-        </h2>
-
-        {/* Step indicators */}
-        <div className="flex justify-between mb-6 mx-auto w-full max-w-3xl">
-          {steps.map((label, index) => (
-            <div
-              key={label}
-              onClick={() => setStep(index)}
-              className={`flex-1 text-center text-sm font-semibold cursor-pointer transition
-                ${index === step ? "block" : "hidden sm:block"}
-                ${index <= step ? "text-indigo-500 dark:text-indigo-400" : "text-gray-400"}`}
+        {/* document upload after intake submit */}
+        {isSubmitted && submittedIntakeId ? (
+              <IntakeDocuments submittedIntakeId={submittedIntakeId} />
+              ) : (
+              <form
+              onSubmit={(e) => {
+                console.log("Form onSubmit triggered");
+                e.preventDefault();
+                console.log("Calling methods.handleSubmit(onSubmit)");
+                methods.handleSubmit(onSubmit, (errors) => {
+                  console.log("❌ Validation failed:", errors);
+                })();
+              }}
+              className="bg-white dark:bg-gray-900 p-4 sm:p-6 lg:p-8 rounded-xl shadow-xl transition-all duration-300"
             >
-              <div
-                className={`w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center ${
-                  index <= step ? "bg-indigo-500 text-white" : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300"
-                }`}
-              >
-                {index + 1}
-              </div>
-              {label}
+            <input type="hidden" {...methods.register("hearAboutUs")} />
+            <input type="hidden" {...methods.register("hearAboutUsDetail")} />
+
+            {/* Header */}
+            <h2 className="text-center mb-8">
+              Step {step + 1}: {steps[step]}
+            </h2>
+
+            {/* Step indicators */}
+            <div className="flex justify-between mb-6 mx-auto w-full max-w-3xl">
+              {steps.map((label, index) => (
+                <div
+                  key={label}
+                  onClick={() => setStep(index)}
+                  className={`flex-1 text-center text-sm font-semibold cursor-pointer transition
+                    ${index === step ? "block" : "hidden sm:block"}
+                    ${
+                      index <= step
+                        ? "text-indigo-500 dark:text-indigo-400"
+                        : "text-gray-400"
+                    }`}
+                >
+                  <div
+                    className={`w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center ${
+                      index <= step
+                        ? "bg-indigo-500 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300"
+                    }`}
+                  >
+                    {index + 1}
+                  </div>
+                  {label}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* Step Content */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          {renderStep()}
-        </motion.div>
+            {/* Step Content */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              {renderStep()}
+            </motion.div>
 
-        {/* Buttons */}
-        <div className="flex justify-between pt-4 border-t mt-4 dark:border-gray-700">
-          {step > 0 && (
-            <button
-              type="button"
-              onClick={prevStep}
-              className="px-5 py-2 bg-gray-300 dark:border-gray-300 text-gray-800 dark:text-gray-900 rounded-lg hover:bg-gray-400 transition"
-            >
-              Back
-            </button>
-          )}
-          {step < steps.length - 1 && (
-            <button
-              type="button"
-              onClick={nextStep}
-              className="ml-auto  px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-            >
-              Next
-            </button>
-          )}
-          {/* 💾 Save Draft Button */}
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={handleSaveDraft}
-          className="ml-auto  px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-        >
-          Save Draft
-        </button>
-      </div>
-        </div>
-      </form>
+            {/* Buttons */}
+            <div className="flex justify-between pt-4 border-t mt-4 dark:border-gray-700">
+              {step > 0 && (
+                <button
+                  type="button"
+                  onClick={prevStep}
+                  className="px-5 py-2 bg-gray-300 dark:border-gray-300 text-gray-800 dark:text-gray-900 rounded-lg hover:bg-gray-400 transition"
+                >
+                  Back
+                </button>
+              )}
+              {step < steps.length - 1 && (
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  className="ml-auto px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                >
+                  Next
+                </button>
+              )}
+              {/* 💾 Save Draft Button */}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleSaveDraft}
+                  className="ml-auto px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                >
+                  Save Draft
+                </button>
+              </div>
+            </div>
+          </form>
+        )}
+
       </div>
     </FormProvider>
   );

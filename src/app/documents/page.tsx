@@ -1,53 +1,49 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, FileText } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import DocumentsTable from "@/components/table/DocumentsTable";
 
-
+interface DocumentType {
+  id: string;
+  clientName: string;
+  caseType: string;
+  status: string;
+  documentStatus: string;
+  createdDate: string;
+  files: string[];
+}
 
 export default function DocumentsPage() {
-  // Static document data for now
-  const [documents, setDocuments] = useState([
-    {
-      id: "DOC-001",
-      clientName: "John Smith",
-      caseType: "Personal Injury",
-      status: "New Intake",
-      documentStatus: "submitted",
-      createdDate: "2024-01-15 10:30 AM",
-      files: ["intake-form.pdf", "medical-records.pdf"]
-    },
-    {
-      id: "DOC-002",
-      clientName: "Sarah Johnson",
-      caseType: "Auto Accident",
-      status: "Hired",
-      documentStatus: "submitted",
-      createdDate: "2024-01-14 02:15 PM",
-      files: ["accident-report.pdf", "insurance-claim.pdf"]
-    },
-    {
-      id: "DOC-003",
-      clientName: "Michael Chen",
-      caseType: "Workers Comp",
-      status: "New Intake",
-      documentStatus: "pending",
-      createdDate: "2024-01-13 09:45 AM",
-      files: []
-    },
-  ]);
+  const [documents, setDocuments] = useState<DocumentType[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Calculate stats for cards
+  useEffect(() => {
+    async function fetchDocuments() {
+      try {
+        const res = await fetch("/api/documents");
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setDocuments(data);
+        }
+      } catch (err) {
+        console.error("Error fetching documents:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchDocuments();
+  }, []);
+
   const submittedCount = documents.filter(d => d.documentStatus === "submitted").length;
   const pendingCount = documents.filter(d => d.documentStatus === "pending").length;
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Page Header */}
         <div>
           <h1 className="text-3xl font-bold text-foreground">Documents</h1>
           <p className="text-muted-foreground mt-1">Manage client documents and files</p>
@@ -75,7 +71,6 @@ export default function DocumentsPage() {
           </Card>
         </div>
 
-        {/* Search */}
         <Card>
           <CardContent className="flex gap-4 flex-col md:flex-row">
             <div className="flex-1 relative">
@@ -88,8 +83,11 @@ export default function DocumentsPage() {
           </CardContent>
         </Card>
 
-        {/* Table */}
-        <DocumentsTable documents={documents} />
+        {loading ? (
+          <div className="text-center text-gray-500 py-10">Loading...</div>
+        ) : (
+          <DocumentsTable documents={documents} />
+        )}
       </div>
     </main>
   );

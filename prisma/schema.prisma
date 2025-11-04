@@ -179,6 +179,11 @@ model IntakeInfo {
   seatbeltUsed                 String?
   treatmentDetails             String?
   user                         User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  Document Document[]
+  LeadId String? @unique
+  Lead   Lead? @relation(fields: [LeadId], references: [id])
+
 }
 
 model Lead {
@@ -197,4 +202,15 @@ model Lead {
   dateOfBirth   DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  intakeInfo  IntakeInfo?
+}
+
+model Document {
+  id          String      @id @default(cuid())
+  intakeId    String
+  fileName    String
+  filePath    String
+  mimeType    String?
+  uploadedAt  DateTime    @default(now())
+  intake      IntakeInfo  @relation(fields: [intakeId], references: [id], onDelete: Cascade)
 }
