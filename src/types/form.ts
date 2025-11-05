@@ -57,7 +57,7 @@ export interface FormSubmission {
   templateId: string;
   userId?: string;
   matterId?: string;
-  status: 'Pending' | 'Submitted';
+  status: 'Pending' | 'Submitted' | 'Draft';
   data: Record<string, any>;
   createdAt: string;
   updatedAt: string;

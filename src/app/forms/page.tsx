@@ -18,6 +18,7 @@ export default function FormsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showIntakeModal, setShowIntakeModal] = useState(false);
 
@@ -26,9 +27,14 @@ export default function FormsPage() {
     fetchTemplates();
   }, []);
 
-  const fetchSubmissions = async () => {
+  useEffect(() => {
+    fetchSubmissions(statusFilter);
+  }, [statusFilter]);
+
+  const fetchSubmissions = async (status?: string) => {
     try {
-      const response = await fetch('/api/forms');
+      const url = status && status !== 'all' ? `/api/forms?status=${encodeURIComponent(status)}` : '/api/forms';
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         setSubmissions(data);
@@ -56,12 +62,12 @@ export default function FormsPage() {
     const matchesSearch = submission.template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (submission.user?.firstName + ' ' + submission.user?.lastName).toLowerCase().includes(searchTerm.toLowerCase()) ||
                          submission.matter?.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || submission.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
   const pendingSubmissions = filteredSubmissions.filter(s => s.status === 'Pending');
   const submittedSubmissions = filteredSubmissions.filter(s => s.status === 'Submitted');
+  const draftSubmissions = filteredSubmissions.filter(s => s.status === 'Draft');
 
   if (loading) {
     return <div className="flex justify-center items-center h-64">Loading...</div>;
@@ -106,14 +112,16 @@ export default function FormsPage() {
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="Pending">Pending</SelectItem>
             <SelectItem value="Submitted">Submitted</SelectItem>
+            <SelectItem value="Draft">Draft</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <Tabs defaultValue="pending" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="pending">Pending ({pendingSubmissions.length})</TabsTrigger>
           <TabsTrigger value="submitted">Submitted ({submittedSubmissions.length})</TabsTrigger>
+          <TabsTrigger value="draft">Draft ({draftSubmissions.length})</TabsTrigger>
           <TabsTrigger value="templates">Templates ({templates.length})</TabsTrigger>
         </TabsList>
 
@@ -123,6 +131,10 @@ export default function FormsPage() {
 
         <TabsContent value="submitted">
           <FormsTable submissions={submittedSubmissions} />
+        </TabsContent>
+
+        <TabsContent value="draft">
+          <FormsTable submissions={draftSubmissions} showEditButton={true} />
         </TabsContent>
 
         <TabsContent value="templates">
@@ -142,7 +154,7 @@ export default function FormsPage() {
   );
 }
 
-function FormsTable({ submissions }: { submissions: FormSubmission[] }) {
+function FormsTable({ submissions, showEditButton = false }: { submissions: FormSubmission[]; showEditButton?: boolean }) {
   return (
     <div className="border rounded-lg">
       <Table>
@@ -153,6 +165,7 @@ function FormsTable({ submissions }: { submissions: FormSubmission[] }) {
             <TableHead>Contact</TableHead>
             <TableHead>Matter</TableHead>
             <TableHead>Status</TableHead>
+            {showEditButton && <TableHead>Actions</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -165,10 +178,21 @@ function FormsTable({ submissions }: { submissions: FormSubmission[] }) {
               </TableCell>
               <TableCell>{submission.matter?.title || 'N/A'}</TableCell>
               <TableCell>
-                <Badge variant={submission.status === 'Pending' ? 'secondary' : 'default'}>
+                <Badge variant={submission.status === 'Pending' || submission.status === 'Draft' ? 'secondary' : 'default'}>
                   {submission.status}
                 </Badge>
               </TableCell>
+              {showEditButton && (
+                <TableCell>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.location.href = `/forms/${submission.id}/fill`}
+                  >
+                    Edit
+                  </Button>
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

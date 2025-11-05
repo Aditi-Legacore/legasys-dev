@@ -126,6 +126,45 @@ export default function FillFormPage() {
     setContacts(prev => prev.filter(contact => contact.id !== id));
   };
 
+  const handleSaveDraft = async () => {
+    setSubmitting(true);
+    try {
+      // Convert formData back to field IDs for storage
+      const dataToStore: Record<string, any> = {};
+      Object.keys(formData).forEach(label => {
+        const field = Array.from(fieldMap.values()).find(f => f.label === label);
+        if (field) {
+          dataToStore[field.id] = formData[label];
+        }
+      });
+
+      const response = await fetch(`/api/forms/${params.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'Draft',
+          data: {
+            ...dataToStore,
+            contacts: contacts.map(contact => contact.data),
+          },
+        }),
+      });
+
+      if (response.ok) {
+        alert('Draft saved successfully!');
+      } else {
+        throw new Error('Failed to save draft');
+      }
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      alert('Failed to save draft');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -146,7 +185,7 @@ export default function FillFormPage() {
       // Convert formData back to field IDs for storage
       const dataToStore: Record<string, any> = {};
       console.log("formData", formData);
-      
+
       Object.keys(formData).forEach(label => {
         const field = Array.from(fieldMap.values()).find(f => f.label === label);
         console.log("dataToStore", dataToStore, field);
@@ -196,6 +235,7 @@ export default function FillFormPage() {
             onChange={(e) => handleInputChange(field.label, e.target.value)}
             placeholder={field.placeholder}
             required={field.required}
+            className="h-11 text-base"
           />
         );
 
@@ -207,6 +247,7 @@ export default function FillFormPage() {
             onChange={(e) => handleInputChange(field.label, e.target.value)}
             placeholder={field.placeholder}
             required={field.required}
+            className="min-h-[120px] text-base resize-y"
           />
         );
 
@@ -215,11 +256,12 @@ export default function FillFormPage() {
           <RadioGroup
             value={value}
             onValueChange={(val) => handleInputChange(field.label, val)}
+            className="space-y-3"
           >
             {field.options?.map((option) => (
-              <div key={option} className="flex items-center space-x-2">
-                <RadioGroupItem value={option} id={`${field.id}-${option}`} />
-                <Label htmlFor={`${field.id}-${option}`}>{option}</Label>
+              <div key={option} className="flex items-center space-x-3">
+                <RadioGroupItem value={option} id={`${field.id}-${option}`} className="h-5 w-5" />
+                <Label htmlFor={`${field.id}-${option}`} className="text-base font-normal cursor-pointer">{option}</Label>
               </div>
             ))}
           </RadioGroup>
@@ -227,17 +269,18 @@ export default function FillFormPage() {
 
       case 'multi_select':
         return (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {field.options?.map((option) => (
-              <div key={option} className="flex items-center space-x-2">
+              <div key={option} className="flex items-center space-x-3">
                 <Checkbox
                   id={`${field.id}-${option}`}
                   checked={value?.includes(option) || false}
                   onCheckedChange={(checked) =>
                     handleMultiSelectChange(field.label, option, checked as boolean)
                   }
+                  className="h-5 w-5"
                 />
-                <Label htmlFor={`${field.id}-${option}`}>{option}</Label>
+                <Label htmlFor={`${field.id}-${option}`} className="text-base font-normal cursor-pointer">{option}</Label>
               </div>
             ))}
           </div>
@@ -246,12 +289,12 @@ export default function FillFormPage() {
       case 'dropdown':
         return (
           <Select value={value} onValueChange={(val) => handleInputChange(field.label, val)}>
-            <SelectTrigger>
+            <SelectTrigger className="h-11 text-base">
               <SelectValue placeholder="Select an option" />
             </SelectTrigger>
             <SelectContent>
               {field.options?.map((option) => (
-                <SelectItem key={option} value={option}>
+                <SelectItem key={option} value={option} className="text-base">
                   {option}
                 </SelectItem>
               ))}
@@ -261,13 +304,14 @@ export default function FillFormPage() {
 
       case 'yes_no':
         return (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <Checkbox
               id={field.id}
               checked={value}
               onCheckedChange={(checked) => handleInputChange(field.label, checked)}
+              className="h-5 w-5"
             />
-            <Label htmlFor={field.id}>Yes</Label>
+            <Label htmlFor={field.id} className="text-base font-normal cursor-pointer">Yes</Label>
           </div>
         );
 
@@ -279,6 +323,7 @@ export default function FillFormPage() {
             value={value}
             onChange={(e) => handleInputChange(field.label, e.target.value)}
             required={field.required}
+            className="h-11 text-base"
           />
         );
 
@@ -289,6 +334,7 @@ export default function FillFormPage() {
             type="file"
             onChange={(e) => handleInputChange(field.label, e.target.files?.[0] || null)}
             required={field.required}
+            className="h-11 text-base file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium"
           />
         );
 
@@ -300,75 +346,135 @@ export default function FillFormPage() {
             onChange={(e) => handleInputChange(field.label, e.target.value)}
             placeholder={field.placeholder}
             required={field.required}
+            className="h-11 text-base"
           />
         );
     }
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-64">Loading form...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading form...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!submission) {
-    return <div className="flex justify-center items-center h-64">Form not found</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-600 text-lg">Form not found</p>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-2xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">{submission.template.title}</h1>
-        <p className="text-gray-600 mt-2">
-          {/* Matter: {submission.matter?.title || 'N/A'} */}
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 sm:mb-8">
+          <div className="px-6 sm:px-8 py-6 sm:py-8 border-b border-gray-200">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+              {submission.template.title}
+            </h1>
+            {submission.matter?.title && (
+              <p className="text-gray-600 text-sm sm:text-base">
+                Matter: {submission.matter.title}
+              </p>
+            )}
+          </div>
+        </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Contacts Section */}
-        {contacts.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">Contacts</h2>
-            {contacts.map((contact, index) => (
-              <ContactSection
-                key={contact.id}
-                contact={contact}
-                index={index}
-                onUpdate={handleContactUpdate}
-                onRemove={handleContactRemove}
-                showEmail={true}
-                selectedFields={contact.selectedFields}
-                showValidation={true}
-              />
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+          {/* Contacts Section */}
+          {contacts.length > 0 && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">
+                Contacts
+              </h2>
+              <div className="space-y-6">
+                {contacts.map((contact, index) => (
+                  <div 
+                    key={contact.id} 
+                    className="bg-gray-50 rounded-lg p-4 sm:p-6 border border-gray-200"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="flex-shrink-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                        {index + 1}
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Contact {index + 1}
+                      </h3>
+                    </div>
+                    <ContactSection
+                      contact={contact}
+                      index={index}
+                      onUpdate={handleContactUpdate}
+                      onRemove={handleContactRemove}
+                      showEmail={true}
+                      selectedFields={contact.selectedFields}
+                      showValidation={true}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Form Fields */}
+          <div className="space-y-6">
+            {(Array.isArray(submission.template.fields) ? submission.template.fields : (submission.template.fields.fields || [])).map((field) => (
+              <Card key={field.id} className="bg-white border border-gray-200 shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg sm:text-xl font-semibold text-gray-900 flex items-baseline gap-2">
+                    <span>{field.label}</span>
+                    {field.required && (
+                      <span className="text-red-600 text-base" aria-label="required">*</span>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {renderField(field)}
+                </CardContent>
+              </Card>
             ))}
           </div>
-        )}
 
-        {(Array.isArray(submission.template.fields) ? submission.template.fields : (submission.template.fields.fields || [])).map((field) => (
-          <Card key={field.id}>
-            <CardHeader>
-              <CardTitle className="text-lg">
-                {field.label}
-                {field.required && <span className="text-red-500 ml-1">*</span>}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {renderField(field)}
-            </CardContent>
-          </Card>
-        ))}
-
-        <div className="flex justify-end gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.push('/forms')}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={submitting}>
-            {submitting ? 'Submitting...' : 'Submit Form'}
-          </Button>
-        </div>
-      </form>
+          {/* Action Buttons */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push('/forms')}
+                className="w-full sm:w-auto h-11 px-6 text-base font-medium"
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleSaveDraft}
+                disabled={submitting}
+                className="w-full sm:w-auto h-11 px-6 text-base font-medium"
+              >
+                {submitting ? 'Saving...' : 'Save Draft'}
+              </Button>
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="w-full sm:w-auto h-11 px-6 text-base font-medium bg-blue-600 hover:bg-blue-700"
+              >
+                {submitting ? 'Submitting...' : 'Submit Form'}
+              </Button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
