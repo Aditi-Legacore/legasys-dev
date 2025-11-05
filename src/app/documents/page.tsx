@@ -1,68 +1,98 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { FileText } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import DocumentsTable from "@/components/table/DocumentsTable";
 import FilterBar from "@/components/ui/FilterBar";
+import FilterSidebar from "@/components/ui/FilterSidebar";
 
-
+interface DocumentType {
+  id: string;
+  clientName: string;
+  caseType: string;
+  status: string;
+  documentStatus: string;
+  createdDate: string;
+  files: string[];
+}
 
 export default function DocumentsPage() {
+  const [documents, setDocuments] = useState<DocumentType[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterValue, setFilterValue] = useState("all");
+  const [caseTypeFilter, setCaseTypeFilter] = useState("all");
+  const [dateFromFilter, setDateFromFilter] = useState("");
+  const [dateToFilter, setDateToFilter] = useState("");
+  const [showFiltersSidebar, setShowFiltersSidebar] = useState(false);
 
-  // Static document data for now
-  const [documents, setDocuments] = useState([
-    {
-      id: "DOC-001",
-      clientName: "John Smith",
-      caseType: "Personal Injury",
-      status: "New Intake",
-      documentStatus: "submitted",
-      createdDate: "2024-01-15 10:30 AM",
-      files: ["intake-form.pdf", "medical-records.pdf"]
-    },
-    {
-      id: "DOC-002",
-      clientName: "Sarah Johnson",
-      caseType: "Auto Accident",
-      status: "Hired",
-      documentStatus: "submitted",
-      createdDate: "2024-01-14 02:15 PM",
-      files: ["accident-report.pdf", "insurance-claim.pdf"]
-    },
-    {
-      id: "DOC-003",
-      clientName: "Michael Chen",
-      caseType: "Workers Comp",
-      status: "New Intake",
-      documentStatus: "pending",
-      createdDate: "2024-01-13 09:45 AM",
-      files: []
-    },
-  ]);
+  useEffect(() => {
+    async function fetchDocuments() {
+      try {
+        const res = await fetch("/api/documents");
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setDocuments(data);
+        }
+      } catch (err) {
+        console.error("Error fetching documents:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  // Filtered documents based on search and filter
-  const filteredDocuments = documents.filter((doc) => {
-    const matchesSearch =
-      doc.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doc.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doc.caseType.toLowerCase().includes(searchQuery.toLowerCase());
+    fetchDocuments();
+  }, []);
 
-    const matchesFilter = filterValue === "all" || doc.documentStatus === filterValue;
+  // Get unique case types for filter options
+  const uniqueCaseTypes = useMemo(() => {
+    const caseTypes = [...new Set(documents.map(doc => doc.caseType))].filter(Boolean);
+    return caseTypes.sort();
+  }, [documents]);
 
-    return matchesSearch && matchesFilter;
-  });
+  // Filtered documents based on search and filters
+  const filteredDocuments = useMemo(() => {
+    return documents.filter((doc) => {
+      const matchesSearch =
+        doc.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.caseType.toLowerCase().includes(searchQuery.toLowerCase());
 
-  // Calculate stats for cards
+      const matchesStatus = filterValue === "all" || doc.documentStatus === filterValue;
+      const matchesCaseType = caseTypeFilter === "all" || doc.caseType === caseTypeFilter;
+
+      // Date range filtering
+      let matchesDateRange = true;
+      if (dateFromFilter || dateToFilter) {
+        const docDate = new Date(doc.createdDate);
+        if (dateFromFilter) {
+          const fromDate = new Date(dateFromFilter);
+          matchesDateRange = matchesDateRange && docDate >= fromDate;
+        }
+        if (dateToFilter) {
+          const toDate = new Date(dateToFilter);
+          matchesDateRange = matchesDateRange && docDate <= toDate;
+        }
+      }
+
+      return matchesSearch && matchesStatus && matchesCaseType && matchesDateRange;
+    });
+  }, [documents, searchQuery, filterValue, caseTypeFilter, dateFromFilter, dateToFilter]);
+
+  // Reset filters function
+  const resetFilters = () => {
+    setCaseTypeFilter("all");
+    setDateFromFilter("");
+    setDateToFilter("");
+  };
+
   const submittedCount = documents.filter(d => d.documentStatus === "submitted").length;
   const pendingCount = documents.filter(d => d.documentStatus === "pending").length;
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Page Header */}
         <div>
           <h1 className="text-3xl font-bold text-foreground">Documents</h1>
           <p className="text-muted-foreground mt-1">Manage client documents and files</p>
@@ -90,7 +120,6 @@ export default function DocumentsPage() {
           </Card>
         </div>
 
-        {/* Search */}
         <Card>
           <CardContent>
             <FilterBar
@@ -105,12 +134,36 @@ export default function DocumentsPage() {
                 { value: "pending", label: "Pending" },
               ]}
               filterPlaceholder="Filter by status"
+              onMoreFilters={() => setShowFiltersSidebar(true)}
             />
           </CardContent>
         </Card>
 
-        {/* Table */}
-        <DocumentsTable documents={filteredDocuments} />
+        {loading ? (
+          <div className="text-center text-gray-500 py-10">Loading...</div>
+        ) : (
+          <DocumentsTable documents={filteredDocuments} />
+        )}
+
+        <FilterSidebar
+          isOpen={showFiltersSidebar}
+          onClose={() => setShowFiltersSidebar(false)}
+          caseTypeFilter={caseTypeFilter}
+          setCaseTypeFilter={setCaseTypeFilter}
+          caseTypeOptions={[
+            { value: "all", label: "All Case Types" },
+            ...uniqueCaseTypes.map((caseType) => ({ value: caseType || "", label: caseType || "" })),
+          ]}
+          dateFromFilter={dateFromFilter}
+          setDateFromFilter={setDateFromFilter}
+          dateToFilter={dateToFilter}
+          setDateToFilter={setDateToFilter}
+          referralSourceFilter=""
+          setReferralSourceFilter={() => {}}
+          referralSourceOptions={[]}
+          onResetFilters={resetFilters}
+          showReferralSource={false}
+        />
       </div>
     </main>
   );

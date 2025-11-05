@@ -1,10 +1,13 @@
-# TODO: Add Date Range Filter to Reports Page
+# TODO: Make Search Bar and Filters Functional in Documents Page
 
 ## Steps to Complete
-- [x] Update src/app/reports/page.tsx to add state for FilterSidebar (showFiltersSidebar, dateFromFilter, dateToFilter, etc.)
-- [x] Add onMoreFilters prop to FilterBar in reports page
-- [x] Import and add FilterSidebar component to reports page
-- [x] Implement resetFilters function
-- [x] Hide case type and referral source filters in reports page
-- [ ] Add filtering logic for summarizedReports based on date range (note: current data is static, may need to add date fields or make data dynamic)
-- [ ] Test the filter functionality
+
+- [x] Add state variables for additional filters (caseTypeFilter, dateFromFilter, dateToFilter) in documents/page.tsx
+- [x] Import and add FilterSidebar component to documents/page.tsx
+- [x] Add onMoreFilters prop to FilterBar to open the sidebar
+- [x] Compute unique case types from documents data for filter options
+- [x] Update filteredDocuments useMemo to include filtering by case type, date range, and status
+- [x] Add resetFilters function and integrate with FilterSidebar
+- [x] Ensure pagination resets on filter changes (if needed, but currently no pagination)
+- [x] Test the functionality by running the app and verifying search and filters work
+- [x] Fix DocumentsTable to update when filtered documents change

@@ -3,6 +3,50 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export async function GET(req: NextRequest) {
+  const serverSession = await getServerSession(authOptions);
+  if (!serverSession || !serverSession.user.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(req.url);
+  const referenceId = searchParams.get('referenceId');
+
+  if (!referenceId) {
+    return NextResponse.json({ error: "Reference ID required" }, { status: 400 });
+  }
+
+  try {
+    const lead = await prisma.lead.findUnique({
+      where: { referenceId },
+    });
+
+    if (!lead) {
+      return NextResponse.json({ error: "Invalid reference ID" }, { status: 404 });
+    }
+
+    const intake = await prisma.intakeInfo.findFirst({
+      where: {
+        referenceId: referenceId,
+        userId: serverSession.user.id,
+        isDraft: true
+      },
+      orderBy: {
+        updatedAt: 'desc'
+      }
+    });
+
+    if (!intake) {
+      return NextResponse.json({ error: "Draft not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ draft: intake });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Failed to fetch draft" }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   const serverSession = await getServerSession(authOptions);
   if (!serverSession || !serverSession.user.id) {
@@ -26,7 +70,7 @@ export async function POST(req: NextRequest) {
     }
 
     const existingIntake = await prisma.intakeInfo.findFirst({
-      where: { referenceId },
+      where: { referenceId: referenceId },
     });
 
     // Define allowed fields based on Prisma schema
@@ -78,6 +122,7 @@ export async function POST(req: NextRequest) {
         where: { id: existingIntake.id },
         data: {
           ...transformedFields,
+          isDraft: true,
           user: { connect: { id: serverSession.user.id } },
         },
       });
@@ -85,6 +130,7 @@ export async function POST(req: NextRequest) {
       await prisma.intakeInfo.create({
         data: {
           ...transformedFields,
+          isDraft: true,
           user: { connect: { id: serverSession.user.id } },
         },
       });

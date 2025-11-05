@@ -1,8 +1,14 @@
+import { useFormContext } from "react-hook-form";
 import InputField from "../inputs/InputField";
 import RadioGroup from "../inputs/RadioGroup";
 import TextareaField from "../inputs/TextareaField";
 
 export default function ClientInsuranceStep() {
+  const { watch } = useFormContext();
+
+  // Watch the values of Medicare and Medicaid radio buttons
+  const medicare = watch("medicare");
+  const medicaid = watch("medicaid");
   return (
     <div className="space-y-6 w-full">
       {/* Client Automobile Insurance */}
@@ -20,7 +26,7 @@ export default function ClientInsuranceStep() {
         {/* <InputField name="autoAdjuster" label="Adjuster" />
         <InputField name="autoInsured" label="Insured" /> */}
       </div>
-       <TextareaField name="autoAdditionalinfo" label="Additional Info" />
+       {/* <TextareaField name="autoAdditionalinfo" label="Additional Info" /> */}
 
       {/* Client Health Insurance */}
       <h2 className="text-xl font-semibold pb-2 pt-6 text-gray-700 dark:text-gray-200">
@@ -47,7 +53,14 @@ export default function ClientInsuranceStep() {
         <div>
           <RadioGroup name="medicare" label="Medicare" options={["Yes", "No"]} />
         </div>
-        <InputField name="medicareNumber" label="Medicare #" />
+        {medicare === "Yes" && (
+        <InputField
+          name="medicareNumber"
+          label="Medicare #"
+          placeholder="Enter Medicare number"
+        />
+      )}
+
       </div>
 
       {/* Medicaid */}
@@ -55,9 +68,11 @@ export default function ClientInsuranceStep() {
         <div>
           <RadioGroup name="medicaid" label="Medicaid" options={["Yes", "No"]} />
         </div>
+        {medicaid === "Yes" && (
         <InputField name="medicaidNumber" label="Medicaid #" />
+        )}
       </div>
-      <TextareaField name="healthAdditionalinfo" label="Additional Info" />
+      {/* <TextareaField name="healthAdditionalinfo" label="Additional Info" /> */}
     </div>
   );
 }

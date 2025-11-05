@@ -5,6 +5,7 @@ interface InputProps {
   label: string;
   type?: string;
   placeholder?: string;
+   disabled?: boolean; // ✅ add this line
 }
 
 export default function InputField({ name, label, type = "text", placeholder }: InputProps) {

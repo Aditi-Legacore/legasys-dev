@@ -92,12 +92,23 @@ export async function PUT(
       'hearAboutUs', 'hearAboutUsDetail', 'isDraft'
     ];
 
+    // Define DateTime fields that need conversion
+    const dateFields = [
+      'dateOfBirth', 'accidentDate', 'priorTreatmentFrom', 'priorTreatmentTo',
+      'currentTreatmentFrom', 'currentTreatmentTo', 'currentTreatmentFrom2',
+      'currentTreatmentFrom3', 'currentTreatmentTo2', 'currentTreatmentTo3',
+      'priorTreatmentFrom2', 'priorTreatmentFrom3', 'priorTreatmentTo2', 'priorTreatmentTo3'
+    ];
+
     // Filter data to only include allowed fields
     const updateData: any = {};
     for (const field of allowedFields) {
       if (data[field] !== undefined) {
         if (field === 'isDraft') {
           updateData[field] = false;
+        } else if (dateFields.includes(field) && typeof data[field] === 'string') {
+          // Convert ISO string to DateTime
+          updateData[field] = new Date(data[field]).toISOString();
         } else {
           updateData[field] = data[field];
         }
