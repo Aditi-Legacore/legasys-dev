@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # TODO: Enhance Reports Page with Dynamic Data and Filtering
 
 ## Steps to Complete
@@ -11,3 +12,8 @@
 - [ ] Update FilterSidebar props for caseType and referralSource based on activeTab
 - [ ] Test the functionality by running the app and verifying dynamic data, filtering, and search work across all tabs
 - [ ] Ensure ReportTable handles new data structures correctly (minor updates if needed)
+=======
+- [x] Modify buildIntakeData function to include LeadId if present in data
+- [x] In POST handler, before creating intake, query Lead by referenceId and set data.LeadId
+- [x] Ensure intake creation/update uses the LeadId for association
+>>>>>>> 6cfa0ef0921c0a9e72a8fa9f620e189bc9a549b7
