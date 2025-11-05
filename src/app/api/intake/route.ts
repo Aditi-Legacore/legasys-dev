@@ -217,18 +217,7 @@ export async function POST(request: NextRequest) {
         });
       }
 
-       const session = await prisma.intakeSession.findUnique({
-        where: { referenceId: data.referenceId },
-      });
 
-      console.log("session", session);
-
-      if (session) {
-        await prisma.intakeSession.update({
-          where: { id: session.id },
-          data: { status: "Submitted" },
-        });
-      }
     }
 
     console.log("data", data);
