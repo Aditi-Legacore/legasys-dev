@@ -1,20 +1,10 @@
-# Consolidation of IntakeSession into Lead Model
+# TODO: Add Date Range Filter to Reports Page
 
-## Overview
-Consolidate IntakeSession functionality into Lead model, remove IntakeSession entirely, and move resend email logic to reuse existing sendmail functionality.
-
-## Completed Tasks
-- [x] Update Prisma schema: Add referenceId and dateOfBirth to Lead, remove IntakeSession
-- [x] Generate and run migration
-
-## Completed Tasks
-- [x] Update QuickIntakeForm to set referenceId and dateOfBirth on Lead
-- [x] Modify /api/session to create/update Lead instead of IntakeSession
-- [x] Update /api/session/validate to query Lead
-- [x] Update /api/intake/draft to work with Lead
-- [x] Remove IntakeSession deletion from /api/intake
-- [x] Update LeadsTable to use existing sendIntakeReferenceEmail and lead.referenceId
-- [x] Update types and any other references
-
-## Pending Tasks
-- [ ] Test the changes
+## Steps to Complete
+- [x] Update src/app/reports/page.tsx to add state for FilterSidebar (showFiltersSidebar, dateFromFilter, dateToFilter, etc.)
+- [x] Add onMoreFilters prop to FilterBar in reports page
+- [x] Import and add FilterSidebar component to reports page
+- [x] Implement resetFilters function
+- [x] Hide case type and referral source filters in reports page
+- [ ] Add filtering logic for summarizedReports based on date range (note: current data is static, may need to add date fields or make data dynamic)
+- [ ] Test the filter functionality

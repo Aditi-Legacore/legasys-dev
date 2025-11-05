@@ -1,14 +1,17 @@
 'use client';
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Search, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import DocumentsTable from "@/components/table/DocumentsTable";
+import FilterBar from "@/components/ui/FilterBar";
 
 
 
 export default function DocumentsPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterValue, setFilterValue] = useState("all");
+
   // Static document data for now
   const [documents, setDocuments] = useState([
     {
@@ -39,6 +42,18 @@ export default function DocumentsPage() {
       files: []
     },
   ]);
+
+  // Filtered documents based on search and filter
+  const filteredDocuments = documents.filter((doc) => {
+    const matchesSearch =
+      doc.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      doc.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      doc.caseType.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesFilter = filterValue === "all" || doc.documentStatus === filterValue;
+
+    return matchesSearch && matchesFilter;
+  });
 
   // Calculate stats for cards
   const submittedCount = documents.filter(d => d.documentStatus === "submitted").length;
@@ -77,19 +92,25 @@ export default function DocumentsPage() {
 
         {/* Search */}
         <Card>
-          <CardContent className="flex gap-4 flex-col md:flex-row">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search by name or document ID..."
-                className="pl-10"
-              />
-            </div>
+          <CardContent>
+            <FilterBar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              searchPlaceholder="Search by name or document ID..."
+              filterValue={filterValue}
+              setFilterValue={setFilterValue}
+              filterOptions={[
+                { value: "all", label: "All Documents" },
+                { value: "submitted", label: "Submitted" },
+                { value: "pending", label: "Pending" },
+              ]}
+              filterPlaceholder="Filter by status"
+            />
           </CardContent>
         </Card>
 
         {/* Table */}
-        <DocumentsTable documents={documents} />
+        <DocumentsTable documents={filteredDocuments} />
       </div>
     </main>
   );
