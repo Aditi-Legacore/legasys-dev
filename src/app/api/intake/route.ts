@@ -160,6 +160,7 @@ const buildIntakeData = (data: any) => ({
   hearAboutUs: toNullable(data.hearAboutUs),
   hearAboutUsDetail: toNullable(data.hearAboutUsDetail),
   isDraft: false, // Set to false since this is a final submission
+  ...(data.LeadId && { Lead: { connect: { id: data.LeadId } } }),
 });
 
 export async function POST(request: NextRequest) {
@@ -172,6 +173,17 @@ export async function POST(request: NextRequest) {
       const userExists = await prisma.user.findUnique({ where: { id: data.userId }, select: { id: true } });
       if (!userExists) {
         data.userId = null; // Set to null if user doesn't exist
+      }
+    }
+
+    // Set LeadId if referenceId is provided
+    if (data.referenceId) {
+      const lead = await prisma.lead.findUnique({
+        where: { referenceId: data.referenceId },
+        select: { id: true },
+      });
+      if (lead) {
+        data.LeadId = lead.id;
       }
     }
 
