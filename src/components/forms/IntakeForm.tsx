@@ -19,6 +19,7 @@ import { useSearchParams } from "next/navigation";
 import type { DefaultUser } from "next-auth";
 import { toast } from "sonner";
 import IntakeDocuments from "./intakeDocuments/intakeDocuments";
+import router from "next/router";
 
 declare module "next-auth" {
   interface Session {
@@ -253,6 +254,8 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
     toast.success(intakeId ? "✅ Intake updated successfully!" : "✅ Intake created successfully!");
     setIsSubmitted(true);
     setSubmittedIntakeId(savedData.id);
+    // router.push("/intake-list");
+    router.push("/forms");
   } catch (error) {
     console.error("❌ Error saving intake:", error);
     toast.error("⚠️ There was an error saving the form.");

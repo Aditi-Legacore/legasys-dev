@@ -30,6 +30,39 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
     }
   };
 
+  const handleNext = async () => {
+    try {
+      const templatesResponse = await fetch('/api/form-templates');
+      if (!templatesResponse.ok) {
+        throw new Error('Failed to fetch templates');
+      }
+      const templates = await templatesResponse.json();
+      const matchingTemplate = templates.find((template: any) => template.title === caseType);
+      if (matchingTemplate) {
+        const submissionResponse = await fetch('/api/forms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            templateId: matchingTemplate.id,
+            data: {},
+          }),
+        });
+        if (submissionResponse.ok) {
+          const submission = await submissionResponse.json();
+          router.push(`/forms/${submission.id}/fill`);
+        } else {
+          setError('Failed to create form submission');
+        }
+      } else {
+        setError('No form template found for this case type');
+      }
+    } catch (err) {
+      setError('Something went wrong while creating the form');
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
   <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-2xl p-6 shadow-2xl border border-gray-200 dark:border-gray-700">

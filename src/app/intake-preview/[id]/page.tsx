@@ -57,7 +57,8 @@ export default function IntakePreviewPage() {
       const res = await fetch(`/api/intake/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete intake');
       toast.success('Intake deleted successfully.');
-      router.push('/intake-list');
+      // router.push('/intake-list');
+      router.push('/forms');
     } catch (error) {
       console.error(error);
       toast.error('Failed to delete intake.');
