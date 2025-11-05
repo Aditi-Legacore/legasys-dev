@@ -1,11 +1,38 @@
 'use client';
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import TabsNav from "@/components/TabsNav";
 import ReportTable from "@/components/table/ReportTable";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import FilterBar from "@/components/ui/FilterBar";
 import FilterSidebar from "@/components/ui/FilterSidebar";
+import { Loader2 } from "lucide-react";
+
+interface IntakeData {
+  id: string;
+  clientName: string;
+  isDraft: boolean;
+  createdAt: string;
+  Lead?: { caseType: string };
+}
+
+interface LeadData {
+  id: string;
+  name: string;
+  status: string;
+  caseType: string;
+  createdAt: string;
+  referralSource: string;
+}
+
+interface DocumentData {
+  id: string;
+  clientName: string;
+  caseType: string;
+  status: string;
+  documentStatus: string;
+  createdDate: string;
+}
 
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState<"intakes" | "leads" | "documents">("intakes");
@@ -14,41 +41,201 @@ export default function ReportsPage() {
   const [showFiltersSidebar, setShowFiltersSidebar] = useState(false);
   const [dateFromFilter, setDateFromFilter] = useState("");
   const [dateToFilter, setDateToFilter] = useState("");
+  const [caseTypeFilter, setCaseTypeFilter] = useState("");
+  const [referralSourceFilter, setReferralSourceFilter] = useState("");
 
-  const handleExport = () => {
-    alert(`Exporting ${activeTab} data...`);
-  };
+  // Data states
+  const [intakesData, setIntakesData] = useState<IntakeData[]>([]);
+  const [leadsData, setLeadsData] = useState<LeadData[]>([]);
+  const [documentsData, setDocumentsData] = useState<DocumentData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Example summarized data for reports
-  const summarizedReports = {
-    intakes: [
-      { name: "Total Intakes", value: 156, status: "Completed" },
-      { name: "Pending Intakes", value: 23, status: "Pending" },
-    ],
-    leads: [
-      { name: "New Leads", value: 58, status: "New" },
-      { name: "In Progress Leads", value: 33, status: "In Progress" },
-    ],
-    documents: [
-      { name: "Uploaded Docs", value: 342, status: "Reviewed" },
-      { name: "Pending Approval", value: 27, status: "Pending" },
-    ],
-  };
+  // Fetch data based on active tab
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        let endpoint = "";
+        if (activeTab === "intakes") endpoint = "/api/intake";
+        else if (activeTab === "leads") endpoint = "/api/leads";
+        else if (activeTab === "documents") endpoint = "/api/documents";
 
+        const response = await fetch(endpoint);
+        if (!response.ok) throw new Error(`Failed to fetch ${activeTab} data`);
+        const data = await response.json();
+
+        if (activeTab === "intakes") setIntakesData(data);
+        else if (activeTab === "leads") setLeadsData(data);
+        else if (activeTab === "documents") setDocumentsData(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [activeTab]);
+
+  // Aggregate data for reports
+  const aggregatedData = useMemo(() => {
+    if (activeTab === "intakes") {
+      const total = intakesData.length;
+      const completed = intakesData.filter(i => !i.isDraft).length;
+      const drafts = intakesData.filter(i => i.isDraft).length;
+      const caseTypes = intakesData.reduce((acc, i) => {
+        const type = i.Lead?.caseType || "N/A";
+        acc[type] = (acc[type] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      return [
+        { name: "Total Intakes", count: total, status: "All" },
+        { name: "Completed Intakes", count: completed, status: "Completed" },
+        { name: "Draft Intakes", count: drafts, status: "Draft" },
+        ...Object.entries(caseTypes).map(([type, count]) => ({
+          name: `${type} Cases`,
+          count: count,
+          status: "By Case Type"
+        }))
+      ];
+    } else if (activeTab === "leads") {
+      const total = leadsData.length;
+      const newLeads = leadsData.filter(l => l.status === "new").length;
+      const completed = leadsData.filter(l => l.status === "completed").length;
+      const inProgress = leadsData.filter(l => l.status === "in_progress").length;
+      const caseTypes = leadsData.reduce((acc, l) => {
+        acc[l.caseType] = (acc[l.caseType] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      return [
+        { name: "Total Leads", count: total, status: "All" },
+        { name: "New Leads", count: newLeads, status: "New" },
+        { name: "Completed Leads", count: completed, status: "Completed" },
+        { name: "In Progress Leads", count: inProgress, status: "In Progress" },
+        ...Object.entries(caseTypes).map(([type, count]) => ({
+          name: `${type} Cases`,
+          count: count,
+          status: "By Case Type"
+        }))
+      ];
+    } else if (activeTab === "documents") {
+      const total = documentsData.length;
+      const submitted = documentsData.filter(d => d.documentStatus === "submitted").length;
+      const pending = documentsData.filter(d => d.documentStatus === "pending").length;
+      const caseTypes = documentsData.reduce((acc, d) => {
+        acc[d.caseType] = (acc[d.caseType] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      return [
+        { name: "Total Documents", count: total, status: "All" },
+        { name: "Submitted Documents", count: submitted, status: "Submitted" },
+        { name: "Pending Documents", count: pending, status: "Pending" },
+        ...Object.entries(caseTypes).map(([type, count]) => ({
+          name: `${type} Cases`,
+          count: count,
+          status: "By Case Type"
+        }))
+      ];
+    }
+    return [];
+  }, [activeTab, intakesData, leadsData, documentsData]);
+
+  // Filtered data
+  const filteredData = useMemo(() => {
+    let data = aggregatedData;
+
+    // Search filter
+    if (searchQuery) {
+      data = data.filter(item =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Status filter
+    if (filterValue !== "all") {
+      if (filterValue === "today") {
+        // For now, just show all - could implement date filtering later
+      } else if (filterValue === "week") {
+        // Implement week filter
+      } else if (filterValue === "month") {
+        // Implement month filter
+      } else {
+        data = data.filter(item => item.status.toLowerCase() === filterValue.toLowerCase());
+      }
+    }
+
+    // Date range filter
+    if (dateFromFilter || dateToFilter) {
+      // Since aggregated data doesn't have dates, this might not apply directly
+      // Could be used for raw data filtering if we switch to detailed view
+    }
+
+    // Case type filter (for aggregated data, filter by name containing case type)
+    if (caseTypeFilter && caseTypeFilter !== "all") {
+      data = data.filter(item =>
+        item.name.toLowerCase().includes(caseTypeFilter.toLowerCase())
+      );
+    }
+
+    return data;
+  }, [aggregatedData, searchQuery, filterValue, dateFromFilter, dateToFilter, caseTypeFilter]);
+
+  // Dynamic columns based on tab
   const reportColumns = {
     intakes: ["Name", "Count", "Status"],
     leads: ["Name", "Count", "Status"],
     documents: ["Name", "Count", "Status"],
   };
 
+  // Filter options for FilterBar
+  const filterOptions = [
+    { value: "all", label: "All" },
+    { value: "completed", label: "Completed" },
+    { value: "new", label: "New" },
+    { value: "pending", label: "Pending" },
+    { value: "draft", label: "Draft" },
+  ];
+
+  // Case type options for sidebar
+  const caseTypeOptions = useMemo(() => {
+    const types = new Set<string>();
+    if (activeTab === "intakes") {
+      intakesData.forEach(i => types.add(i.Lead?.caseType || "N/A"));
+    } else if (activeTab === "leads") {
+      leadsData.forEach(l => types.add(l.caseType));
+    } else if (activeTab === "documents") {
+      documentsData.forEach(d => types.add(d.caseType));
+    }
+    return [{ value: "all", label: "All Case Types" }, ...Array.from(types).map(type => ({ value: type, label: type }))];
+  }, [activeTab, intakesData, leadsData, documentsData]);
+
+  // Referral source options (only for leads)
+  const referralSourceOptions = useMemo(() => {
+    if (activeTab !== "leads") return [];
+    const sources = new Set<string>();
+    leadsData.forEach(l => sources.add(l.referralSource));
+    return [{ value: "all", label: "All Sources" }, ...Array.from(sources).map(source => ({ value: source, label: source }))];
+  }, [activeTab, leadsData]);
+
+  const handleExport = () => {
+    alert(`Exporting ${activeTab} data...`);
+  };
+
   // Reset filters function
   const resetFilters = () => {
     setDateFromFilter("");
     setDateToFilter("");
+    setCaseTypeFilter("");
+    setReferralSourceFilter("");
   };
 
   const columns = reportColumns[activeTab];
-  const data = summarizedReports[activeTab];
+  const data = filteredData;
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
@@ -79,12 +266,7 @@ export default function ReportsPage() {
                   searchPlaceholder="Search by name or record..."
                   filterValue={filterValue}
                   setFilterValue={setFilterValue}
-                  filterOptions={[
-                    { value: "all", label: "All" },
-                    { value: "today", label: "Today" },
-                    { value: "week", label: "This Week" },
-                    { value: "month", label: "This Month" },
-                  ]}
+                  filterOptions={filterOptions}
                   filterPlaceholder="Filter by type"
                   onMoreFilters={() => setShowFiltersSidebar(true)}
                   onExport={handleExport}
@@ -93,27 +275,48 @@ export default function ReportsPage() {
               </div>
             </div>
 
+            {/* Loading State */}
+            {loading && (
+              <div className="flex justify-center items-center py-8">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                <span className="ml-2 text-muted-foreground">Loading {activeTab} data...</span>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+              <div className="text-center py-8">
+                <p className="text-red-500">Error: {error}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+
             {/* Dynamic Report Table */}
-            <ReportTable columns={columns} data={data} />
+            {!loading && !error && <ReportTable columns={columns} data={data} />}
           </CardContent>
         </Card>
 
         <FilterSidebar
           isOpen={showFiltersSidebar}
           onClose={() => setShowFiltersSidebar(false)}
-          caseTypeFilter=""
-          setCaseTypeFilter={() => {}}
-          caseTypeOptions={[]}
+          caseTypeFilter={caseTypeFilter}
+          setCaseTypeFilter={setCaseTypeFilter}
+          caseTypeOptions={caseTypeOptions}
           dateFromFilter={dateFromFilter}
           setDateFromFilter={setDateFromFilter}
           dateToFilter={dateToFilter}
           setDateToFilter={setDateToFilter}
-          referralSourceFilter=""
-          setReferralSourceFilter={() => {}}
-          referralSourceOptions={[]}
+          referralSourceFilter={referralSourceFilter}
+          setReferralSourceFilter={setReferralSourceFilter}
+          referralSourceOptions={referralSourceOptions}
           onResetFilters={resetFilters}
-          showCaseType={false}
-          showReferralSource={false}
+          showCaseType={true}
+          showReferralSource={activeTab === "leads"}
         />
 
       </div>

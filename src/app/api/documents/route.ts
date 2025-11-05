@@ -41,6 +41,7 @@ export async function GET() {
             caseType: true, // ✅ Fetch caseType from Lead
           },
         },
+        user: true,
       },
       orderBy: { createdAt: "desc" },
     });

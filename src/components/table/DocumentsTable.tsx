@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Eye, Edit, Trash2,FileText  } from "lucide-react";
+import { Eye, Edit, Trash2,FileText,Upload   } from "lucide-react";
 import Pagination from "@/components/ui/pagination";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -26,6 +26,12 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
   const [currentPage, setCurrentPage] = useState(1);
   const [tableDocs, setTableDocs] = useState<Document[]>(documents);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Update tableDocs when documents prop changes
+  React.useEffect(() => {
+    setTableDocs(documents);
+    setCurrentPage(1); // Reset to first page when documents change
+  }, [documents]);
 
   const router = useRouter();
 
@@ -146,21 +152,14 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
 
                   {/* ✅ Action Buttons */}
                   <td className="px-4 py-4 text-center flex justify-center gap-1 sm:gap-2">
-                    <button
-                      onClick={() => onView?.(doc)}
-                      className="p-2 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg text-blue-600 dark:text-blue-400 transition"
-                      title="View"
-                    >
-                      <Eye size={16} />
-                    </button>
-
-                    <button
-                      onClick={() => onEdit?.(doc)}
-                      className="p-2 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg text-green-600 dark:text-green-400 transition"
-                      title="Edit"
-                    >
-                      <Edit size={16} />
-                    </button>
+                   
+                     <button
+                        onClick={() => router.push(`/intake-form?id=${doc.id}`)}
+                        className="p-2 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg text-blue-600 dark:text-blue-400 transition"
+                        title="Upload Documents"
+                      >
+                        <Upload size={16} />
+                      </button>
 
                     <button
                       onClick={() => handleDelete(doc)}

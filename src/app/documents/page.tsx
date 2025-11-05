@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect, useState } from "react";
+// import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, FileText } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+// import { FileText } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import DocumentsTable from "@/components/table/DocumentsTable";
 import FilterBar from "@/components/ui/FilterBar";
+import FilterSidebar from "@/components/ui/FilterSidebar";
 
 interface DocumentType {
   id: string;
@@ -22,6 +25,10 @@ export default function DocumentsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterValue, setFilterValue] = useState("all");
+  const [caseTypeFilter, setCaseTypeFilter] = useState("all");
+  const [dateFromFilter, setDateFromFilter] = useState("");
+  const [dateToFilter, setDateToFilter] = useState("");
+  const [showFiltersSidebar, setShowFiltersSidebar] = useState(false);
 
   useEffect(() => {
     async function fetchDocuments() {
@@ -40,6 +47,48 @@ export default function DocumentsPage() {
 
     fetchDocuments();
   }, []);
+
+  // Get unique case types for filter options
+  const uniqueCaseTypes = useMemo(() => {
+    const caseTypes = [...new Set(documents.map(doc => doc.caseType))].filter(Boolean);
+    return caseTypes.sort();
+  }, [documents]);
+
+  // Filtered documents based on search and filters
+  const filteredDocuments = useMemo(() => {
+    return documents.filter((doc) => {
+      const matchesSearch =
+        doc.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.caseType.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesStatus = filterValue === "all" || doc.documentStatus === filterValue;
+      const matchesCaseType = caseTypeFilter === "all" || doc.caseType === caseTypeFilter;
+
+      // Date range filtering
+      let matchesDateRange = true;
+      if (dateFromFilter || dateToFilter) {
+        const docDate = new Date(doc.createdDate);
+        if (dateFromFilter) {
+          const fromDate = new Date(dateFromFilter);
+          matchesDateRange = matchesDateRange && docDate >= fromDate;
+        }
+        if (dateToFilter) {
+          const toDate = new Date(dateToFilter);
+          matchesDateRange = matchesDateRange && docDate <= toDate;
+        }
+      }
+
+      return matchesSearch && matchesStatus && matchesCaseType && matchesDateRange;
+    });
+  }, [documents, searchQuery, filterValue, caseTypeFilter, dateFromFilter, dateToFilter]);
+
+  // Reset filters function
+  const resetFilters = () => {
+    setCaseTypeFilter("all");
+    setDateFromFilter("");
+    setDateToFilter("");
+  };
 
   const submittedCount = documents.filter(d => d.documentStatus === "submitted").length;
   const pendingCount = documents.filter(d => d.documentStatus === "pending").length;
@@ -88,6 +137,7 @@ export default function DocumentsPage() {
                 { value: "pending", label: "Pending" },
               ]}
               filterPlaceholder="Filter by status"
+              onMoreFilters={() => setShowFiltersSidebar(true)}
             />
           </CardContent>
         </Card>
@@ -95,8 +145,28 @@ export default function DocumentsPage() {
         {loading ? (
           <div className="text-center text-gray-500 py-10">Loading...</div>
         ) : (
-          <DocumentsTable documents={documents} />
+          <DocumentsTable documents={filteredDocuments} />
         )}
+
+        <FilterSidebar
+          isOpen={showFiltersSidebar}
+          onClose={() => setShowFiltersSidebar(false)}
+          caseTypeFilter={caseTypeFilter}
+          setCaseTypeFilter={setCaseTypeFilter}
+          caseTypeOptions={[
+            { value: "all", label: "All Case Types" },
+            ...uniqueCaseTypes.map((caseType) => ({ value: caseType || "", label: caseType || "" })),
+          ]}
+          dateFromFilter={dateFromFilter}
+          setDateFromFilter={setDateFromFilter}
+          dateToFilter={dateToFilter}
+          setDateToFilter={setDateToFilter}
+          referralSourceFilter=""
+          setReferralSourceFilter={() => {}}
+          referralSourceOptions={[]}
+          onResetFilters={resetFilters}
+          showReferralSource={false}
+        />
       </div>
     </main>
   );
