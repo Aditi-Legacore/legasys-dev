@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Search, FileText } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import DocumentsTable from "@/components/table/DocumentsTable";
+import FilterBar from "@/components/ui/FilterBar";
 
 interface DocumentType {
   id: string;
@@ -19,6 +20,8 @@ interface DocumentType {
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState<DocumentType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterValue, setFilterValue] = useState("all");
 
   useEffect(() => {
     async function fetchDocuments() {
@@ -72,14 +75,20 @@ export default function DocumentsPage() {
         </div>
 
         <Card>
-          <CardContent className="flex gap-4 flex-col md:flex-row">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search by name or document ID..."
-                className="pl-10"
-              />
-            </div>
+          <CardContent>
+            <FilterBar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              searchPlaceholder="Search by name or document ID..."
+              filterValue={filterValue}
+              setFilterValue={setFilterValue}
+              filterOptions={[
+                { value: "all", label: "All Documents" },
+                { value: "submitted", label: "Submitted" },
+                { value: "pending", label: "Pending" },
+              ]}
+              filterPlaceholder="Filter by status"
+            />
           </CardContent>
         </Card>
 

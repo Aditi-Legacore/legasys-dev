@@ -1,22 +1,30 @@
 'use client';
 
 import { useState, useEffect, useMemo } from "react";
-import { Input } from "@/components/ui/input";
-import { Search, Filter, Plus } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import LeadsTable from "@/components/table/LeadsTable";
 import { Badge } from "@/components/ui/badge";
 import { Lead } from "@/types/leads";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import QuickIntakeForm from "@/components/forms/QuickIntakeForm";
+import Pagination from "@/components/ui/pagination";
+import FilterBar from "@/components/ui/FilterBar";
+import FilterSidebar from "@/components/ui/FilterSidebar";
+import { Plus } from "lucide-react";
 
 export default function LeadsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [caseTypeFilter, setCaseTypeFilter] = useState("all");
+  const [dateFromFilter, setDateFromFilter] = useState("");
+  const [dateToFilter, setDateToFilter] = useState("");
+  const [referralSourceFilter, setReferralSourceFilter] = useState("all");
   const [showQuickIntake, setShowQuickIntake] = useState(false);
+  const [showFiltersSidebar, setShowFiltersSidebar] = useState(false);
   const [leadsData, setLeadsData] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const fetchLeads = async () => {
     try {
@@ -38,7 +46,18 @@ export default function LeadsPage() {
     fetchLeads();
   }, []);
 
-  // Filtered leads based on search and status
+  // Get unique case types and referral sources for filter options
+  const uniqueCaseTypes = useMemo(() => {
+    const caseTypes = [...new Set(leadsData.map(lead => lead.caseType))].filter(Boolean);
+    return caseTypes.sort();
+  }, [leadsData]);
+
+  const uniqueReferralSources = useMemo(() => {
+    const sources = [...new Set(leadsData.map(lead => lead.referralSource))].filter(Boolean);
+    return sources.sort();
+  }, [leadsData]);
+
+  // Filtered leads based on all filters
   const filteredLeads = useMemo(() => {
     return leadsData.filter((lead) => {
       const matchesSearch =
@@ -48,10 +67,46 @@ export default function LeadsPage() {
         lead.caseType.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
+      const matchesCaseType = caseTypeFilter === "all" || lead.caseType === caseTypeFilter;
+      const matchesReferralSource = referralSourceFilter === "all" || lead.referralSource === referralSourceFilter;
 
-      return matchesSearch && matchesStatus;
+      // Date range filtering
+      let matchesDateRange = true;
+      if (dateFromFilter || dateToFilter) {
+        const leadDate = new Date(lead.dueDate);
+        if (dateFromFilter) {
+          const fromDate = new Date(dateFromFilter);
+          matchesDateRange = matchesDateRange && leadDate >= fromDate;
+        }
+        if (dateToFilter) {
+          const toDate = new Date(dateToFilter);
+          matchesDateRange = matchesDateRange && leadDate <= toDate;
+        }
+      }
+
+      return matchesSearch && matchesStatus && matchesCaseType && matchesReferralSource && matchesDateRange;
     });
-  }, [leadsData, searchQuery, statusFilter]);
+  }, [leadsData, searchQuery, statusFilter, caseTypeFilter, dateFromFilter, dateToFilter, referralSourceFilter]);
+
+  // Paginated leads
+  const paginatedLeads = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredLeads.slice(startIndex, endIndex);
+  }, [filteredLeads, currentPage, itemsPerPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, caseTypeFilter, dateFromFilter, dateToFilter, referralSourceFilter]);
+
+  // Reset filters function
+  const resetFilters = () => {
+    setCaseTypeFilter("all");
+    setDateFromFilter("");
+    setDateToFilter("");
+    setReferralSourceFilter("all");
+  };
 
   // Status counts for cards
   const completedCount = leadsData.filter((l: Lead) => l.status === "completed").length;
@@ -101,46 +156,46 @@ export default function LeadsPage() {
 
         {/* Filters/Search */}
         <Card>
-          <CardContent className="flex gap-4 flex-col md:flex-row">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search by name, contact, or case type..."
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <CardContent className="flex gap-2 md:gap-4 flex-wrap">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full md:w-[180px]">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="new">New</SelectItem>
-                  <SelectItem value="form_sent">Form Sent</SelectItem>
-                  <SelectItem value="in_progress">In Progress</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline" className="w-full md:w-auto bg-blue-400">
-                <Filter className="w-4 h-4 mr-2" />
-                More Filters
-              </Button>
+          <CardContent>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div className="flex-1">
+                <FilterBar
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  searchPlaceholder="Search by name, contact, or case type..."
+                  filterValue={statusFilter}
+                  setFilterValue={setStatusFilter}
+                  filterOptions={[
+                    { value: "all", label: "All Status" },
+                    { value: "new", label: "New" },
+                    { value: "in_progress", label: "In Progress" },
+                    { value: "completed", label: "Completed" },
+                  ]}
+                  filterPlaceholder="Filter by status"
+                  onMoreFilters={() => setShowFiltersSidebar(true)}
+                />
+              </div>
               <Button
-                className="bg-green-400 hover:bg-success/90 text-success-foreground w-full md:w-auto"
+                className="bg-green-400 hover:bg-success/90 text-success-foreground"
                 onClick={() => setShowQuickIntake(true)}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Quick Intake
               </Button>
-            </CardContent>
+            </div>
           </CardContent>
         </Card>
 
         {/* Leads Table */}
-        <LeadsTable leads={filteredLeads} onLeadUpdate={fetchLeads} />
+        <LeadsTable leads={paginatedLeads} onLeadUpdate={fetchLeads} />
+
+        {/* Pagination */}
+        <Pagination
+          totalItems={filteredLeads.length}
+          itemsPerPage={itemsPerPage}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+        />
 
         {/* Quick Intake Modal */}
         {showQuickIntake && (
@@ -158,6 +213,28 @@ export default function LeadsPage() {
             </div>
           </div>
         )}
+
+        <FilterSidebar
+          isOpen={showFiltersSidebar}
+          onClose={() => setShowFiltersSidebar(false)}
+          caseTypeFilter={caseTypeFilter}
+          setCaseTypeFilter={setCaseTypeFilter}
+          caseTypeOptions={[
+            { value: "all", label: "All Case Types" },
+            ...uniqueCaseTypes.map((caseType) => ({ value: caseType || "", label: caseType || "" })),
+          ]}
+          dateFromFilter={dateFromFilter}
+          setDateFromFilter={setDateFromFilter}
+          dateToFilter={dateToFilter}
+          setDateToFilter={setDateToFilter}
+          referralSourceFilter={referralSourceFilter}
+          setReferralSourceFilter={setReferralSourceFilter}
+          referralSourceOptions={[
+            { value: "all", label: "All Sources" },
+            ...uniqueReferralSources.map((source) => ({ value: source || "", label: source || "" })),
+          ]}
+          onResetFilters={resetFilters}
+        />
 
       </div>
     </main>
