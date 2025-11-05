@@ -10,7 +10,7 @@ export default function ClientInsuranceStep() {
   const medicare = watch("medicare");
   const medicaid = watch("medicaid");
   return (
-    <div className="space-y-6 w-full">
+    <div className="space-y-3 w-full">
       {/* Client Automobile Insurance */}
       <h2 className="text-xl font-semibold pb-2 text-gray-700 dark:text-gray-200">
         Client Automobile Insurance

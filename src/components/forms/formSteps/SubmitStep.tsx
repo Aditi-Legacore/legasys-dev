@@ -49,7 +49,7 @@ export default function SubmitStep({ isSubmitting = false }: SubmitStepProps) {
   };
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="space-y-3 w-full">
       {/* Radio Section */}
       <div>
         <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">

@@ -3,7 +3,7 @@ import TextareaField from "../inputs/TextareaField";
 
 export default function InjuriesStep() {
   return (
-    <div className="space-y-6 w-full">
+    <div className="space-y-3 w-full">
       <TextareaField
         name="bodyPartsAffected"
         label="Describe all parts of the body affected by this accident"

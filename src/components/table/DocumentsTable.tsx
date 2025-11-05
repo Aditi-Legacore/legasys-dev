@@ -1,10 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { Eye, Edit, Trash2,FileText,Upload   } from "lucide-react";
+import { Eye, Edit, Trash2,FileText,Upload, MoreVertical   } from "lucide-react";
 import Pagination from "@/components/ui/pagination";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import UploadDocumentsModal from "@/components/modal/UploadDocumentsModal";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Document {
   id: string;
@@ -26,6 +34,8 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
   const [currentPage, setCurrentPage] = useState(1);
   const [tableDocs, setTableDocs] = useState<Document[]>(documents);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [selectedIntakeId, setSelectedIntakeId] = useState<string>("");
 
   // Update tableDocs when documents prop changes
   React.useEffect(() => {
@@ -40,6 +50,21 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
   const paginatedDocuments = tableDocs.slice(startIndex, startIndex + itemsPerPage);
 
   const handlePageChange = (page: number) => setCurrentPage(page);
+
+  const handleUploadClick = (doc: Document) => {
+    setSelectedIntakeId(doc.id);
+    setUploadModalOpen(true);
+  };
+
+  const handleUploadSuccess = () => {
+    setUploadModalOpen(false);
+    // Refresh the table data by calling the parent component's refresh function if available
+    if (onView) {
+      // Assuming onView can be used to refresh, or we need to add a refresh prop
+      // For now, we'll trigger a re-fetch by updating the state
+      setTableDocs((prev) => [...prev]); // This will trigger a re-render and potentially refresh
+    }
+  };
 
   // ✅ Delete handler
   const handleDelete = async (doc: Document) => {
@@ -150,29 +175,22 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
                     )}
                   </td>
 
-                  {/* ✅ Action Buttons */}
-                  <td className="px-4 py-4 text-center flex justify-center gap-1 sm:gap-2">
-                   
-                     <button
-                        onClick={() => router.push(`/intake-form?id=${doc.id}`)}
-                        className="p-2 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg text-blue-600 dark:text-blue-400 transition"
-                        title="Upload Documents"
-                      >
-                        <Upload size={16} />
-                      </button>
-
-                    <button
-                      onClick={() => handleDelete(doc)}
-                      disabled={deletingId === doc.id}
-                      className={`p-2 rounded-lg transition ${
-                        deletingId === doc.id
-                          ? "opacity-50 cursor-not-allowed"
-                          : "hover:bg-red-50 dark:hover:bg-gray-700 text-red-600 dark:text-red-400"
-                      }`}
-                      title="Delete"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  <td className="px-4 py-4 text-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleUploadClick(doc)}>
+                          <Upload className="w-4 h-4 mr-2" /> Upload Documents
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDelete(doc)}>
+                          <Trash2 className="w-4 h-4 mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 </tr>
               ))}
@@ -192,6 +210,14 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
           />
         </div>
       )}
+
+      {/* Upload Documents Modal */}
+      <UploadDocumentsModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        intakeId={selectedIntakeId}
+        onUploadSuccess={handleUploadSuccess}
+      />
     </div>
   );
 }

@@ -2,10 +2,17 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Edit, Trash2, Eye, Plus, Loader2, X } from 'lucide-react';
+import { Edit, Trash2, Eye, Plus, Loader2, X, MoreVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import Pagination from '@/components/ui/pagination';
 import NewIntakeModal from '../NewIntakeModal';
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface CaseIntake {
   id: number | string;
@@ -184,7 +191,12 @@ const handleNewIntake = () => {
                       {startIndex + index + 1}
                     </td>
                     <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-900 dark:text-white font-medium">
-                      {intake.clientName}
+                      <button
+                        onClick={() => handleView(intake)}
+                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline cursor-pointer bg-transparent border-none p-0"
+                      >
+                        {intake.clientName}
+                      </button>
                     </td>
                     <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-600 dark:text-gray-400">
                       {formatDate(intake.accidentDate)}
@@ -199,50 +211,25 @@ const handleNewIntake = () => {
                         {intake.isDraft ? 'Draft' : 'Complete'}
                       </span>
                     </td>
-                    <td className="px-4 lg:px-6 py-3 lg:py-4">
-                      <div className="flex justify-center gap-1 lg:gap-2">
-                        {/* View Button */}
-                        <button
-                          onClick={() => handleView(intake)}
-                          disabled={loadingView === intake.id}
-                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
-                          title="View"
-                        >
-                          {loadingView === intake.id ? (
-                            <Loader2 size={16} className="animate-spin" />
-                          ) : (
-                            <Eye size={16} />
-                          )}
-                        </button>
-
-                        {/* Edit Button */}
-                        <button
-                          onClick={() => handleUpdate(intake.id)}
-                          disabled={loadingEdit === intake.id}
-                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
-                          title="Edit"
-                        >
-                          {loadingEdit === intake.id ? (
-                            <Loader2 size={16} className="animate-spin" />
-                          ) : (
-                            <Edit size={16} />
-                          )}
-                        </button>
-
-                        {/* Delete Button */}
-                        <button
-                          onClick={() => handleDelete(intake.id)}
-                          disabled={loadingDelete === intake.id}
-                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
-                          title="Delete"
-                        >
-                          {loadingDelete === intake.id ? (
-                            <Loader2 size={16} className="animate-spin" />
-                          ) : (
-                            <Trash2 size={16} />
-                          )}
-                        </button>
-                      </div>
+                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleView(intake)}>
+                            <Eye className="w-4 h-4 mr-2" /> View
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleUpdate(intake.id)}>
+                            <Edit className="w-4 h-4 mr-2" /> Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDelete(intake.id)}>
+                            <Trash2 className="w-4 h-4 mr-2" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))}
@@ -264,9 +251,12 @@ const handleNewIntake = () => {
                     <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300">
                       {startIndex + index + 1}
                     </span>
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
+                    <button
+                      onClick={() => handleView(intake)}
+                      className="text-base font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline cursor-pointer bg-transparent border-none p-0 truncate"
+                    >
                       {truncateText(intake.clientName, 20)}
-                    </h3>
+                    </button>
                   </div>
                   <div className="flex gap-2 mt-1">
                     <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-medium max-w-full overflow-hidden text-ellipsis whitespace-nowrap">

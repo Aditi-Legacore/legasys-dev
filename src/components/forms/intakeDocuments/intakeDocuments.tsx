@@ -6,9 +6,10 @@ import { toast } from "sonner"; // or any toast lib you use
 
 interface IntakeDocumentsProps {
   submittedIntakeId: string;
+  onUploadSuccess?: () => void;
 }
 
-const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId }) => {
+const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, onUploadSuccess }) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -47,6 +48,9 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId }) 
 
       toast.success("Documents uploaded successfully!");
       setSelectedFiles([]); // Clear after upload
+      if (onUploadSuccess) {
+        onUploadSuccess();
+      }
     } catch (err) {
       console.error("Upload error:", err);
       toast.error("Failed to upload files.");

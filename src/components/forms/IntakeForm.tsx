@@ -116,13 +116,22 @@ const handleSaveDraft = async () => {
   useEffect(() => {
     if (!isSubmitted && referenceId) {
       fetch(`/api/intake/draft?referenceId=${referenceId}`)
-        .then((res) => res.json())
+        .then((res) => {
+          if (res.ok) {
+            return res.json();
+          } else {
+            // Silently handle 404 or other errors without logging
+            return null;
+          }
+        })
         .then((data) => {
-          if (data.draft) {
+          if (data && data.draft) {
             setDraft(data.draft);
           }
         })
-        .catch((err) => console.error("Failed to fetch draft:", err));
+        .catch(() => {
+          // Silently ignore errors to avoid console noise
+        });
     }
   }, [referenceId, isSubmitted]);
 

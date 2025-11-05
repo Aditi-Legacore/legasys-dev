@@ -70,7 +70,7 @@ export default function MedicalTreatmentStep() {
   };
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="space-y-3 w-full">
       {/* 🚑 Ambulance Section */}
       <RadioGroup
         name="ambulance"
@@ -101,7 +101,7 @@ export default function MedicalTreatmentStep() {
         options={["Yes", "No"]}
       />
       {currentTreatment === "Yes" && (
-        <div className="p-4 rounded-2xl border border-gray-300 dark:border-gray-700 space-y-6">
+        <div className="p-3 rounded-xl border border-gray-300 dark:border-gray-700 space-y-3">
           <h3 className="font-semibold text-lg mb-2 text-gray-700 dark:text-gray-200">
             Current Treatment Details
           </h3>
@@ -175,7 +175,7 @@ export default function MedicalTreatmentStep() {
         options={["Yes", "No"]}
       />
       {priorInjuries === "Yes" && (
-        <div className="p-4 rounded-2xl border border-gray-300 dark:border-gray-700 space-y-6">
+        <div className="p-3 rounded-xl border border-gray-300 dark:border-gray-700 space-y-3">
           <h3 className="font-semibold text-lg mb-2 text-gray-700 dark:text-gray-200">
             Prior Injuries Details
           </h3>
