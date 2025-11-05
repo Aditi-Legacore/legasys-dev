@@ -1,13 +1,13 @@
-# TODO: Make Search Bar and Filters Functional in Documents Page
+# TODO: Enhance Reports Page with Dynamic Data and Filtering
 
 ## Steps to Complete
 
-- [x] Add state variables for additional filters (caseTypeFilter, dateFromFilter, dateToFilter) in documents/page.tsx
-- [x] Import and add FilterSidebar component to documents/page.tsx
-- [x] Add onMoreFilters prop to FilterBar to open the sidebar
-- [x] Compute unique case types from documents data for filter options
-- [x] Update filteredDocuments useMemo to include filtering by case type, date range, and status
-- [x] Add resetFilters function and integrate with FilterSidebar
-- [x] Ensure pagination resets on filter changes (if needed, but currently no pagination)
-- [x] Test the functionality by running the app and verifying search and filters work
-- [x] Fix DocumentsTable to update when filtered documents change
+- [ ] Add state variables for loading, error, and dynamic data arrays (intakesData, leadsData, documentsData) in reports/page.tsx
+- [ ] Implement useEffect to fetch data from /api/intake, /api/leads, /api/documents on mount and activeTab change
+- [ ] Add data aggregation logic: Compute summaries for each tab (total counts, status breakdowns, case type distributions)
+- [ ] Update filtering logic with useMemo: Filter by searchQuery (name/clientName), filterValue (status/time), sidebar filters (dateFrom/dateTo, caseType)
+- [ ] Adjust ReportTable columns and data props based on activeTab (e.g., intakes: ["Client Name", "Status", "Case Type", "Created Date"])
+- [ ] Add loading states (spinner) and error handling (error message display)
+- [ ] Update FilterSidebar props for caseType and referralSource based on activeTab
+- [ ] Test the functionality by running the app and verifying dynamic data, filtering, and search work across all tabs
+- [ ] Ensure ReportTable handles new data structures correctly (minor updates if needed)

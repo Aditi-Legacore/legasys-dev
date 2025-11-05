@@ -27,6 +27,12 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
   const [tableDocs, setTableDocs] = useState<Document[]>(documents);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Update tableDocs when documents prop changes
+  React.useEffect(() => {
+    setTableDocs(documents);
+    setCurrentPage(1); // Reset to first page when documents change
+  }, [documents]);
+
   const router = useRouter();
 
   const itemsPerPage = 5;
