@@ -5,11 +5,42 @@ import { join } from "path";
 
 // for fetching uploaded documents in table
 
+// export async function GET() {
+//   try {
+//     const intakes = await prisma.intakeInfo.findMany({
+//       include: {
+//         Document: true,
+//       },
+//       orderBy: { createdAt: "desc" },
+//     });
+
+//     const result = intakes.map((intake) => ({
+//       id: intake.id,
+//       clientName: intake.clientName,
+//       caseType: "Personal Injury", // as it is not in intakeinfo table
+//       status: intake.isDraft ? "Draft" : "Hired", // example
+//       documentStatus: intake.Document.length > 0 ? "submitted" : "pending",
+//       createdDate: intake.createdAt.toISOString(),
+//       files: intake.Document.map((doc) => doc.fileName),
+//     }));
+
+//     return NextResponse.json(result);
+//   } catch (error) {
+//     console.error("Error fetching documents:", error);
+//     return NextResponse.json({ error: "Failed to fetch documents" }, { status: 500 });
+//   }
+// }
+
 export async function GET() {
   try {
     const intakes = await prisma.intakeInfo.findMany({
       include: {
-        Document: true,
+        Document: true, // ✅ Use uppercase — matches schema
+        Lead: {
+          select: {
+            caseType: true, // ✅ Fetch caseType from Lead
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -17,8 +48,8 @@ export async function GET() {
     const result = intakes.map((intake) => ({
       id: intake.id,
       clientName: intake.clientName,
-      caseType: "Personal Injury", // as it is not in intakeinfo table
-      status: intake.isDraft ? "Draft" : "Hired", // example
+      caseType: intake.Lead?.caseType || "N/A",
+      status: intake.isDraft ? "Draft" : "Hired",
       documentStatus: intake.Document.length > 0 ? "submitted" : "pending",
       createdDate: intake.createdAt.toISOString(),
       files: intake.Document.map((doc) => doc.fileName),
@@ -27,9 +58,13 @@ export async function GET() {
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error fetching documents:", error);
-    return NextResponse.json({ error: "Failed to fetch documents" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch documents" },
+      { status: 500 }
+    );
   }
 }
+
 
 // 🗑️ DELETE entire intake + related documents
 export async function DELETE(request: Request) {

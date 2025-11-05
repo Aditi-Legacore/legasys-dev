@@ -3,7 +3,7 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { prisma } from "@/lib/prisma";
 
-// for upload document
+// for uploading documents to db and uploads/documents folder
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -21,7 +21,9 @@ export async function POST(
 
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
     const maxSize = 600 * 1024; // 600KB
-    const uploadsDir = join(process.cwd(), "uploads", "documents");
+    // const uploadsDir = join(process.cwd(), "uploads", "documents");
+    const uploadsDir = join(process.cwd(), "public", "uploads", "documents");
+
     await mkdir(uploadsDir, { recursive: true });
 
     const uploadedDocs = [];
@@ -60,5 +62,35 @@ export async function POST(
   }
 }
 
+// for viewing the uploaded documents in page
 
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
 
+    const documents = await prisma.document.findMany({
+      where: { intakeId: id },
+      select: {
+        id: true,
+        fileName: true,
+        filePath: true,
+        mimeType: true,
+      },
+    });
+
+    if (!documents || documents.length === 0) {
+      return NextResponse.json([], { status: 200 });
+    }
+
+    return NextResponse.json(documents);
+  } catch (error) {
+    console.error("Error fetching document files:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch document files" },
+      { status: 500 }
+    );
+  }
+}

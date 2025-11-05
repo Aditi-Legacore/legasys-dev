@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Eye, Edit, Trash2 } from "lucide-react";
+import { Eye, Edit, Trash2,FileText  } from "lucide-react";
 import Pagination from "@/components/ui/pagination";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface Document {
   id: string;
@@ -25,6 +26,8 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
   const [currentPage, setCurrentPage] = useState(1);
   const [tableDocs, setTableDocs] = useState<Document[]>(documents);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const itemsPerPage = 5;
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -87,6 +90,9 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
                 <th className="px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                   Document Status
                 </th>
+                <th className="px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
+                  Files
+                </th>
                 <th className="px-4 py-3 text-center text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                   Actions
                 </th>
@@ -123,6 +129,19 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
                     >
                       {doc.documentStatus}
                     </span>
+                  </td>
+                  <td className="px-4 py-4 text-center">
+                    {doc.documentStatus === "submitted" ? (
+                      <button
+                        onClick={() => router.push(`/documents/${doc.id}`)}
+                        className="p-2 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg text-blue-600 dark:text-blue-400 transition"
+                        title="View Uploaded Files"
+                      >
+                        <FileText size={16} />
+                      </button>
+                    ) : (
+                      <span className="text-gray-400 text-xs italic">—</span>
+                    )}
                   </td>
 
                   {/* ✅ Action Buttons */}
