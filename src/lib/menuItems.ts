@@ -51,6 +51,11 @@ export const menuItems: MenuItem[] = [
     icon: FileText,
   },
   {
+    label: "Form Templates",
+    path: "/form-templates",
+    icon: FileText,
+  },
+  {
     label: "Documents",
     path: "/documents",
     icon: FolderOpen,
