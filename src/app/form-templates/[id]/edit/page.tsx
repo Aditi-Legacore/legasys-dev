@@ -650,7 +650,7 @@ function FieldEditor({ field, index, onUpdate, onRemove, onAddOption, onUpdateOp
                         variant="outline"
                         size="sm"
                         onClick={() => onRemoveOption(field.id, optionIndex)}
-                        className="h-9 w-9 p-0 flex-shrink-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="h-9 w-9 p-0 shrink-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                       >
                         <X className="w-4 h-4" />
                       </Button>

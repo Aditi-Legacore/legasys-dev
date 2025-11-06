@@ -10,6 +10,7 @@ import QuickIntakeForm from "@/components/forms/QuickIntakeForm";
 import Pagination from "@/components/ui/pagination";
 import FilterBar from "@/components/ui/FilterBar";
 import FilterSidebar from "@/components/ui/FilterSidebar";
+import ActiveFilters from "@/components/ui/ActiveFilters";
 import { Plus } from "lucide-react";
 
 export default function LeadsPage() {
@@ -113,6 +114,49 @@ export default function LeadsPage() {
   const inProgressCount = leadsData.filter((l: Lead) => l.status === "in_progress").length;
   const newCount = leadsData.filter((l: Lead) => l.status === "new").length;
 
+  // Active filters for display
+  const activeFilters = useMemo(() => {
+    const filters = [];
+    if (searchQuery) {
+      filters.push({
+        label: `Search: "${searchQuery}"`,
+        onRemove: () => setSearchQuery("")
+      });
+    }
+    if (statusFilter !== "all") {
+      const statusLabel = statusFilter === "new" ? "New" : statusFilter === "in_progress" ? "In Progress" : "Completed";
+      filters.push({
+        label: `Status: ${statusLabel}`,
+        onRemove: () => setStatusFilter("all")
+      });
+    }
+    if (caseTypeFilter !== "all") {
+      filters.push({
+        label: `Case Type: ${caseTypeFilter}`,
+        onRemove: () => setCaseTypeFilter("all")
+      });
+    }
+    if (referralSourceFilter !== "all") {
+      filters.push({
+        label: `Referral Source: ${referralSourceFilter}`,
+        onRemove: () => setReferralSourceFilter("all")
+      });
+    }
+    if (dateFromFilter) {
+      filters.push({
+        label: `From: ${dateFromFilter}`,
+        onRemove: () => setDateFromFilter("")
+      });
+    }
+    if (dateToFilter) {
+      filters.push({
+        label: `To: ${dateToFilter}`,
+        onRemove: () => setDateToFilter("")
+      });
+    }
+    return filters;
+  }, [searchQuery, statusFilter, caseTypeFilter, referralSourceFilter, dateFromFilter, dateToFilter]);
+
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -185,6 +229,9 @@ export default function LeadsPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Active Filters */}
+        <ActiveFilters filters={activeFilters} />
 
         {/* Leads Table */}
         <LeadsTable leads={paginatedLeads} onLeadUpdate={fetchLeads} />

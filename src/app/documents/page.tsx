@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import DocumentsTable from "@/components/table/DocumentsTable";
 import FilterBar from "@/components/ui/FilterBar";
 import FilterSidebar from "@/components/ui/FilterSidebar";
+import ActiveFilters from "@/components/ui/ActiveFilters";
 
 interface DocumentType {
   id: string;
@@ -90,6 +91,43 @@ export default function DocumentsPage() {
   const submittedCount = documents.filter(d => d.documentStatus === "submitted").length;
   const pendingCount = documents.filter(d => d.documentStatus === "pending").length;
 
+  // Active filters for display
+  const activeFilters = useMemo(() => {
+    const filters = [];
+    if (searchQuery) {
+      filters.push({
+        label: `Search: "${searchQuery}"`,
+        onRemove: () => setSearchQuery("")
+      });
+    }
+    if (filterValue !== "all") {
+      const statusLabel = filterValue === "submitted" ? "Submitted" : "Pending";
+      filters.push({
+        label: `Status: ${statusLabel}`,
+        onRemove: () => setFilterValue("all")
+      });
+    }
+    if (caseTypeFilter !== "all") {
+      filters.push({
+        label: `Case Type: ${caseTypeFilter}`,
+        onRemove: () => setCaseTypeFilter("all")
+      });
+    }
+    if (dateFromFilter) {
+      filters.push({
+        label: `From: ${dateFromFilter}`,
+        onRemove: () => setDateFromFilter("")
+      });
+    }
+    if (dateToFilter) {
+      filters.push({
+        label: `To: ${dateToFilter}`,
+        onRemove: () => setDateToFilter("")
+      });
+    }
+    return filters;
+  }, [searchQuery, filterValue, caseTypeFilter, dateFromFilter, dateToFilter]);
+
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -138,6 +176,9 @@ export default function DocumentsPage() {
             />
           </CardContent>
         </Card>
+
+        {/* Active Filters */}
+        <ActiveFilters filters={activeFilters} />
 
         {loading ? (
           <div className="text-center text-gray-500 py-10">Loading...</div>

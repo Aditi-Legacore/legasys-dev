@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import FilterBar from "@/components/ui/FilterBar";
+import ActiveFilters from "@/components/ui/ActiveFilters";
 import Pagination from "@/components/ui/pagination";
 
 export default function StagesPage() {
@@ -46,6 +47,25 @@ export default function StagesPage() {
   const activeCount = stages.filter((s) => s.status === 'Active').length;
   const ongoingCount = stages.filter((s) => s.status === 'Ongoing').length;
   const completedCount = stages.filter((s) => s.status === 'Completed').length;
+
+  // Active filters for display
+  const activeFilters = useMemo(() => {
+    const filters = [];
+    if (searchQuery) {
+      filters.push({
+        label: `Search: "${searchQuery}"`,
+        onRemove: () => setSearchQuery("")
+      });
+    }
+    if (statusFilter !== "all") {
+      const statusLabel = statusFilter === "active" ? "Active" : statusFilter === "ongoing" ? "Ongoing" : "Completed";
+      filters.push({
+        label: `Status: ${statusLabel}`,
+        onRemove: () => setStatusFilter("all")
+      });
+    }
+    return filters;
+  }, [searchQuery, statusFilter]);
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
@@ -118,6 +138,9 @@ export default function StagesPage() {
                 />
               </div>
             </div>
+
+            {/* Active Filters */}
+            <ActiveFilters filters={activeFilters} />
           </CardContent>
         </Card>
 
