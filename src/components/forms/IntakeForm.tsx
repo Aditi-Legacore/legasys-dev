@@ -68,7 +68,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedIntakeId, setSubmittedIntakeId] = useState<string | null>(null);
 
-// Prefill draft if exists
+  // Prefill draft if exists
   useEffect(() => {
     const draftData = localStorage.getItem("draftData");
     if (draftData) {
@@ -76,7 +76,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
     }
   }, []);
 
-const handleSaveDraft = async () => {
+  const handleSaveDraft = async () => {
     try {
       if (!referenceId) {
         toast.error("No reference ID found. Please start a new session.");
@@ -96,7 +96,23 @@ const handleSaveDraft = async () => {
         console.error(`Failed to save draft: ${res.status} ${res.statusText}`, errorText);
         throw new Error(`Failed to save draft: ${res.statusText}`);
       }
+
       toast.success("Draft saved successfully!");
+      const savedData = await res.json();
+      console.log("savedData", savedData);
+      
+      // Log activity for saving draft
+      await fetch('/api/activity-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          refId: savedData.id,
+          activityType: 'save_draft',
+          shortDescription: 'Draft Saved',
+          longDescription: 'saved intake as draft',
+        }),
+      });
+
     } catch (err) {
       console.error(err);
       toast.error("Error saving draft.");
@@ -144,128 +160,141 @@ const handleSaveDraft = async () => {
     }
   }, [draft, methods]);
 
-  
-useEffect(() => {
-  if (session?.user) {
-    methods.setValue("clientName", session.user.name || "");
-    methods.setValue("email", session.user.email || "");
-  }
-  if (containerRef.current) {
-    containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-  } else {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-  if (intakeId) {
-    const fetchIntake = async () => {
-      try {
-        setIsLoadingExistingData(true);
-        const res = await fetch(`/api/intake/${intakeId}`);
-        if (!res.ok) throw new Error("Failed to fetch intake data");
-        const data = await res.json();
 
-        // Map database fields back to form fields
-        const mappedData = {
-          ...data,
-          phone: data.phoneNumber || '',
-          dob: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
-          phoneNumber: data.phoneNumber || '',
-          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
-        };
+  useEffect(() => {
+    if (session?.user) {
+      methods.setValue("clientName", session.user.name || "");
+      methods.setValue("email", session.user.email || "");
+    }
+    if (containerRef.current) {
+      containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    if (intakeId) {
+      const fetchIntake = async () => {
+        try {
+          setIsLoadingExistingData(true);
+          const res = await fetch(`/api/intake/${intakeId}`);
+          if (!res.ok) throw new Error("Failed to fetch intake data");
+          const data = await res.json();
 
-        Object.keys(mappedData).forEach((key) => {
-          if (mappedData[key] !== null && mappedData[key] !== undefined) {
-            methods.setValue(key as keyof IntakeFormData, mappedData[key]);
-          }
-        });
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setIsLoadingExistingData(false);
-      }
-    };
-    fetchIntake();
-  }
-}, [session, intakeId, methods]);  // ✅ Removed "step" here
+          // Map database fields back to form fields
+          const mappedData = {
+            ...data,
+            phone: data.phoneNumber || '',
+            dob: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
+            phoneNumber: data.phoneNumber || '',
+            dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
+          };
 
-  
+          Object.keys(mappedData).forEach((key) => {
+            if (mappedData[key] !== null && mappedData[key] !== undefined) {
+              methods.setValue(key as keyof IntakeFormData, mappedData[key]);
+            }
+          });
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setIsLoadingExistingData(false);
+        }
+      };
+      fetchIntake();
+    }
+  }, [session, intakeId, methods]);  // ✅ Removed "step" here
+
+
 
 
 
   // ✅ Scroll to top whenever step changes
   // 👇 Add this effect for scrolling on step change
-useEffect(() => {
-  if (containerRef.current) {
-    containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-  } else {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-}, [step]);
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [step]);
 
-useEffect(() => {
-  const draft = localStorage.getItem("draftData");
-  if (draft) {
-    setFormData(JSON.parse(draft));
-  }
-}, []);
+  useEffect(() => {
+    const draft = localStorage.getItem("draftData");
+    if (draft) {
+      setFormData(JSON.parse(draft));
+    }
+  }, []);
 
   // new code for update field added to fetch data from database
 
   const onSubmit = async (data: IntakeFormData) => {
-  console.log("🚀 Form submission attempted with data:", data);
-  console.log("Session user ID:", session?.user?.id);
-  setIsSubmitting(true);
+    console.log("🚀 Form submission attempted with data:", data);
+    console.log("Session user ID:", session?.user?.id);
+    setIsSubmitting(true);
 
-  try {
-    const method = intakeId ? "PUT" : "POST";
-    const url = intakeId ? `/api/intake/${intakeId}` : `/api/intake`;
+    try {
+      const method = intakeId ? "PUT" : "POST";
+      const url = intakeId ? `/api/intake/${intakeId}` : `/api/intake`;
 
-    console.log(`📡 Sending ${method} request to ${url}`);
+      console.log(`📡 Sending ${method} request to ${url}`);
 
-  const payload: any = {
-  ...data,
-  phoneNumber: data.phone,
-  dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null, // ✅ only convert if dob exists
-  userId: session?.user?.id || null,
-  referenceId: referenceId || null, // Include referenceId if exists
-};
+      const payload: any = {
+        ...data,
+        phoneNumber: data.phone,
+        dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null, // ✅ only convert if dob exists
+        userId: session?.user?.id || null,
+        referenceId: referenceId || null, // Include referenceId if exists
+      };
 
-delete payload.phone;
-delete payload.dob;
+      delete payload.phone;
+      delete payload.dob;
 
-const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake`, {
-  method: intakeId ? "PUT" : "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(payload),
-});
+      const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake`, {
+        method: intakeId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
 
-    console.log("Response status:", response.status);
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ Server error:", errorText);
-      throw new Error("Failed to save intake");
+      console.log("Response status:", response.status);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Server error:", errorText);
+        throw new Error("Failed to save intake");
+      }
+
+      const savedData = await response.json();
+      console.log("✅ Intake form saved:", savedData);
+
+      // Email notification is handled in the API route
+
+      toast.success(intakeId ? "✅ Intake updated successfully!" : "✅ Intake created successfully!");
+      setIsSubmitted(true);
+      setSubmittedIntakeId(savedData.id);
+
+
+      await fetch('/api/activity-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          refId: savedData.id,
+          activityType: 'intake_submission',
+          shortDescription: 'Intake Submitted',
+          longDescription: 'successfully submitted intake form',
+        }),
+      });
+
+      // router.push("/intake-list");                                                                                                                                         
+      // router.push("/forms");
+    } catch (error) {
+      console.error("❌ Error saving intake:", error);
+      toast.error("⚠️ There was an error saving the form.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const savedData = await response.json();
-    console.log("✅ Intake form saved:", savedData);
-
-    // Email notification is handled in the API route
-
-    toast.success(intakeId ? "✅ Intake updated successfully!" : "✅ Intake created successfully!");
-    setIsSubmitted(true);
-    setSubmittedIntakeId(savedData.id);
-    // router.push("/intake-list");
-    router.push("/forms");
-  } catch (error) {
-    console.error("❌ Error saving intake:", error);
-    toast.error("⚠️ There was an error saving the form.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
 
-  
+
   // ✅ Validate current step before moving to the next
   const nextStep = async () => {
     const fieldsToValidate = stepFields[step];
@@ -279,7 +308,7 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
     }
 
     setStep((s) => s + 1);
-    
+
   };
 
 
@@ -354,19 +383,19 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
       >
         {/* document upload after intake submit */}
         {isSubmitted && submittedIntakeId ? (
-              <IntakeDocuments submittedIntakeId={submittedIntakeId} />
-              ) : (
-              <form
-              onSubmit={(e) => {
-                console.log("Form onSubmit triggered");
-                e.preventDefault();
-                console.log("Calling methods.handleSubmit(onSubmit)");
-                methods.handleSubmit(onSubmit, (errors) => {
-                  console.log("❌ Validation failed:", errors);
-                })();
-              }}
-              className="bg-white dark:bg-gray-900 p-4 sm:p-6 lg:p-8 rounded-xl shadow-xl transition-all duration-300"
-            >
+          <IntakeDocuments submittedIntakeId={submittedIntakeId} />
+        ) : (
+          <form
+            onSubmit={(e) => {
+              console.log("Form onSubmit triggered");
+              e.preventDefault();
+              console.log("Calling methods.handleSubmit(onSubmit)");
+              methods.handleSubmit(onSubmit, (errors) => {
+                console.log("❌ Validation failed:", errors);
+              })();
+            }}
+            className="bg-white dark:bg-gray-900 p-4 sm:p-6 lg:p-8 rounded-xl shadow-xl transition-all duration-300"
+          >
             <input type="hidden" {...methods.register("hearAboutUs")} />
             <input type="hidden" {...methods.register("hearAboutUsDetail")} />
 
@@ -383,18 +412,16 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
                   onClick={() => setStep(index)}
                   className={`flex-1 text-center text-sm font-semibold cursor-pointer transition
                     ${index === step ? "block" : "hidden sm:block"}
-                    ${
-                      index <= step
-                        ? "text-indigo-500 dark:text-indigo-400"
-                        : "text-gray-400"
+                    ${index <= step
+                      ? "text-indigo-500 dark:text-indigo-400"
+                      : "text-gray-400"
                     }`}
                 >
                   <div
-                    className={`w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center ${
-                      index <= step
+                    className={`w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center ${index <= step
                         ? "bg-indigo-500 text-white"
                         : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300"
-                    }`}
+                      }`}
                   >
                     {index + 1}
                   </div>

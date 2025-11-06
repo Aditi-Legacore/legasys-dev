@@ -47,6 +47,18 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId }) 
 
       toast.success("Documents uploaded successfully!");
       setSelectedFiles([]); // Clear after upload
+
+      // Log activity for document upload
+      await fetch('/api/activity-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          refId: submittedIntakeId,
+          activityType: 'document_upload',
+          shortDescription: 'Document Uploaded',
+          longDescription: `uploaded ${selectedFiles.length} document(s)`,
+        }),
+      });
     } catch (err) {
       console.error("Upload error:", err);
       toast.error("Failed to upload files.");

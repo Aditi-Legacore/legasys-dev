@@ -76,6 +76,18 @@ export default function IntakeForm({ onClose }: { onClose: () => void }) {
       localStorage.setItem("referenceId", leadData.referenceId);
       localStorage.setItem("caseType", data.caseType);
       setError("");
+
+      // Log activity for generating reference ID
+      await fetch('/api/activity-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          refId: leadData.referenceId,
+          activityType: 'generate_reference_id',
+          shortDescription: 'Reference ID Generated',
+          longDescription: 'generated reference ID',
+        }),
+      });
     } catch (err) {
       setError("Something went wrong");
     }

@@ -25,7 +25,7 @@ export default function IntakePreviewPage() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [showPdfPreview, setShowPdfPreview] = useState(false);
   const [notes, setNotes] = useState<{ id: string; content: string; createdAt: string; createdBy: string }[]>([]);
-  const [activityLogs, setActivityLogs] = useState<{ id: string; action: string; details?: string; createdAt: string; createdBy: string }[]>([]);
+  const [activityLogs, setActivityLogs] = useState<{ id: string; shortDescription: string; longDescription?: string; createdAt: string; createdBy: string; createdByName?: string }[]>([]);
   const [documents, setDocuments] = useState<{ id: string; name: string; type: string; uploadedAt: string }[]>([]);
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [loadingActivity, setLoadingActivity] = useState(false);
@@ -33,6 +33,7 @@ export default function IntakePreviewPage() {
   const [newNote, setNewNote] = useState('');
   const [newActivityAction, setNewActivityAction] = useState('');
   const [newActivityDetails, setNewActivityDetails] = useState('');
+  const [activeTab, setActiveTab] = useState('information');
   const contentRef = useRef<HTMLDivElement>(null);
 
   const id = params.id as string;
@@ -55,12 +56,16 @@ export default function IntakePreviewPage() {
   }, [id]);
 
   useEffect(() => {
-    if (id) {
+    if (id && activeTab === 'notes') {
       fetchNotes();
+    }
+    if (id && activeTab === 'activity') {
       fetchActivityLogs();
+    }
+    if (id && activeTab === 'documents') {
       fetchDocuments();
     }
-  }, [id]);
+  }, [id, activeTab]);
 
   const fetchNotes = async () => {
     setLoadingNotes(true);
@@ -121,6 +126,18 @@ export default function IntakePreviewPage() {
       setNewNote('');
       fetchNotes();
       toast.success('Note added successfully.');
+
+      // Log activity for adding note
+      await fetch('/api/activity-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          intakeId: id,
+          activityType: 'add_note',
+          shortDescription: 'Note Added',
+          longDescription: 'added a note',
+        }),
+      });
     } catch (error) {
       console.error(error);
       toast.error('Failed to add note.');
@@ -156,6 +173,19 @@ export default function IntakePreviewPage() {
       if (!res.ok) throw new Error('Failed to delete note');
       fetchNotes();
       toast.success('Note deleted successfully.');
+
+      // Log activity for deleting note
+      await fetch('/api/activity-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          // intakeId: id,
+          refId: id,
+          activityType: 'delete_note',
+          shortDescription: 'Note Deleted',
+          longDescription: 'deleted a note',
+        }),
+      });
     } catch (error) {
       console.error(error);
       toast.error('Failed to delete note.');
@@ -294,7 +324,7 @@ export default function IntakePreviewPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Side: Tabs with Information, Notes, Activity Log, Documents */}
             <div className="lg:col-span-2">
-              <Tabs defaultValue="information" className="w-full">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="information">Information</TabsTrigger>
                   <TabsTrigger value="notes">Notes</TabsTrigger>

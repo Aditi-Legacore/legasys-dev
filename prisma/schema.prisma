@@ -187,8 +187,8 @@ model IntakeInfo {
   Lead   Lead? @relation(fields: [LeadId], references: [id])
 
   // New models for notes and activity logs
+  activityLogs                ActivityLog[]  @relation("IntakeToActivityLogs")
   Notes Note[]
-  ActivityLogs ActivityLog[]
 }
 
 model Lead {
@@ -272,12 +272,12 @@ model Note {
 
 model ActivityLog {
   id              String   @id @default(uuid())
-  intakeId        String
+  intakeId         String
   activityType    String
   shortDescription String
   longDescription  String
   createdBy       String
   createdAt       DateTime @default(now())
 
-  intake     IntakeInfo @relation(fields: [intakeId], references: [id], onDelete: Cascade)
+  intake          IntakeInfo  @relation("IntakeToActivityLogs", fields: [intakeId], references: [id], onDelete: Cascade)
 }

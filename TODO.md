@@ -1,8 +1,7 @@
-# TODO: Update Note Creation to Include User Details
+# TODO: Implement Tab-Specific API Calls in Intake Preview
 
-## Steps to Complete
-
-- [x] Edit `prisma/schema.prisma` to add relation between `Note` and `User` models for `createdBy`.
-- [x] Edit `src/app/api/intake/[id]/notes/route.ts` GET method to include `createdByUser` with `firstName` and `lastName`.
-- [x] Run `npx prisma generate` to update the Prisma client.
-- [x] Test the API to ensure notes include user first name and last name.
+- [x] Add state for activeTab with default "information"
+- [x] Add onValueChange to Tabs component to update activeTab
+- [x] Remove fetchNotes, fetchActivityLogs, fetchDocuments from initial useEffect on id
+- [x] Add new useEffect that calls appropriate fetch function based on activeTab and id
+- [ ] Test tab switching to verify APIs are called only on tab change
