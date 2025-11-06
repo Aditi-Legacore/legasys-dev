@@ -6,10 +6,10 @@ import { prisma } from "@/lib/prisma";
 // for uploading documents to db and uploads/documents folder
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     if (!id) return NextResponse.json({ error: "Invalid intake ID" }, { status: 400 });
 
     const intake = await prisma.intakeInfo.findUnique({ where: { id } });

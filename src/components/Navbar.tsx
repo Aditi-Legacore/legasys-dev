@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { Settings, Bell, Mail, Sun, Moon, Loader2, Menu, X } from "lucide-react";
+import { Settings, Bell, Mail, Sun, Moon, Loader2, Menu, X, FileText, Calendar, ChevronDown } from "lucide-react";
 import { useTheme } from "next-themes";
 import { signOut, useSession } from "next-auth/react";
 import Searchbar from "./Searchbar";
@@ -12,9 +12,11 @@ const Navbar: React.FC = () => {
   const [mounted, setMounted] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [quickIntakeOpen, setQuickIntakeOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const quickIntakeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -27,6 +29,9 @@ const Navbar: React.FC = () => {
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
         setMobileMenuOpen(false);
       }
+      if (quickIntakeRef.current && !quickIntakeRef.current.contains(event.target as Node)) {
+        setQuickIntakeOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -35,6 +40,18 @@ const Navbar: React.FC = () => {
   if (!mounted) return null;
 
   const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
+
+  const handleQuickForm = () => {
+    setQuickIntakeOpen(false);
+    // Add your quick form logic here
+    console.log("Opening Quick Form...");
+  };
+
+  const handleQuickAppointment = () => {
+    setQuickIntakeOpen(false);
+    // Add your quick appointment logic here
+    console.log("Opening Quick Appointment...");
+  };
 
   return (
     <nav className="sticky top-0 z-30 flex justify-between items-center px-4 py-3 lg:px-6 lg:py-4 shadow-sm bg-white dark:bg-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-800">
@@ -48,6 +65,7 @@ const Navbar: React.FC = () => {
 
       {/* Desktop Actions - Hidden on Mobile/Tablet */}
       <div className="hidden lg:flex items-center gap-1 xl:gap-2">
+
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
@@ -157,6 +175,7 @@ const Navbar: React.FC = () => {
 
       {/* Mobile/Tablet Actions */}
       <div className="flex lg:hidden items-center gap-1 sm:gap-2">
+
         {/* Theme Toggle - Always visible */}
         <button
           onClick={toggleTheme}

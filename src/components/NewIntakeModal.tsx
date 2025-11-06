@@ -30,6 +30,8 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
     }
   };
 
+
+
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
   <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-2xl p-6 shadow-2xl border border-gray-200 dark:border-gray-700">

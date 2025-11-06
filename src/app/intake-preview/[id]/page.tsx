@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Edit, Trash2, Download, Share2, Eye, ArrowLeft } from 'lucide-react';
+import { Edit, Trash2, Download, Share2, Eye, ArrowLeft, Car, Shield, Heart, Stethoscope, AlertTriangle, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { IntakeData } from '@/types/intake';
 
@@ -57,7 +57,8 @@ export default function IntakePreviewPage() {
       const res = await fetch(`/api/intake/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete intake');
       toast.success('Intake deleted successfully.');
-      router.push('/intake-list');
+      // router.push('/intake-list');
+      router.push('/forms');
     } catch (error) {
       console.error(error);
       toast.error('Failed to delete intake.');
@@ -155,10 +156,10 @@ export default function IntakePreviewPage() {
 
   return (
     <>
-      <div ref={contentRef} className="min-h-screen bg-white dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+      <div ref={contentRef} className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 sm:p-8 lg:p-12">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between gap-4 mb-6 lg:mb-8">
+          <div className="flex items-center justify-between gap-4 mb-8 lg:mb-12">
             <button
               onClick={() => router.back()}
               className="flex items-center justify-center bg-gray-600 hover:bg-gray-700 text-white p-2 rounded-lg transition-colors duration-200"
@@ -167,10 +168,10 @@ export default function IntakePreviewPage() {
               <ArrowLeft size={20} />
             </button>
             <div className="flex-1 text-center">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-2">
                 Case Intake Preview
               </h1>
-              <p className="text-slate-600 dark:text-gray-400 mt-1 sm:mt-2 text-sm sm:text-base">
+              <p className="text-slate-600 dark:text-gray-400 text-base sm:text-lg">
                 Review and manage case intake details
               </p>
             </div>
@@ -210,143 +211,169 @@ export default function IntakePreviewPage() {
           </div>
 
           {/* Intake Details */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-8">
               {/* Accident Information */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 className="text-green-600">Accident Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <p className="text-black dark:text-gray-200"><strong>Date:</strong> {formatDate(intake.accidentDate)}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Time:</strong> {intake.accidentTime || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Location:</strong> {intake.accidentLocation || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Description:</strong> {intake.accidentDescription || 'N/A'}</p>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+                <h5 className="text-lg font-semibold text-green-600 mb-6 flex items-center gap-2">
+                  <Car size={24} />
+                  Accident Information
+                </h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Date:</strong> {formatDate(intake.accidentDate)}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Time:</strong> {intake.accidentTime || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Location:</strong> {intake.accidentLocation || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Description:</strong> {intake.accidentDescription || 'N/A'}</p>
                 </div>
               </div>
 
               {/* Defendant 1 Information */}
               {intake.defendant1Name && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                  <h3 className="text-lg font-bold mb-2 text-green-600">Defendant 1 Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <p className="text-black dark:text-gray-200"><strong>Name:</strong> {intake.defendant1Name}</p>
-                    {/* <p className="text-black dark:text-gray-200"><strong>Phone:</strong> {intake.defendant1Phone || 'N/A'}</p> */}
-                    <p className="text-black dark:text-gray-200"><strong>Address:</strong> {intake.defendant1Address || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Carrier:</strong> {intake.defendant1Carrier || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Carrier Phone:</strong> {intake.defendant1CarrierPhone || 'N/A'}</p>
-                    {/* <p className="text-black dark:text-gray-200"><strong>Policy:</strong> {intake.defendant1Policy || 'N/A'}</p> */}
-                    <p className="text-black dark:text-gray-200"><strong>Year:</strong> {intake.defendant1Year || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Make:</strong> {intake.defendant1Make || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Model:</strong> {intake.defendant1Model || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Damage:</strong> {intake.defendant1Damage || 'N/A'}</p>
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+                  <h5 className="text-lg font-semibold text-green-600 mb-6 flex items-center gap-2">
+                    <Shield size={24} />
+                    Defendant 1 Information
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Name:</strong> {intake.defendant1Name}</p>
+                    {/* <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Phone:</strong> {intake.defendant1Phone || 'N/A'}</p> */}
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Address:</strong> {intake.defendant1Address || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Carrier:</strong> {intake.defendant1Carrier || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Carrier Phone:</strong> {intake.defendant1CarrierPhone || 'N/A'}</p>
+                    {/* <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Policy:</strong> {intake.defendant1Policy || 'N/A'}</p> */}
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Year:</strong> {intake.defendant1Year || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Make:</strong> {intake.defendant1Make || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Model:</strong> {intake.defendant1Model || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Damage:</strong> {intake.defendant1Damage || 'N/A'}</p>
                   </div>
                 </div>
               )}
 
               {/* Defendant 2 Information */}
               {intake.defendant2Name && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                  <h3 className="text-lg font-bold mb-2 text-green-600">Defendant 2 Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <p className="text-black dark:text-gray-200"><strong>Name:</strong> {intake.defendant2Name}</p>
-                    {/* <p className="text-black dark:text-gray-200"><strong>Phone:</strong> {intake.defendant2Phone || 'N/A'}</p> */}
-                    <p className="text-black dark:text-gray-200"><strong>Address:</strong> {intake.defendant2Address || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Carrier:</strong> {intake.defendant2Carrier || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Carrier Phone:</strong> {intake.defendant2CarrierPhone || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Policy:</strong> {intake.defendant2Policy || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Year:</strong> {intake.defendant2Year || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Make:</strong> {intake.defendant2Make || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Model:</strong> {intake.defendant2Model || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Damage:</strong> {intake.defendant2Damage || 'N/A'}</p>
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+                  <h5 className="text-lg font-semibold text-green-600 mb-6 flex items-center gap-2">
+                    <Shield size={24} />
+                    Defendant 2 Information
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Name:</strong> {intake.defendant2Name}</p>
+                    {/* <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Phone:</strong> {intake.defendant2Phone || 'N/A'}</p> */}
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Address:</strong> {intake.defendant2Address || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Carrier:</strong> {intake.defendant2Carrier || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Carrier Phone:</strong> {intake.defendant2CarrierPhone || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Policy:</strong> {intake.defendant2Policy || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Year:</strong> {intake.defendant2Year || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Make:</strong> {intake.defendant2Make || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Model:</strong> {intake.defendant2Model || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Damage:</strong> {intake.defendant2Damage || 'N/A'}</p>
                   </div>
                 </div>
               )}
 
               {/* Auto Insurance */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 className="text-lg font-bold mb-2 text-green-600">Auto Insurance</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <p className="text-black dark:text-gray-200"><strong>Name:</strong> {intake.autoName || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Phone:</strong> {intake.autoPhone || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Address:</strong> {intake.autoAddress || 'N/A'}</p>
-                  {/* <p className="text-black dark:text-gray-200"><strong>Carrier:</strong> {intake.autoCarrier || 'N/A'}</p> */}
-                  <p className="text-black dark:text-gray-200"><strong>Agent:</strong> {intake.autoAgent || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Policy:</strong> {intake.autoPolicy || 'N/A'}</p>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+                <h5 className="text-lg font-semibold text-green-600 mb-6 flex items-center gap-2">
+                  <Shield size={24} />
+                  Auto Insurance
+                </h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Name:</strong> {intake.autoName || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Phone:</strong> {intake.autoPhone || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Address:</strong> {intake.autoAddress || 'N/A'}</p>
+                  {/* <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Carrier:</strong> {intake.autoCarrier || 'N/A'}</p> */}
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Agent:</strong> {intake.autoAgent || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Policy:</strong> {intake.autoPolicy || 'N/A'}</p>
                 </div>
               </div>
 
               {/* Health Insurance */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 className="text-lg font-bold mb-2 text-green-600">Health Insurance</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <p className="text-black dark:text-gray-200"><strong>Carrier Name:</strong> {intake.healthCarrier || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Phone:</strong> {intake.healthPhone || 'N/A'}</p>
-                  {/* <p className="text-black dark:text-gray-200"><strong>Type:</strong> {intake.healthType || 'N/A'}</p> */}
-                  <p className="text-black dark:text-gray-200"><strong>Address:</strong> {intake.healthAddress || 'N/A'}</p>
-                  {/* <p className="text-black dark:text-gray-200"><strong>Group:</strong> {intake.healthGroup || 'N/A'}</p> */}
-                  <p className="text-black dark:text-gray-200"><strong>Policy:</strong> {intake.healthPolicy || 'N/A'}</p>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+                <h5 className="text-lg font-semibold text-green-600 mb-6 flex items-center gap-2">
+                  <Heart size={24} />
+                  Health Insurance
+                </h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Carrier Name:</strong> {intake.healthCarrier || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Phone:</strong> {intake.healthPhone || 'N/A'}</p>
+                  {/* <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Type:</strong> {intake.healthType || 'N/A'}</p> */}
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Address:</strong> {intake.healthAddress || 'N/A'}</p>
+                  {/* <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Group:</strong> {intake.healthGroup || 'N/A'}</p> */}
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Policy:</strong> {intake.healthPolicy || 'N/A'}</p>
                 </div>
               </div>
 
               {/* Medical Treatment */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 className="text-lg font-bold mb-2 text-green-600">Medical Treatment</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <p className="text-black dark:text-gray-200"><strong>Ambulance:</strong> {intake.ambulance ? 'Yes' : 'No'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Ambulance Company:</strong> {intake.ambulanceCompany || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Admitted:</strong> {intake.admitted ? 'Yes' : 'No'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Length of Stay:</strong> {intake.lengthOfStay || 'N/A'}</p>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+                <h5 className="text-lg font-semibold text-green-600 mb-6 flex items-center gap-2">
+                  <Stethoscope size={24} />
+                  Medical Treatment
+                </h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Ambulance:</strong> {intake.ambulance ? 'Yes' : 'No'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Ambulance Company:</strong> {intake.ambulanceCompany || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Admitted:</strong> {intake.admitted ? 'Yes' : 'No'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Length of Stay:</strong> {intake.lengthOfStay || 'N/A'}</p>
                 </div>
                 {intake.doctorHospital1 && (
-                  <div className="mt-4">
-                    <h4 className="font-medium text-green-600">Treatment 1</h4>
-                    <p className="text-black dark:text-gray-200"><strong>Doctor/Hospital:</strong> {intake.doctorHospital1}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Address:</strong> {intake.address1 || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Phone:</strong> {intake.phone1 || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Treatment Date:</strong> {formatDate(intake.treatmentDate1)}</p>
+                  <div className="mt-6">
+                    <h4 className="font-semibold text-green-600 mb-2">Treatment 1</h4>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Doctor/Hospital:</strong> {intake.doctorHospital1}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Address:</strong> {intake.address1 || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Phone:</strong> {intake.phone1 || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Treatment Date:</strong> {formatDate(intake.treatmentDate1)}</p>
                   </div>
                 )}
                 {intake.doctorHospital2 && (
-                  <div className="mt-4">
-                    <h4 className="font-medium text-green-600">Treatment 2</h4>
-                    <p className="text-black dark:text-gray-200"><strong>Doctor/Hospital:</strong> {intake.doctorHospital2}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Address:</strong> {intake.address2 || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Phone:</strong> {intake.phone2 || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Treatment Date:</strong> {formatDate(intake.treatmentDate2)}</p>
+                  <div className="mt-6">
+                    <h4 className="font-semibold text-green-600 mb-2">Treatment 2</h4>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Doctor/Hospital:</strong> {intake.doctorHospital2}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Address:</strong> {intake.address2 || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Phone:</strong> {intake.phone2 || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Treatment Date:</strong> {formatDate(intake.treatmentDate2)}</p>
                   </div>
                 )}
                 {intake.doctorHospital3 && (
-                  <div className="mt-4">
-                    <h4 className="font-medium text-green-600">Treatment 3</h4>
-                    <p className="text-black dark:text-gray-200"><strong>Doctor/Hospital:</strong> {intake.doctorHospital3}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Address:</strong> {intake.address3 || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Phone:</strong> {intake.phone3 || 'N/A'}</p>
-                    <p className="text-black dark:text-gray-200"><strong>Treatment Date:</strong> {formatDate(intake.treatmentDate3)}</p>
+                  <div className="mt-6">
+                    <h4 className="font-semibold text-green-600 mb-2">Treatment 3</h4>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Doctor/Hospital:</strong> {intake.doctorHospital3}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Address:</strong> {intake.address3 || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Phone:</strong> {intake.phone3 || 'N/A'}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Treatment Date:</strong> {formatDate(intake.treatmentDate3)}</p>
                   </div>
                 )}
               </div>
 
               {/* Injuries */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 className="text-lg font-bold mb-2 text-green-600">Injuries</h3>
-                <p className="text-black dark:text-gray-200"><strong>Body Parts Affected:</strong> {intake.bodyPartsAffected || 'N/A'}</p>
-                <p className="text-black dark:text-gray-200"><strong>Prior Injuries:</strong> {intake.priorInjuries || 'N/A'}</p>
-                <p className="text-black dark:text-gray-200"><strong>Prior Insurance Claims:</strong> {intake.priorInsuranceClaims || 'N/A'}</p>
-                <p className="text-black dark:text-gray-200"><strong>Prior Attorneys:</strong> {intake.priorAttorneys || 'N/A'}</p>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+                <h5 className="text-lg font-semibold text-green-600 mb-6 flex items-center gap-2">
+                  <AlertTriangle size={24} />
+                  Injuries
+                </h5>
+                <div className="space-y-4">
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Body Parts Affected:</strong> {intake.bodyPartsAffected || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Prior Injuries:</strong> {intake.priorInjuries || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Prior Insurance Claims:</strong> {intake.priorInsuranceClaims || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Prior Attorneys:</strong> {intake.priorAttorneys || 'N/A'}</p>
+                </div>
               </div>
             </div>
             <div className="lg:col-span-1">
               {/* Plaintiff Information */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 className="text-lg font-bold mb-2 text-green-600">Plaintiff Information</h3>
-                <div className="grid grid-cols-1 gap-4">
-                  <p className="text-black dark:text-gray-200"><strong>Name:</strong> {intake.clientName}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Gender:</strong> {intake.gender || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Phone:</strong> {intake.phoneNumber || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Email:</strong> {intake.email}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Address:</strong> {intake.address || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>City:</strong> {intake.city || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Zip:</strong> {intake.zip || 'N/A'}</p>
-                  <p className="text-black dark:text-gray-200"><strong>Date of Birth:</strong> {formatDate(intake.dateOfBirth)}</p>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+                <h5 className="text-lg font-semibold text-green-600 mb-6 flex items-center gap-2">
+                  <User size={24} />
+                  Plaintiff Information
+                </h5>
+                <div className="space-y-4">
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Name:</strong> {intake.clientName}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Gender:</strong> {intake.gender || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Phone:</strong> {intake.phoneNumber || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Email:</strong> {intake.email}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Address:</strong> {intake.address || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">City:</strong> {intake.city || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Zip:</strong> {intake.zip || 'N/A'}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg"><strong className="text-gray-900 dark:text-white">Date of Birth:</strong> {formatDate(intake.dateOfBirth)}</p>
                 </div>
               </div>
             </div>

@@ -19,6 +19,7 @@ import { useSearchParams } from "next/navigation";
 import type { DefaultUser } from "next-auth";
 import { toast } from "sonner";
 import IntakeDocuments from "./intakeDocuments/intakeDocuments";
+import router from "next/router";
 
 declare module "next-auth" {
   interface Session {
@@ -260,6 +261,8 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
     setIsSubmitted(true);
     setSubmittedIntakeId(savedData.id);
     setStep(6); // Auto-navigate to step 7 (DOCUMENT UPLOAD)
+    // router.push("/intake-list");
+    router.push("/forms");
   } catch (error) {
     console.error("❌ Error saving intake:", error);
     toast.error("⚠️ There was an error saving the form.");
@@ -331,17 +334,18 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
         ref={containerRef}
         className="w-full mx-auto max-h-[80vh] overflow-auto"
       >
-        <form
-          onSubmit={(e) => {
-            console.log("Form onSubmit triggered");
-            e.preventDefault();
-            console.log("Calling methods.handleSubmit(onSubmit)");
-            methods.handleSubmit(onSubmit, (errors) => {
-              console.log("❌ Validation failed:", errors);
-            })();
-          }}
-          className="bg-white dark:bg-gray-900 p-4 sm:p-6 lg:p-8 rounded-xl shadow-xl transition-all duration-300"
-        >
+        <div className="max-w-4xl mx-auto border border-gray-300 dark:border-gray-600 rounded-xl">
+          <form
+            onSubmit={(e) => {
+              console.log("Form onSubmit triggered");
+              e.preventDefault();
+              console.log("Calling methods.handleSubmit(onSubmit)");
+              methods.handleSubmit(onSubmit, (errors) => {
+                console.log("❌ Validation failed:", errors);
+              })();
+            }}
+            className="bg-white dark:bg-gray-900 p-4 sm:p-6 lg:p-8 rounded-xl shadow-xl transition-all duration-300"
+          >
           <input type="hidden" {...methods.register("hearAboutUs")} />
           <input type="hidden" {...methods.register("hearAboutUsDetail")} />
 
@@ -427,6 +431,7 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
             )}
           </div>
         </form>
+        </div>
 
       </div>
     </FormProvider>

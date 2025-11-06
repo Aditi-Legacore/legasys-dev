@@ -20,6 +20,9 @@ interface CaseIntake {
   accidentDate: string;
   accidentDescription: string | null | undefined;
   isDraft: boolean;
+  Lead?: {
+    caseType: string;
+  } | null;
 }
 
 export default function IntakeTable() {
@@ -167,6 +170,7 @@ const handleNewIntake = () => {
                   <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
                     Client Name
                   </th>
+                 
                   <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
                     Date of Loss
                   </th>
@@ -195,7 +199,7 @@ const handleNewIntake = () => {
                         onClick={() => handleView(intake)}
                         className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline cursor-pointer bg-transparent border-none p-0"
                       >
-                        {intake.clientName}
+                        {intake.clientName} - {intake.Lead?.caseType || 'N/A'}
                       </button>
                     </td>
                     <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-600 dark:text-gray-400">
@@ -255,7 +259,7 @@ const handleNewIntake = () => {
                       onClick={() => handleView(intake)}
                       className="text-base font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline cursor-pointer bg-transparent border-none p-0 truncate"
                     >
-                      {truncateText(intake.clientName, 20)}
+                      {truncateText(`${intake.clientName} - ${intake.Lead?.caseType || 'N/A'}`, 20)}
                     </button>
                   </div>
                   <div className="flex gap-2 mt-1">
