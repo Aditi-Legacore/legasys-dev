@@ -1,13 +1,8 @@
-# TODO: Enhance Reports Page with Dynamic Data and Filtering
+# TODO: Update Note Creation to Include User Details
 
 ## Steps to Complete
 
-- [ ] Add state variables for loading, error, and dynamic data arrays (intakesData, leadsData, documentsData) in reports/page.tsx
-- [ ] Implement useEffect to fetch data from /api/intake, /api/leads, /api/documents on mount and activeTab change
-- [ ] Add data aggregation logic: Compute summaries for each tab (total counts, status breakdowns, case type distributions)
-- [ ] Update filtering logic with useMemo: Filter by searchQuery (name/clientName), filterValue (status/time), sidebar filters (dateFrom/dateTo, caseType)
-- [ ] Adjust ReportTable columns and data props based on activeTab (e.g., intakes: ["Client Name", "Status", "Case Type", "Created Date"])
-- [ ] Add loading states (spinner) and error handling (error message display)
-- [ ] Update FilterSidebar props for caseType and referralSource based on activeTab
-- [ ] Test the functionality by running the app and verifying dynamic data, filtering, and search work across all tabs
-- [ ] Ensure ReportTable handles new data structures correctly (minor updates if needed)
+- [x] Edit `prisma/schema.prisma` to add relation between `Note` and `User` models for `createdBy`.
+- [x] Edit `src/app/api/intake/[id]/notes/route.ts` GET method to include `createdByUser` with `firstName` and `lastName`.
+- [x] Run `npx prisma generate` to update the Prisma client.
+- [x] Test the API to ensure notes include user first name and last name.

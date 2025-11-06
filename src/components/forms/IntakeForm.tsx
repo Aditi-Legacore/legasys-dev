@@ -13,13 +13,12 @@ import MedicalTreatmentStep from "./formSteps/MedicalTreatmentStep";
 // import InjuriesStep from "./formSteps/InjuriesStep";
 import SubmitStep from "./formSteps/SubmitStep";
 import { useSession } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 // Extend the session user type to include 'id'
 import type { DefaultUser } from "next-auth";
 import { toast } from "sonner";
 import IntakeDocuments from "./intakeDocuments/intakeDocuments";
-import router from "next/router";
 
 declare module "next-auth" {
   interface Session {
@@ -57,6 +56,7 @@ interface IntakeFormWizardProps {
 
 export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const referenceId = searchParams.get("ref") || localStorage.getItem("referenceId");
   const [draft, setDraft] = useState<any>(null);
 
