@@ -428,7 +428,7 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
                 Back
               </button>
             )}
-            {step === steps.length - 2 && (
+            {/* {step === steps.length - 2 && (
               <button
                 type="button"
                 onClick={handleFinalSubmit}
@@ -437,7 +437,7 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
               >
                 {isSubmitting ? "Submitting..." : "Submit"}
               </button>
-            )}
+            )} */}
             {step < steps.length - 2 && (
               <button
                 type="button"
