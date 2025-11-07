@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { FormTemplate } from '@/types/form';
@@ -12,6 +11,62 @@ import Pagination from '@/components/ui/pagination';
 import FilterBar from '@/components/ui/FilterBar';
 import FilterSidebar from '@/components/ui/FilterSidebar';
 import ActiveFilters from '@/components/ui/ActiveFilters';
+import CommonTable, { Column, Action } from '@/components/ui/CommonTable';
+
+// FormTemplatesTable component using CommonTable
+function FormTemplatesTable({ templates, onDelete, router }: { templates: FormTemplate[], onDelete: (id: string) => void, router: any }) {
+  // Define columns for CommonTable
+  const columns: Column[] = [
+    {
+      key: 'title',
+      label: 'Form Title',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium'
+    },
+    {
+      key: 'language',
+      label: 'Language',
+      className: 'px-4 py-4',
+      render: (value) => <Badge variant="outline">{value}</Badge>
+    },
+    {
+      key: 'createdBy',
+      label: 'Created By',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      render: (value) => value || 'N/A'
+    },
+    {
+      key: 'createdAt',
+      label: 'Created At',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      render: (value) => new Date(value).toLocaleDateString()
+    }
+  ];
+
+  // Define actions for CommonTable
+  const actions: Action[] = [
+    {
+      label: 'Edit',
+      icon: Edit,
+      onClick: (row) => router.push(`/form-templates/${row.id}/edit`),
+      className: 'text-blue-600 dark:text-blue-400'
+    },
+    {
+      label: 'Delete',
+      icon: Trash2,
+      onClick: (row) => onDelete(row.id),
+      className: 'text-red-600 dark:text-red-400'
+    }
+  ];
+
+  return (
+    <CommonTable
+      columns={columns}
+      data={templates}
+      actions={actions}
+      emptyMessage="No form templates found."
+    />
+  );
+}
 
 export default function FormTemplatesPage() {
   const [templates, setTemplates] = useState<FormTemplate[]>([]);
@@ -205,51 +260,11 @@ export default function FormTemplatesPage() {
         <ActiveFilters filters={activeFilters} />
 
         {/* Templates Table */}
-        <Card className="card-shadow overflow-hidden hidden md:block bg-white dark:bg-gray-800">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted/50 dark:bg-gray-700 border-b border-border dark:border-gray-600">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Form Title</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Language</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Created By</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Created At</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-card dark:bg-gray-800 divide-y divide-border dark:divide-gray-600">
-                {paginatedTemplates.map((template) => (
-                  <tr key={template.id} className="hover:bg-primary-light/50 dark:hover:bg-gray-700 transition-fast cursor-pointer group">
-                    <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300 font-medium">{template.title}</td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline">{template.language}</Badge>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">{template.createdBy || 'N/A'}</td>
-                    <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">{new Date(template.createdAt).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex justify-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => router.push(`/form-templates/${template.id}/edit`)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(template.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+        <FormTemplatesTable
+          templates={paginatedTemplates}
+          onDelete={handleDelete}
+          router={router}
+        />
 
         {/* Pagination */}
         <Pagination

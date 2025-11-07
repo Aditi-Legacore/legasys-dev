@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import FilterBar from "@/components/ui/FilterBar";
 import ActiveFilters from "@/components/ui/ActiveFilters";
 import Pagination from "@/components/ui/pagination";
+import CommonTable, { Column } from "@/components/ui/CommonTable";
 
 export default function StagesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -147,49 +148,7 @@ export default function StagesPage() {
         </Card>
 
         {/* Stages Table */}
-        <Card className="card-shadow overflow-hidden hidden md:block bg-white dark:bg-gray-800">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted/50 dark:bg-gray-700 border-b border-border dark:border-gray-600">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Stage Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Created Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Status</th>
-                </tr>
-              </thead>
-              <tbody className="bg-card dark:bg-gray-800 divide-y divide-border dark:divide-gray-600">
-                {paginatedStages.map((stage) => (
-                  <tr key={stage.id} className="hover:bg-primary-light/50 dark:hover:bg-gray-700 transition-fast cursor-pointer group">
-                    <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">{stage.name}</td>
-                    <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">{stage.description}</td>
-                    <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">{stage.created}</td>
-                    <td className="px-6 py-4">
-                      <Badge
-                        className={`${
-                          stage.status === 'Completed'
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                            : stage.status === 'Ongoing'
-                            ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
-                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                        }`}
-                      >
-                        {stage.status}
-                      </Badge>
-                    </td>
-                  </tr>
-                ))}
-                {paginatedStages.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="text-center py-6 text-gray-500 dark:text-gray-400">
-                      No stages found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+        <StagesTable stages={paginatedStages} />
 
         {/* Pagination */}
         <Pagination
@@ -201,5 +160,52 @@ export default function StagesPage() {
 
       </div>
     </main>
+  );
+}
+
+function StagesTable({ stages }: { stages: any[] }) {
+  // Define columns for CommonTable
+  const columns: Column[] = [
+    {
+      key: 'name',
+      label: 'Stage Name',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium'
+    },
+    {
+      key: 'description',
+      label: 'Description',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400'
+    },
+    {
+      key: 'created',
+      label: 'Created Date',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400'
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      className: 'px-4 py-4',
+      render: (value: string) => (
+        <Badge
+          className={`${
+            value === 'Completed'
+              ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+              : value === 'Ongoing'
+              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
+              : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+          }`}
+        >
+          {value}
+        </Badge>
+      )
+    }
+  ];
+
+  return (
+    <CommonTable
+      columns={columns}
+      data={stages}
+      emptyMessage="No stages found."
+    />
   );
 }

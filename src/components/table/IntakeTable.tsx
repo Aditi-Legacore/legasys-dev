@@ -8,6 +8,8 @@ import Pagination from '@/components/ui/pagination';
 import NewIntakeModal from '../NewIntakeModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import CommonTable, { Column, Action } from '@/components/ui/CommonTable';
+import { Badge } from '@/components/ui/badge';
 
 interface CaseIntake {
   id: number | string;
@@ -115,6 +117,72 @@ const handleNewIntake = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedIntakes = intakes.slice(startIndex, startIndex + itemsPerPage);
 
+  // Define columns for CommonTable
+  const columns: Column[] = [
+    {
+      key: 'clientName',
+      label: 'Client Name',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium'
+    },
+    {
+      key: 'accidentDate',
+      label: 'Date of Loss',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      render: (value) => formatDate(value)
+    },
+    {
+      key: 'accidentDescription',
+      label: 'Accident Description',
+      className: 'px-4 py-4',
+      render: (value) => (
+        <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-medium">
+          {value}
+        </span>
+      )
+    },
+    {
+      key: 'isDraft',
+      label: 'Status',
+      className: 'px-4 py-4',
+      render: (value) => (
+        <Badge
+          className={`px-3 py-1 rounded-full text-xs font-medium ${
+            value
+              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+              : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+          }`}
+        >
+          {value ? 'Draft' : 'Complete'}
+        </Badge>
+      )
+    }
+  ];
+
+  // Define actions for CommonTable
+  const actions: Action[] = [
+    {
+      label: 'View',
+      icon: Eye,
+      onClick: (row) => handleView(row),
+      disabled: (row) => loadingView === row.id,
+      className: 'text-blue-600 dark:text-blue-400'
+    },
+    {
+      label: 'Edit',
+      icon: Edit,
+      onClick: (row) => handleUpdate(row.id),
+      disabled: (row) => loadingEdit === row.id,
+      className: 'text-green-600 dark:text-green-400'
+    },
+    {
+      label: 'Delete',
+      icon: Trash2,
+      onClick: (row) => handleDelete(row.id),
+      disabled: (row) => loadingDelete === row.id,
+      className: 'text-red-600 dark:text-red-400'
+    }
+  ];
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -151,110 +219,13 @@ const handleNewIntake = () => {
         </div>
 
         {/* Desktop Table View */}
-        <Card className="card-shadow overflow-hidden hidden md:block bg-white dark:bg-gray-800">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted/50 dark:bg-gray-700 border-b border-border dark:border-gray-600">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
-                    S.No
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
-                    Client Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
-                    Date of Loss
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
-                    Accident Description
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-card dark:bg-gray-800 divide-y divide-border dark:divide-gray-600">
-                {paginatedIntakes.map((intake, index) => (
-                  <tr
-                    key={intake.id}
-                    className="hover:bg-primary-light/50 dark:hover:bg-gray-700 transition-fast cursor-pointer group"
-                  >
-                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      {startIndex + index + 1}
-                    </td>
-                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-900 dark:text-white font-medium">
-                      {intake.clientName}
-                    </td>
-                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-600 dark:text-gray-400">
-                      {formatDate(intake.accidentDate)}
-                    </td>
-                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm">
-                      <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 lg:px-3 py-1 rounded-full text-xs font-medium">
-                        {intake.accidentDescription}
-                      </span>
-                    </td>
-                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm">
-                      <span className={`inline-block px-2 lg:px-3 py-1 rounded-full text-xs font-medium ${intake.isDraft ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200' : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'}`}>
-                        {intake.isDraft ? 'Draft' : 'Complete'}
-                      </span>
-                    </td>
-                    <td className="px-4 lg:px-6 py-3 lg:py-4">
-                      <div className="flex justify-center gap-1 lg:gap-2">
-                        {/* View Button */}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleView(intake)}
-                          disabled={loadingView === intake.id}
-                          title="View"
-                        >
-                          {loadingView === intake.id ? (
-                            <Loader2 size={16} className="animate-spin" />
-                          ) : (
-                            <Eye size={16} />
-                          )}
-                        </Button>
-
-                        {/* Edit Button */}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleUpdate(intake.id)}
-                          disabled={loadingEdit === intake.id}
-                          title="Edit"
-                        >
-                          {loadingEdit === intake.id ? (
-                            <Loader2 size={16} className="animate-spin" />
-                          ) : (
-                            <Edit size={16} />
-                          )}
-                        </Button>
-
-                        {/* Delete Button */}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(intake.id)}
-                          disabled={loadingDelete === intake.id}
-                          title="Delete"
-                        >
-                          {loadingDelete === intake.id ? (
-                            <Loader2 size={16} className="animate-spin" />
-                          ) : (
-                            <Trash2 size={16} />
-                          )}
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+        <CommonTable
+          columns={columns}
+          data={paginatedIntakes}
+          actions={actions}
+          showSerialNumber={true}
+          emptyMessage="No case intakes found."
+        />
 
         {/* Mobile Card View */}
         <div className="md:hidden space-y-4">

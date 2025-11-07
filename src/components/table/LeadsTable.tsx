@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Lead } from "@/types/leads";
 import { toast } from "sonner";
+import CommonTable, { Column, Action } from "@/components/ui/CommonTable";
 
 interface LeadsTableProps {
   leads: Lead[];
@@ -81,91 +82,99 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
       toast.error("Failed to archive lead");
     }
   };
+  // Define columns for CommonTable
+  const columns: Column[] = [
+    {
+      key: 'dueDate',
+      label: 'Due Date',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      render: (value) => new Date(value).toLocaleDateString('en-US')
+    },
+    {
+      key: 'name',
+      label: 'Client Name',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium'
+    },
+    {
+      key: 'caseType',
+      label: 'Case Type',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      render: (value) => value ? value.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : '-'
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      className: 'px-4 py-4',
+      render: (value: string) => (
+        <Badge className={statusConfig[value as keyof typeof statusConfig]?.color || statusConfig.default.color}>
+          {statusConfig[value as keyof typeof statusConfig]?.label || statusConfig.default.label}
+        </Badge>
+      )
+    },
+    {
+      key: 'contact',
+      label: 'Contact',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      render: (value, row) => (
+        <div>
+          <div>{value}</div>
+          <div className="text-xs text-muted-foreground dark:text-gray-400">
+            {row.phone}
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'matter',
+      label: 'Matter',
+      className: 'px-4 py-4 text-xs sm:text-sm',
+      render: (value) => (
+        value !== "-" ? (
+          <span className="text-primary dark:text-blue-400 font-medium">{value}</span>
+        ) : (
+          <span className="text-muted-foreground dark:text-gray-400">-</span>
+        )
+      )
+    }
+  ];
+
+  // Define actions for CommonTable
+  const actions: Action[] = [
+    {
+      label: 'View Details',
+      icon: Eye,
+      onClick: (row) => {
+        // Handle view details - placeholder for now
+        console.log('View details for lead:', row);
+      },
+      className: 'text-blue-600 dark:text-blue-400'
+    },
+    {
+      label: 'Resend Email',
+      icon: Mail,
+      onClick: (row) => handleResendEmail(row),
+      className: 'text-green-600 dark:text-green-400'
+    },
+    {
+      label: 'Convert to Matter',
+      icon: FileCheck,
+      onClick: (row) => handleConvertToMatter(row),
+      className: 'text-purple-600 dark:text-purple-400'
+    },
+    {
+      label: 'Archive',
+      icon: Archive,
+      onClick: (row) => handleArchive(row),
+      className: 'text-red-600 dark:text-red-400'
+    }
+  ];
+
   return (
-    <Card className="card-shadow overflow-hidden hidden md:block bg-white dark:bg-gray-800">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-muted/50 dark:bg-gray-700 border-b border-border dark:border-gray-600">
-            <tr>
-              {[
-                "Due Date",
-                "Client Name",
-                "Case Type",
-                "Status",
-                "Contact",
-                "Matter",
-                "Actions",
-              ].map((header) => (
-                <th
-                  key={header}
-                  className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider"
-                >
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-card dark:bg-gray-800 divide-y divide-border dark:divide-gray-600">
-            {leads.map((lead) => (
-              <tr
-                key={lead.id}
-                className="hover:bg-primary-light/50 dark:hover:bg-gray-700 transition-fast cursor-pointer group"
-              >
-                <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">
-                  {new Date(lead.dueDate).toLocaleDateString('en-US')}
-                </td>
-                <td className="px-6 py-4 text-sm font-medium text-foreground dark:text-white">
-                  {lead.name}
-                </td>
-                <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">
-                  {lead.caseType ? lead.caseType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '-'}
-                </td>
-                <td className="px-6 py-4">
-                  <Badge className={statusConfig[lead.status]?.color || statusConfig.default.color}>
-                    {statusConfig[lead.status]?.label || statusConfig.default.label}
-                  </Badge>
-                </td>
-                <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">
-                  <div>{lead.contact}</div>
-                  <div className="text-xs text-muted-foreground dark:text-gray-400">
-                    {lead.phone}
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  {lead.matter !== "-" ? (
-                    <span className="text-primary dark:text-blue-400 font-medium">{lead.matter}</span>
-                  ) : (
-                    <span className="text-muted-foreground dark:text-gray-400">-</span>
-                  )}
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <Eye className="w-4 h-4 mr-2" /> View Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleResendEmail(lead)}>
-                        <Mail className="w-4 h-4 mr-2" /> Resend Email
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleConvertToMatter(lead)}>
-                        <FileCheck className="w-4 h-4 mr-2" /> Convert to Matter
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleArchive(lead)}>
-                        <Archive className="w-4 h-4 mr-2" /> Archive
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Card>
+    <CommonTable
+      columns={columns}
+      data={leads}
+      actions={actions}
+      emptyMessage="No leads found."
+    />
   );
 }

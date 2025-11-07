@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Plus } from 'lucide-react';
 import PrepareFormModal from '@/components/forms/PrepareFormModal';
@@ -13,6 +12,7 @@ import Pagination from '@/components/ui/pagination';
 import FilterBar from '@/components/ui/FilterBar';
 import FilterSidebar from '@/components/ui/FilterSidebar';
 import ActiveFilters from '@/components/ui/ActiveFilters';
+import CommonTable, { Column, Action } from '@/components/ui/CommonTable';
 
 export default function FormsPage() {
   const [submissions, setSubmissions] = useState<FormSubmission[]>([]);
@@ -261,79 +261,62 @@ export default function FormsPage() {
 }
 
 function FormsTable({ submissions, showEditButton = false }: { submissions: FormSubmission[]; showEditButton?: boolean }) {
+  // Define columns for CommonTable
+  const columns: Column[] = [
+    {
+      key: 'createdAt',
+      label: 'Due',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      render: (value) => new Date(value).toLocaleDateString()
+    },
+    {
+      key: 'template',
+      label: 'Form',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium',
+      render: (value) => value.title
+    },
+    {
+      key: 'user',
+      label: 'Contact',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      render: (value) => value ? `${value.firstName} ${value.lastName}` : 'N/A'
+    },
+    {
+      key: 'matter',
+      label: 'Matter',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      render: (value) => value?.title || 'N/A'
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      className: 'px-4 py-4',
+      render: (value: string) => (
+        <Badge variant={value === 'Pending' || value === 'Draft' ? 'secondary' : 'default'}>
+          {value}
+        </Badge>
+      )
+    }
+  ];
+
+  // Define actions for CommonTable
+  const actions: Action[] = [];
+  if (showEditButton) {
+    actions.push({
+      label: 'Edit',
+      onClick: (row) => window.location.href = `/forms/${row.id}/fill`,
+      className: 'text-blue-600 dark:text-blue-400'
+    });
+  }
+
   return (
-    <Card className="card-shadow overflow-hidden hidden md:block bg-white dark:bg-gray-800">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-muted/50 dark:bg-gray-700 border-b border-border dark:border-gray-600">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Due</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Form</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Contact</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Matter</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Status</th>
-              {showEditButton && <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Actions</th>}
-            </tr>
-          </thead>
-          <tbody className="bg-card dark:bg-gray-800 divide-y divide-border dark:divide-gray-600">
-            {submissions.map((submission) => (
-              <tr key={submission.id} className="hover:bg-primary-light/50 dark:hover:bg-gray-700 transition-fast cursor-pointer group">
-                <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">{new Date(submission.createdAt).toLocaleDateString()}</td>
-                <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">{submission.template.title}</td>
-                <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">
-                  {submission.user ? `${submission.user.firstName} ${submission.user.lastName}` : 'N/A'}
-                </td>
-                <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">{submission.matter?.title || 'N/A'}</td>
-                <td className="px-6 py-4">
-                  <Badge variant={submission.status === 'Pending' || submission.status === 'Draft' ? 'secondary' : 'default'}>
-                    {submission.status}
-                  </Badge>
-                </td>
-                {showEditButton && (
-                  <td className="px-6 py-4 text-center">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.location.href = `/forms/${submission.id}/fill`}
-                    >
-                      Edit
-                    </Button>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Card>
+    <CommonTable
+      columns={columns}
+      data={submissions}
+      actions={actions}
+      emptyMessage="No form submissions found."
+    />
   );
 }
 
-function TemplatesTable({ templates }: { templates: any[] }) {
-  return (
-    <div className="border rounded-lg">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Form Title</TableHead>
-            <TableHead>Language</TableHead>
-            <TableHead>Created By</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {templates.map((template) => (
-            <TableRow key={template.id}>
-              <TableCell>{template.title}</TableCell>
-              <TableCell>{template.language}</TableCell>
-              <TableCell>{template.createdBy || 'N/A'}</TableCell>
-              <TableCell>
-                <Button variant="outline" size="sm">Edit</Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
-}
+
