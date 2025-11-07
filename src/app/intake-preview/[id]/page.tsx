@@ -41,8 +41,20 @@ export default function IntakePreviewPage() {
   useEffect(() => {
     const fetchIntake = async () => {
       try {
-        const res = await fetch(`/api/intake/${id}`);
-        if (!res.ok) throw new Error('Failed to fetch intake');
+        // First try to fetch by ID (for intake table links)
+        let res = await fetch(`/api/intake/${id}`);
+        if (res.status === 404) {
+          // If not found by ID, try to fetch by referenceId (for leads table links)
+          res = await fetch(`/api/intake/reference/${id}`);
+        }
+        if (res.status === 404) {
+          setIntake(null);
+          return;
+        }
+        if (!res.ok) {
+          console.log(`Fetch failed with status: ${res.status} ${res.statusText}`);
+          throw new Error('Failed to fetch intake');
+        }
         const data = await res.json();
         setIntake(data);
       } catch (error) {

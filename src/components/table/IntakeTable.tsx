@@ -17,6 +17,7 @@ interface CaseIntake {
   accidentDate: string;
   accidentDescription: string | null | undefined;
   isDraft: boolean;
+  Lead?: { caseType: string };
 }
 
 export default function IntakeTable() {

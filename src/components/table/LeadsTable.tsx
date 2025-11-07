@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Lead } from "@/types/leads";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import CommonTable, { Column, Action } from "@/components/ui/CommonTable";
 
 interface LeadsTableProps {
@@ -28,6 +29,8 @@ const statusConfig = {
 };
 
 export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
+  const router = useRouter();
+
   const handleResendEmail = async (lead: Lead) => {
     try {
       const response = await fetch('/api/resend-email', {
@@ -96,7 +99,14 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
       label: 'Client Name',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium',
       sortable: true,
-      link: (row) => `/leads/${row.id}` // Assuming lead details page
+      render: (value, row) => row.referenceId ? (
+        <a
+          href={`/intake-preview/${row.referenceId}`}
+          className="underline text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+        >
+          {value}
+        </a>
+      ) : value
     },
     {
       key: 'caseType',
@@ -148,10 +158,7 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
     {
       label: 'View Details',
       icon: Eye,
-      onClick: (row) => {
-        // Handle view details - placeholder for now
-        console.log('View details for lead:', row);
-      },
+      onClick: (row) => row.referenceId && router.push(`/intake-preview/${row.referenceId}`),
       className: 'text-blue-600 dark:text-blue-400'
     },
     {

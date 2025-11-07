@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Eye, Edit, Trash2, FileText } from "lucide-react";
+import { Eye, Edit, Trash2, FileText, Upload } from "lucide-react";
 import Pagination from "@/components/ui/pagination";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import CommonTable, { Column, Action } from "@/components/ui/CommonTable";
+import UploadDocumentsModal from "@/components/modal/UploadDocumentsModal";
 
 interface Document {
   id: string;
@@ -28,6 +29,8 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
   const [currentPage, setCurrentPage] = useState(1);
   const [tableDocs, setTableDocs] = useState<Document[]>(documents);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
 
   // Update tableDocs when documents prop changes
   React.useEffect(() => {
@@ -75,7 +78,7 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
       label: 'Client Name',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
       sortable: true,
-      link: (row) => `/documents/${row.id}`
+      link: (row) => `/intake-preview/${row.id}`
     },
     {
       key: 'caseType',
@@ -138,9 +141,12 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
       className: 'text-blue-600 dark:text-blue-400'
     },
     {
-      label: 'Edit',
-      icon: Edit,
-      onClick: (row) => onEdit?.(row),
+      label: 'Upload',
+      icon: Upload,
+      onClick: (row) => {
+        setSelectedDocId(row.id);
+        setUploadModalOpen(true);
+      },
       className: 'text-green-600 dark:text-green-400'
     },
     {
@@ -172,6 +178,23 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
             onPageChange={handlePageChange}
           />
         </div>
+      )}
+
+      {/* Upload Documents Modal */}
+      {selectedDocId && (
+        <UploadDocumentsModal
+          isOpen={uploadModalOpen}
+          onClose={() => {
+            setUploadModalOpen(false);
+            setSelectedDocId(null);
+          }}
+          intakeId={selectedDocId}
+          onUploadSuccess={() => {
+            // Refresh documents or handle success
+            setUploadModalOpen(false);
+            setSelectedDocId(null);
+          }}
+        />
       )}
     </>
   );
