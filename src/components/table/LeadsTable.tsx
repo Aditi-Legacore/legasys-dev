@@ -5,12 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MoreVertical, Eye, Mail, FileCheck, Archive } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Lead } from "@/types/leads";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -131,7 +125,7 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
   const columns: Column[] = [
     {
       key: 'dueDate',
-      label: 'Due Date',
+      label: 'Date Of Loss',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
       sortable: true,
       render: (value) => new Date(value).toLocaleDateString('en-US')
