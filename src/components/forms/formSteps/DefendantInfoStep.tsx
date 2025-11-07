@@ -240,11 +240,11 @@ export default function DefendantInfoStep() {
   };
 
   return (
-    <div className="space-y-8 w-full">
+    <div className="space-y-3 w-full">
       {[...Array(defendantCount)].map((_, index) => (
         <div
           key={index}
-          className="p-4 rounded-2xl dark:bg-gray-800 space-y-6 relative"
+          className="p-3 rounded-xl dark:bg-gray-800 space-y-3 relative"
         >
           {/* Header with remove button */}
           <div className="flex justify-between items-center mb-2">

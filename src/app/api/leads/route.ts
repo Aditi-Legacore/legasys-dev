@@ -1,5 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+// import { NextRequest, NextResponse } from "next/server";
+// import { prisma } from "@/lib/prisma";
+
 import { prisma } from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
+
+// for generating referenceId and storing data in Leads table
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,14 +53,33 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// export async function GET() {
+//   try {
+//     const leads = await prisma.lead.findMany({
+//       orderBy: { createdAt: "desc" },
+//     });
+//     return NextResponse.json(leads, { status: 200 });
+//   } catch (err) {
+//     console.error("❌ GET /api/leads error:", err);
+//     return NextResponse.json({ error: "Failed to fetch leads" }, { status: 500 });
+//   }
+// }
+
 export async function GET() {
   try {
     const leads = await prisma.lead.findMany({
       orderBy: { createdAt: "desc" },
+      include: {
+        intakeInfo: {
+          select: { id: true }, // only fetch what we need
+        },
+      },
     });
+
     return NextResponse.json(leads, { status: 200 });
   } catch (err) {
     console.error("❌ GET /api/leads error:", err);
     return NextResponse.json({ error: "Failed to fetch leads" }, { status: 500 });
   }
 }
+

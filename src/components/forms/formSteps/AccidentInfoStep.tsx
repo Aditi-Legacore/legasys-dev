@@ -11,9 +11,11 @@ export default function AccidentInfoStep() {
   const hospitalized = watch("hospitalized"); // watch nested field if needed
 
   return (
-    <div className="space-y-4 w-full">
-      <DateInputField name="accidentDate" label="Date of Accident *" />
-      <InputField name="accidentTime" label="Time" type="time" />
+    <div className="space-y-3 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <DateInputField name="accidentDate" label="Date of Accident *" />
+        <InputField name="accidentTime" label="Time" type="time" />
+      </div>
       <InputField name="accidentLocation" label="Accident Location *" />
       <TextareaField name="accidentDescription" label="Accident Description *" />
 
@@ -25,12 +27,11 @@ export default function AccidentInfoStep() {
       />
 
       {passenger === "Yes" && (
-        <div className="p-4 border rounded-lg text-gray-900 dark:text-gray-100
+        <div className="p-3 border rounded-md text-gray-900 dark:text-gray-100
           bg-white dark:bg-gray-800
           border-gray-300 dark:border-gray-600
-          px-3 py-2 
-          focus:outline-none focus:ring-2 
-          focus:ring-indigo-500 dark:focus:ring-indigo-400 
+          focus:outline-none focus:ring-2
+          focus:ring-indigo-500 dark:focus:ring-indigo-400
           transition space-y-3">
           <h3 className="font-semibold text-lg">Passenger/Child Details</h3>
 

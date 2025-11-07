@@ -1,3 +1,5 @@
+import { IntakeInfo } from "@prisma/client";
+
 export interface Lead {
   id: string;
   dueDate: string;
@@ -14,4 +16,5 @@ export interface Lead {
   dateOfBirth?: string;
   createdAt?: string;
   updatedAt?: string;
+  intakeInfo?: IntakeInfo | null;
 }

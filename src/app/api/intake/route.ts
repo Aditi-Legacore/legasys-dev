@@ -251,17 +251,21 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// for fetching all intakes and showing in Intaketable
+
 export async function GET() {
   try {
-    // Temporarily remove auth check for testing - TODO: Add proper auth later
-    // const session = await getServerSession(authOptions);
-    // if (!session || !session.user?.id) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
 
     const allIntakes = await prisma.intakeInfo.findMany({
       // where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
+      include: {
+        Lead: {
+          select: {
+            caseType: true,
+          },
+        },
+      },
     });
     return NextResponse.json(allIntakes, { status: 200 });
   } catch (err) {

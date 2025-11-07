@@ -8,6 +8,7 @@ import FilterBar from "@/components/ui/FilterBar";
 import FilterSidebar from "@/components/ui/FilterSidebar";
 import ActiveFilters from "@/components/ui/ActiveFilters";
 import { Loader2 } from "lucide-react";
+import { utils, writeFile } from 'xlsx';
 
 interface IntakeData {
   id: string;
@@ -223,9 +224,147 @@ export default function ReportsPage() {
     return [{ value: "all", label: "All Sources" }, ...Array.from(sources).map(source => ({ value: source, label: source }))];
   }, [activeTab, leadsData]);
 
-  const handleExport = () => {
-    alert(`Exporting ${activeTab} data...`);
-  };
+  // const handleExport = () => {
+  //   alert(`Exporting ${activeTab} data...`);
+  // };
+
+   // ... your existing code above ...
+  
+  // added in 06-11-2025
+const handleExport = (format: 'csv' | 'excel' | 'json' = 'csv') => {
+  try {
+    // Use the filtered aggregated data that's displayed in the table
+    const dataToExport = filteredData;
+    let filename = `${activeTab}_report`;
+
+    if (dataToExport.length === 0) {
+      alert('No data to export with current filters.');
+      return;
+    }
+
+    // Export in chosen format
+    switch (format) {
+      case 'csv':
+        exportToCSV(dataToExport, filename);
+        break;
+      case 'excel':
+        exportToExcel(dataToExport, filename);
+        break;
+      case 'json':
+        exportToJSON(dataToExport, filename);
+        break;
+    }
+
+  } catch (error) {
+    console.error('Export failed:', error);
+    alert('Export failed. Please try again.');
+  }
+};
+
+// Enhanced CSV Export function
+const exportToCSV = (data: any[], filename: string) => {
+  const headers = ['Report Item', 'Count', 'Status'];
+  
+  const csvHeaders = headers.join(',');
+  const csvRows = data.map(item => {
+    const row = [
+      `"${String(item.name).replace(/"/g, '""')}"`,
+      item.count.toString(),
+      `"${String(item.status).replace(/"/g, '""')}"`
+    ];
+    return row.join(',');
+  });
+
+  const csvContent = [csvHeaders, ...csvRows].join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  downloadBlob(blob, `${filename}_${getFormattedDate()}.csv`);
+};
+
+// Enhanced Excel Export with Better Formatting
+const exportToExcel = (data: any[], filename: string) => {
+  // Prepare the data for Excel
+  const excelData = data.map(item => ({
+    'Report Item': item.name,
+    'Count': item.count,
+    'Status': item.status
+  }));
+
+  // Create worksheet from data
+  const worksheet = utils.json_to_sheet(excelData);
+  
+  // Create workbook
+  const workbook = utils.book_new();
+  
+  // Add title row
+  const title = `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Report - ${new Date().toLocaleDateString()}`;
+  utils.sheet_add_aoa(worksheet, [[title]], { origin: 'A1' });
+  utils.sheet_add_aoa(worksheet, [[]], { origin: 'A2' }); // Empty row
+  utils.sheet_add_json(worksheet, excelData, { origin: 'A3', skipHeader: false });
+
+  // Merge title cells
+  if (!worksheet['!merges']) worksheet['!merges'] = [];
+  worksheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } });
+
+  // Set column widths
+  worksheet['!cols'] = [
+    { wch: 40 }, // Report Item
+    { wch: 15 }, // Count
+    { wch: 25 }  // Status
+  ];
+
+  // Apply styles
+  const titleCell = worksheet['A1'];
+  if (titleCell) {
+    titleCell.s = {
+      font: { bold: true, sz: 14 },
+      alignment: { horizontal: 'center' }
+    };
+  }
+
+  // Style header row (row 3)
+  ['A3', 'B3', 'C3'].forEach(cell => {
+    if (worksheet[cell]) {
+      worksheet[cell].s = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "4472C4" } }, // Blue background
+        alignment: { horizontal: 'center' }
+      };
+    }
+  });
+
+  // Add the worksheet to the workbook
+  utils.book_append_sheet(workbook, worksheet, 'Report');
+
+  // Write the file
+  writeFile(workbook, `${filename}_${getFormattedDate()}.xlsx`);
+};
+
+// JSON Export function (unchanged)
+const exportToJSON = (data: any[], filename: string) => {
+  const jsonContent = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonContent], { type: 'application/json' });
+  downloadBlob(blob, `${filename}_${getFormattedDate()}.json`);
+};
+
+// Generic download function for non-Excel formats
+const downloadBlob = (blob: Blob, filename: string) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+// Helper function to format date for filenames
+const getFormattedDate = () => {
+  return new Date().toISOString().split('T')[0];
+};
+
+
+// previous code below
 
   // Reset filters function
   const resetFilters = () => {
@@ -303,20 +442,23 @@ export default function ReportsPage() {
           <CardContent className="space-y-4">
             {/* Table Header: search + filter + export */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-              <div className="flex-1">
-                <FilterBar
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                  searchPlaceholder="Search by name or record..."
-                  filterValue={filterValue}
-                  setFilterValue={setFilterValue}
-                  filterOptions={filterOptions}
-                  filterPlaceholder="Filter by type"
-                  onMoreFilters={() => setShowFiltersSidebar(true)}
-                  onExport={handleExport}
-                  showExport={true}
-                />
-              </div>
+             
+            <div className="flex-1">
+              <FilterBar
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                searchPlaceholder="Search by name or record..."
+                filterValue={filterValue}
+                setFilterValue={setFilterValue}
+                filterOptions={filterOptions}
+                filterPlaceholder="Filter by type"
+                onMoreFilters={() => setShowFiltersSidebar(true)}
+                onExportCSV={() => handleExport('csv')}
+                onExportExcel={() => handleExport('excel')}
+                onExportJSON={() => handleExport('json')}
+                showExportDropdown={true}
+              />
+            </div>
             </div>
             {/* Active Filters */}
              <ActiveFilters filters={activeFilters} />

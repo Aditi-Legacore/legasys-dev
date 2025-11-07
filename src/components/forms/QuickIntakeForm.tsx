@@ -115,7 +115,7 @@ export default function IntakeForm({ onClose }: { onClose: () => void }) {
             </div>
             <h1 className="text-lg font-bold text-foreground">Lega<span className="font-semibold text-green-300">sys</span></h1>
           </div>
-          <h2 className="text-xl font-bold text-foreground mb-1">Let's Get Started</h2>
+          <h2 className="text-xl font-bold text-muted-foreground mb-1">Let's Get Started</h2>
           <p className="text-sm text-muted-foreground">Tell us about your case — takes 2 minutes</p>
         </div>
 
