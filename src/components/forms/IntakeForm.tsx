@@ -59,7 +59,7 @@ interface IntakeFormWizardProps {
 
 export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps) {
   const searchParams = useSearchParams();
-  const referenceId = searchParams.get("ref") || localStorage.getItem("referenceId");
+  const [referenceId, setReferenceId] = useState<string | null>(null);
   const [draft, setDraft] = useState<any>(null);
 
   const intakeId = searchParams.get("id");  // 👈 get ID from URL
@@ -69,6 +69,33 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   const [formData, setFormData] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedIntakeId, setSubmittedIntakeId] = useState<string | null>(null);
+
+  // Set referenceId and submittedIntakeId on mount
+  useEffect(() => {
+    const refFromUrl = searchParams.get("ref");
+    const refFromStorage = localStorage.getItem("referenceId");
+    const ref = refFromUrl || refFromStorage;
+    setReferenceId(ref);
+    if (ref) {
+      const savedIntakeId = localStorage.getItem(`submittedIntakeId_${ref}`);
+      setSubmittedIntakeId(savedIntakeId || null);
+    }
+  }, [searchParams]);
+
+  // Set step based on referenceId
+  useEffect(() => {
+    if (referenceId) {
+      const savedStep = localStorage.getItem(`intakeFormStep_${referenceId}`);
+      setStep(savedStep ? parseInt(savedStep, 10) : 0);
+    }
+  }, [referenceId]);
+
+  // Persist step in localStorage
+  useEffect(() => {
+    if (referenceId) {
+      localStorage.setItem(`intakeFormStep_${referenceId}`, step.toString());
+    }
+  }, [step, referenceId]);
 
 // Prefill draft if exists
   useEffect(() => {
@@ -260,9 +287,12 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
     toast.success(intakeId ? "✅ Intake updated successfully!" : "✅ Intake created successfully!");
     setIsSubmitted(true);
     setSubmittedIntakeId(savedData.id);
+    if (referenceId) {
+      localStorage.setItem(`submittedIntakeId_${referenceId}`, savedData.id);
+    }
     setStep(6); // Auto-navigate to step 7 (DOCUMENT UPLOAD)
     // router.push("/intake-list");
-    router.push("/forms");
+    // router.push("/forms");
   } catch (error) {
     console.error("❌ Error saving intake:", error);
     toast.error("⚠️ There was an error saving the form.");
@@ -302,7 +332,7 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
       case 4: return <MedicalTreatmentStep />;
       // case 5: return <InjuriesStep />;
       case 5: return <SubmitStep isSubmitting={isSubmitting} />;
-      case 6: return <IntakeDocuments submittedIntakeId={submittedIntakeId || ""} />;
+      case 6: return submittedIntakeId ? <IntakeDocuments submittedIntakeId={submittedIntakeId} /> : <div className="text-center">Loading document upload...</div>;
       default: return null;
     }
   };

@@ -105,10 +105,10 @@ export default function IntakeList() {
   const draftCount = intakesData.filter(i => i.isDraft).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br  dark:border-gray-600 from-slate-50 to-slate-100 p-4 md:p-6">
+      <div className="max-w-7xl  dark:border-gray-600 mx-auto space-y-6">
         {/* Page Header */}
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start  dark:border-gray-600">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Case Intake Management</h1>
             <p className="text-muted-foreground mt-1">Manage and track all case intakes</p>

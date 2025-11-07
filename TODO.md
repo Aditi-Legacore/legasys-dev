@@ -1,12 +1,4 @@
-# TODO: Add SortableHeader to IntakeTable
-
-- [ ] Import SortableHeader from "../ui/SortableHeader"
-- [ ] Add sorting state: sortKey and sortDirection
-- [ ] Add handleSort function
-- [ ] Add sortedIntakes useMemo with sorting logic
-- [ ] Replace Client Name <th> with SortableHeader
-- [ ] Replace Date of Loss <th> with SortableHeader
-- [ ] Replace Accident Description <th> with SortableHeader
-- [ ] Replace Status <th> with SortableHeader
-- [ ] Update paginatedIntakes to use sortedIntakes
-- [ ] Test sorting functionality
+- [ ] Add step persistence to IntakeForm.tsx using localStorage with referenceId key
+- [ ] Load saved step on component mount
+- [ ] Save step on every step change
+- [ ] Test persistence after submission and refresh
