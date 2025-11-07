@@ -31,6 +31,8 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Update tableDocs when documents prop changes
   React.useEffect(() => {
@@ -40,9 +42,47 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
 
   const router = useRouter();
 
+  // Sort data based on current sort state
+  const sortedDocuments = React.useMemo(() => {
+    if (!sortColumn) return tableDocs;
+
+    return [...tableDocs].sort((a, b) => {
+      let aValue = a[sortColumn as keyof Document];
+      let bValue = b[sortColumn as keyof Document];
+
+      // Handle null/undefined values
+      if (aValue == null && bValue == null) return 0;
+      if (aValue == null) return sortDirection === 'asc' ? 1 : -1;
+      if (bValue == null) return sortDirection === 'asc' ? -1 : 1;
+
+      // Handle date sorting
+      if (sortColumn === 'createdDate') {
+        const aDate = new Date(aValue as string);
+        const bDate = new Date(bValue as string);
+        return sortDirection === 'asc' ? aDate.getTime() - bDate.getTime() : bDate.getTime() - aDate.getTime();
+      }
+
+      // Handle document status sorting (custom order: submitted, pending, other)
+      if (sortColumn === 'documentStatus') {
+        const statusOrder = { 'submitted': 1, 'pending': 2 };
+        const aOrder = statusOrder[aValue as keyof typeof statusOrder] || 3;
+        const bOrder = statusOrder[bValue as keyof typeof statusOrder] || 3;
+        return sortDirection === 'asc' ? aOrder - bOrder : bOrder - aOrder;
+      }
+
+      // Handle string sorting
+      const aStr = String(aValue).toLowerCase();
+      const bStr = String(bValue).toLowerCase();
+
+      if (aStr < bStr) return sortDirection === 'asc' ? -1 : 1;
+      if (aStr > bStr) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [tableDocs, sortColumn, sortDirection]);
+
   const itemsPerPage = 5;
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedDocuments = tableDocs.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedDocuments = sortedDocuments.slice(startIndex, startIndex + itemsPerPage);
 
   const handlePageChange = (page: number) => setCurrentPage(page);
 
@@ -166,6 +206,10 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
         actions={actions}
         showSerialNumber={true}
         emptyMessage="No documents found."
+        onSort={(column, direction) => {
+          setSortColumn(column);
+          setSortDirection(direction);
+        }}
       />
 
       {/* Pagination */}

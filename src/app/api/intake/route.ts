@@ -10,6 +10,7 @@ const toNullable = (value: string | undefined): string | null => (value === "" |
 // Helper to build intake data object for Prisma operations
 const buildIntakeData = (data: any) => ({
   ...(data.userId && { user: { connect: { id: data.userId } } }),
+  ...(data.referenceId && { referenceId: data.referenceId }),
 
   // Plaintiff Information
   clientName: data.clientName,
@@ -188,17 +189,6 @@ export async function POST(request: NextRequest) {
     }
 
     let intake;
-    if (!data.referenceId) {
-      intake = await prisma.intakeInfo.create({
-        data: {
-          ...buildIntakeData(data),
-          referenceId: data.referenceId,
-        },
-      });
-    }
-
-    console.log("data.referenceId - 123456", data.referenceId);
-    
     if (data.referenceId) {
       const existingIntake = await prisma.intakeInfo.findFirst({
         where: { referenceId: data.referenceId },
@@ -216,8 +206,10 @@ export async function POST(request: NextRequest) {
           data: buildIntakeData(data),
         });
       }
-
-
+    } else {
+      intake = await prisma.intakeInfo.create({
+        data: buildIntakeData(data),
+      });
     }
 
     console.log("data", data);

@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -30,6 +31,8 @@ const statusConfig = {
 
 export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
   const router = useRouter();
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const handleResendEmail = async (lead: Lead) => {
     try {
@@ -85,6 +88,45 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
       toast.error("Failed to archive lead");
     }
   };
+
+  // Sort data based on current sort state
+  const sortedLeads = React.useMemo(() => {
+    if (!sortColumn) return leads;
+
+    return [...leads].sort((a, b) => {
+      let aValue = a[sortColumn as keyof Lead];
+      let bValue = b[sortColumn as keyof Lead];
+
+      // Handle null/undefined values
+      if (aValue == null && bValue == null) return 0;
+      if (aValue == null) return sortDirection === 'asc' ? 1 : -1;
+      if (bValue == null) return sortDirection === 'asc' ? -1 : 1;
+
+      // Handle date sorting
+      if (sortColumn === 'dueDate') {
+        const aDate = new Date(aValue as string);
+        const bDate = new Date(bValue as string);
+        return sortDirection === 'asc' ? aDate.getTime() - bDate.getTime() : bDate.getTime() - aDate.getTime();
+      }
+
+      // Handle status sorting (custom order: new, form_sent, in_progress, completed)
+      if (sortColumn === 'status') {
+        const statusOrder = { 'new': 1, 'form_sent': 2, 'in_progress': 3, 'completed': 4 };
+        const aOrder = statusOrder[aValue as keyof typeof statusOrder] || 5;
+        const bOrder = statusOrder[bValue as keyof typeof statusOrder] || 5;
+        return sortDirection === 'asc' ? aOrder - bOrder : bOrder - aOrder;
+      }
+
+      // Handle string sorting
+      const aStr = String(aValue).toLowerCase();
+      const bStr = String(bValue).toLowerCase();
+
+      if (aStr < bStr) return sortDirection === 'asc' ? -1 : 1;
+      if (aStr > bStr) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [leads, sortColumn, sortDirection]);
+
   // Define columns for CommonTable
   const columns: Column[] = [
     {
@@ -99,9 +141,9 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
       label: 'Client Name',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium',
       sortable: true,
-      render: (value, row) => row.referenceId ? (
+      render: (value, row) => row.intakeInfo ? (
         <a
-          href={`/intake-preview/${row.referenceId}`}
+          href={`/intake-preview/${row.intakeInfo.id}`}
           className="underline text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
         >
           {value}
@@ -158,7 +200,7 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
     {
       label: 'View Details',
       icon: Eye,
-      onClick: (row) => row.referenceId && router.push(`/intake-preview/${row.referenceId}`),
+      onClick: (row) => row.intakeInfo && router.push(`/intake-preview/${row.intakeInfo.id}`),
       className: 'text-blue-600 dark:text-blue-400'
     },
     {
@@ -184,9 +226,13 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
   return (
     <CommonTable
       columns={columns}
-      data={leads}
+      data={sortedLeads}
       actions={actions}
       emptyMessage="No leads found."
+      onSort={(column, direction) => {
+        setSortColumn(column);
+        setSortDirection(direction);
+      }}
     />
   );
 }

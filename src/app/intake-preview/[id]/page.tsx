@@ -68,21 +68,22 @@ export default function IntakePreviewPage() {
   }, [id]);
 
   useEffect(() => {
-    if (id && activeTab === 'notes') {
+    if (intake?.id && activeTab === 'notes') {
       fetchNotes();
     }
-    if (id && activeTab === 'activity') {
+    if (intake?.id && activeTab === 'activity') {
       fetchActivityLogs();
     }
-    if (id && activeTab === 'documents') {
+    if (intake?.id && activeTab === 'documents') {
       fetchDocuments();
     }
-  }, [id, activeTab]);
+  }, [intake?.id, activeTab]);
 
   const fetchNotes = async () => {
+    if (!intake?.id) return;
     setLoadingNotes(true);
     try {
-      const res = await fetch(`/api/intake/${id}/notes`);
+      const res = await fetch(`/api/intake/${intake.id}/notes`);
       if (!res.ok) throw new Error('Failed to fetch notes');
       const data = await res.json();
       setNotes(data);
@@ -95,9 +96,10 @@ export default function IntakePreviewPage() {
   };
 
   const fetchActivityLogs = async () => {
+    if (!intake?.id) return;
     setLoadingActivity(true);
     try {
-      const res = await fetch(`/api/intake/${id}/activity-logs`);
+      const res = await fetch(`/api/intake/${intake.id}/activity-logs`);
       if (!res.ok) throw new Error('Failed to fetch activity logs');
       const data = await res.json();
       setActivityLogs(data);
@@ -110,9 +112,10 @@ export default function IntakePreviewPage() {
   };
 
   const fetchDocuments = async () => {
+    if (!intake?.id) return;
     setLoadingDocuments(true);
     try {
-      const res = await fetch(`/api/documents?intakeId=${id}`);
+      const res = await fetch(`/api/documents?intakeId=${intake.id}`);
       if (!res.ok) throw new Error('Failed to fetch documents');
       const data = await res.json();
       setDocuments(data);
@@ -125,11 +128,11 @@ export default function IntakePreviewPage() {
   };
 
   const addNote = async () => {
-    if (!newNote.trim()) return;
+    if (!newNote.trim() || !intake?.id) return;
     console.log("session", session);
 
     try {
-      const res = await fetch(`/api/intake/${id}/notes`, {
+      const res = await fetch(`/api/intake/${intake.id}/notes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: newNote, createdBy: session?.user?.name || 'User' }),
@@ -144,7 +147,7 @@ export default function IntakePreviewPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          intakeId: id,
+          intakeId: intake.id,
           activityType: 'add_note',
           shortDescription: 'Note Added',
           longDescription: 'added a note',
@@ -157,9 +160,9 @@ export default function IntakePreviewPage() {
   };
 
   const addActivityLog = async () => {
-    if (!newActivityAction.trim()) return;
+    if (!newActivityAction.trim() || !intake?.id) return;
     try {
-      const res = await fetch(`/api/intake/${id}/activity-logs`, {
+      const res = await fetch(`/api/intake/${intake.id}/activity-logs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: newActivityAction, details: newActivityDetails, createdBy: session?.user?.name || 'User' }),
@@ -176,8 +179,9 @@ export default function IntakePreviewPage() {
   };
 
   const deleteNote = async (noteId: string) => {
+    if (!intake?.id) return;
     try {
-      const res = await fetch(`/api/intake/${id}/notes`, {
+      const res = await fetch(`/api/intake/${intake.id}/notes`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ noteId }),
@@ -191,8 +195,7 @@ export default function IntakePreviewPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          // intakeId: id,
-          refId: id,
+          intakeId: intake.id,
           activityType: 'delete_note',
           shortDescription: 'Note Deleted',
           longDescription: 'deleted a note',
@@ -217,11 +220,11 @@ export default function IntakePreviewPage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this intake?')) return;
+    if (!confirm('Are you sure you want to delete this intake?') || !intake?.id) return;
 
     setLoadingDelete(true);
     try {
-      const res = await fetch(`/api/intake/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/intake/${intake.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete intake');
       toast.success('Intake deleted successfully.');
       router.push('/forms');
@@ -234,9 +237,10 @@ export default function IntakePreviewPage() {
   };
 
   const generatePdf = async () => {
+    if (!intake?.id) return null;
     setLoadingPdf(true);
     try {
-      const res = await fetch(`/api/intake/${id}/pdf`, {
+      const res = await fetch(`/api/intake/${intake.id}/pdf`, {
         method: 'POST',
       });
 
@@ -280,7 +284,7 @@ export default function IntakePreviewPage() {
     if (url) {
       const link = document.createElement('a');
       link.href = url;
-      link.download = `intake-${id}.pdf`;
+      link.download = `intake-${intake?.id || id}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

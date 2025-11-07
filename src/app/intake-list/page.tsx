@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Loader2, Badge } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import CaseIntakeManagement from "@/components/table/IntakeTable";
 import FilterBar from "@/components/ui/FilterBar";
 import FilterSidebar from "@/components/ui/FilterSidebar";
+import ActiveFilters from "@/components/ui/ActiveFilters";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import NewIntakeModal from '@/components/NewIntakeModal';
+import Pagination from "@/components/ui/pagination";
 
 interface IntakeData {
   id: string;
@@ -29,6 +31,8 @@ export default function IntakeList() {
   const [showFiltersSidebar, setShowFiltersSidebar] = useState(false);
   const [loadingNew, setLoadingNew] = useState(false);
   const [showIntakeModal, setShowIntakeModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   // Fetch intake data
   useEffect(() => {
@@ -63,11 +67,11 @@ export default function IntakeList() {
         intake.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         intake.Lead?.caseType.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesStatus = filterValue === "all" || 
+      const matchesStatus = filterValue === "all" ||
         (filterValue === "completed" && !intake.isDraft) ||
         (filterValue === "draft" && intake.isDraft);
 
-      const matchesCaseType = caseTypeFilter === "all" || 
+      const matchesCaseType = caseTypeFilter === "all" ||
         intake.Lead?.caseType === caseTypeFilter;
 
       // Date range filtering
@@ -88,6 +92,55 @@ export default function IntakeList() {
     });
   }, [intakesData, searchQuery, filterValue, caseTypeFilter, dateFromFilter, dateToFilter]);
 
+  // Paginated intakes
+  const paginatedIntakes = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredIntakes.slice(startIndex, endIndex);
+  }, [filteredIntakes, currentPage, itemsPerPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterValue, caseTypeFilter, dateFromFilter, dateToFilter]);
+
+  // Active filters for display
+  const activeFilters = useMemo(() => {
+    const filters = [];
+    if (searchQuery) {
+      filters.push({
+        label: `Search: "${searchQuery}"`,
+        onRemove: () => setSearchQuery("")
+      });
+    }
+    if (filterValue !== "all") {
+      const statusLabel = filterValue === "completed" ? "Completed" : "Drafts";
+      filters.push({
+        label: `Status: ${statusLabel}`,
+        onRemove: () => setFilterValue("all")
+      });
+    }
+    if (caseTypeFilter !== "all") {
+      filters.push({
+        label: `Case Type: ${caseTypeFilter}`,
+        onRemove: () => setCaseTypeFilter("all")
+      });
+    }
+    if (dateFromFilter) {
+      filters.push({
+        label: `From: ${dateFromFilter}`,
+        onRemove: () => setDateFromFilter("")
+      });
+    }
+    if (dateToFilter) {
+      filters.push({
+        label: `To: ${dateToFilter}`,
+        onRemove: () => setDateToFilter("")
+      });
+    }
+    return filters;
+  }, [searchQuery, filterValue, caseTypeFilter, dateFromFilter, dateToFilter]);
+
   // Reset filters function
   const resetFilters = () => {
     setCaseTypeFilter("all");
@@ -105,8 +158,8 @@ export default function IntakeList() {
   const draftCount = intakesData.filter(i => i.isDraft).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br  dark:border-gray-600 from-slate-50 to-slate-100 p-4 md:p-6">
-      <div className="max-w-7xl  dark:border-gray-600 mx-auto space-y-6">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Page Header */}
         <div className="flex justify-between items-start  dark:border-gray-600">
           <div>
@@ -195,6 +248,9 @@ export default function IntakeList() {
           </CardContent>
         </Card>
 
+        {/* Active Filters */}
+        <ActiveFilters filters={activeFilters} />
+
         {/* Main Table */}
         {loading ? (
           <Card>
@@ -204,10 +260,18 @@ export default function IntakeList() {
           </Card>
         ) : (
           <CaseIntakeManagement
-            intakes={filteredIntakes}
-            onDelete={(id) => setIntakesData(prev => prev.filter(intake => intake.id !== id))}
+            intakes={paginatedIntakes}
+            onDelete={(id: string) => setIntakesData(prev => prev.filter(intake => intake.id !== id))}
           />
         )}
+
+        {/* Pagination */}
+        <Pagination
+          totalItems={filteredIntakes.length}
+          itemsPerPage={itemsPerPage}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+        />
 
         {/* Filter Sidebar */}
         <FilterSidebar
@@ -233,6 +297,6 @@ export default function IntakeList() {
         {/* New Intake Modal */}
         {showIntakeModal && <NewIntakeModal onClose={() => setShowIntakeModal(false)} />}
       </div>
-    </div>
+    </main>
   );
 }

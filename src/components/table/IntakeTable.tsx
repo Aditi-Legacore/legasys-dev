@@ -1,13 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Edit, Trash2, Eye, Plus, Loader2, X } from 'lucide-react';
+import { Edit, Trash2, Eye, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import Pagination from '@/components/ui/pagination';
-import NewIntakeModal from '../NewIntakeModal';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import CommonTable, { Column, Action } from '@/components/ui/CommonTable';
 import { Badge } from '@/components/ui/badge';
 
@@ -20,36 +16,18 @@ interface CaseIntake {
   Lead?: { caseType: string };
 }
 
-export default function IntakeTable() {
+interface IntakeTableProps {
+  intakes: CaseIntake[];
+  onDelete: (id: string) => void;
+}
+
+export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableProps) {
   const router = useRouter();
-  const [intakes, setIntakes] = useState<CaseIntake[]>([]);
-  const [loading, setLoading] = useState(true);
   const [loadingView, setLoadingView] = useState<number | string | null>(null);
   const [loadingEdit, setLoadingEdit] = useState<number | string | null>(null);
   const [loadingDelete, setLoadingDelete] = useState<number | string | null>(null);
-  const [loadingNew, setLoadingNew] = useState(false); // ✅ Added loader for "New Intake"
-  const [selectedIntake, setSelectedIntake] = useState<CaseIntake | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showIntakeModal, setShowIntakeModal] = useState(false);
-  const itemsPerPage = 5;
-
-  useEffect(() => {
-    const fetchIntakes = async () => {
-      try {
-        const res = await fetch('/api/intake');
-        if (!res.ok) throw new Error('Failed to fetch intakes');
-        const data = await res.json();
-        setIntakes(data);
-      } catch (error) {
-        console.error(error);
-        toast.error('Failed to load intakes.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchIntakes();
-  }, []);
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const handleView = async (intake: CaseIntake) => {
     setLoadingView(intake.id);
@@ -75,8 +53,7 @@ export default function IntakeTable() {
     try {
       const res = await fetch(`/api/intake/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete intake');
-      setIntakes(intakes.filter(i => i.id !== id));
-      alert("Data deleted successfully");
+      onDelete(id.toString());
       toast.success('Intake deleted successfully.');
     } catch (error) {
       console.error(error);
@@ -84,21 +61,6 @@ export default function IntakeTable() {
     } finally {
       setLoadingDelete(null);
     }
-  };
-
-  // const handleNewIntake = async () => {
-  //   setLoadingNew(true);
-  //   try {
-  //     router.push('/intake-form');
-  //   } finally {
-  //     setLoadingNew(false);
-  //   }
-  // };
-const handleNewIntake = () => {
-  setShowIntakeModal(true);
-};
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
   };
 
   const formatDate = (dateString: string): string => {
@@ -110,13 +72,43 @@ const handleNewIntake = () => {
     });
   };
 
-  const truncateText = (text: string | null | undefined, maxLength: number): string => {
-    if (!text) return '';
-    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-  };
+  // Sort data based on current sort state
+  const sortedIntakes = React.useMemo(() => {
+    if (!sortColumn) return intakes;
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedIntakes = intakes.slice(startIndex, startIndex + itemsPerPage);
+    return [...intakes].sort((a, b) => {
+      let aValue = a[sortColumn as keyof CaseIntake];
+      let bValue = b[sortColumn as keyof CaseIntake];
+
+      // Handle null/undefined values
+      if (aValue == null && bValue == null) return 0;
+      if (aValue == null) return sortDirection === 'asc' ? 1 : -1;
+      if (bValue == null) return sortDirection === 'asc' ? -1 : 1;
+
+      // Handle date sorting
+      if (sortColumn === 'accidentDate') {
+        const aDate = new Date(aValue as string);
+        const bDate = new Date(bValue as string);
+        return sortDirection === 'asc' ? aDate.getTime() - bDate.getTime() : bDate.getTime() - aDate.getTime();
+      }
+
+      // Handle boolean sorting
+      if (sortColumn === 'isDraft') {
+        const aBool = aValue as boolean;
+        const bBool = bValue as boolean;
+        if (aBool === bBool) return 0;
+        return sortDirection === 'asc' ? (aBool ? 1 : -1) : (aBool ? -1 : 1);
+      }
+
+      // Handle string sorting
+      const aStr = String(aValue).toLowerCase();
+      const bStr = String(bValue).toLowerCase();
+
+      if (aStr < bStr) return sortDirection === 'asc' ? -1 : 1;
+      if (aStr > bStr) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [intakes, sortColumn, sortDirection]);
 
   // Define columns for CommonTable
   const columns: Column[] = [
@@ -138,11 +130,17 @@ const handleNewIntake = () => {
       key: 'accidentDescription',
       label: 'Accident Description',
       className: 'px-4 py-4',
-      render: (value) => (
-        <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-medium">
-          {value}
-        </span>
-      )
+      render: (value) => {
+        const truncatedText = value && value.length > 30 ? value.substring(0, 30) + '...' : value;
+        return (
+          <span
+            className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-medium cursor-pointer"
+            title={value} // Shows full text on hover
+          >
+            {truncatedText || 'No description'}
+          </span>
+        );
+      }
     },
     {
       key: 'isDraft',
@@ -188,170 +186,17 @@ const handleNewIntake = () => {
     }
   ];
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-             
-          
-
-        {/* Desktop Table View */}
-        <CommonTable
-          columns={columns}
-          data={paginatedIntakes}
-          actions={actions}
-          showSerialNumber={true}
-          emptyMessage="No case intakes found."
-        />
-
-        {/* Mobile Card View */}
-        <div className="md:hidden space-y-4">
-          {paginatedIntakes.map((intake, index) => (
-            <div
-              key={intake.id}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700"
-            >
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex-1 min-w-0 overflow-hidden">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300">
-                      {startIndex + index + 1}
-                    </span>
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
-                      {truncateText(intake.clientName, 20)}
-                    </h3>
-                  </div>
-                  <div className="flex gap-2 mt-1">
-                    <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-medium max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                      {truncateText(intake.accidentDescription, 20)}
-                    </span>
-                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${intake.isDraft ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200' : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'}`}>
-                      {intake.isDraft ? 'Draft' : 'Complete'}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleView(intake)}
-                    disabled={loadingView === intake.id}
-                    title="View"
-                  >
-                    {loadingView === intake.id ? (
-                      <Loader2 size={16} className="animate-spin" />
-                    ) : (
-                      <Eye size={16} />
-                    )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleUpdate(intake.id)}
-                    disabled={loadingEdit === intake.id}
-                    title="Edit"
-                  >
-                    {loadingEdit === intake.id ? (
-                      <Loader2 size={16} className="animate-spin" />
-                    ) : (
-                      <Edit size={16} />
-                    )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(intake.id)}
-                    disabled={loadingDelete === intake.id}
-                    title="Delete"
-                  >
-                    {loadingDelete === intake.id ? (
-                      <Loader2 size={16} className="animate-spin" />
-                    ) : (
-                      <Trash2 size={16} />
-                    )}
-                  </Button>
-                </div>
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                Date of Loss: {formatDate(intake.accidentDate)}
-              </div>
-            </div>
-          ))}
-
-          {intakes.length === 0 && (
-            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-              <p className="text-slate-500 text-base">
-                No case intakes found. Create one to get started.
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Pagination */}
-        {intakes.length > itemsPerPage && (
-          <div className="mt-6">
-            <Pagination
-              totalItems={intakes.length}
-              itemsPerPage={itemsPerPage}
-              currentPage={currentPage}
-              onPageChange={handlePageChange}
-            />
-          </div>
-        )}
-
-        {/* View Modal */}
-        {showModal && selectedIntake && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6 relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4"
-                aria-label="Close modal"
-              >
-                <X size={20} />
-              </Button>
-
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-6 pr-8">
-                Case Details
-              </h2>
-
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-gray-400 mb-1">Client Name</p>
-                  <p className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">
-                    {selectedIntake.clientName}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-gray-400 mb-1">Date of Loss</p>
-                  <p className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">
-                    {formatDate(selectedIntake.accidentDate)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-gray-400 mb-1">Accident Description</p>
-                  <p className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">
-                    {selectedIntake.accidentDescription}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* New Intake Modal */}
-        {showIntakeModal && <NewIntakeModal onClose={() => setShowIntakeModal(false)} />}
-      </div>
-    </div>
+    <CommonTable
+      columns={columns}
+      data={sortedIntakes}
+      actions={actions}
+      showSerialNumber={true}
+      emptyMessage="No case intakes found."
+      onSort={(column, direction) => {
+        setSortColumn(column);
+        setSortDirection(direction);
+      }}
+    />
   );
 }
