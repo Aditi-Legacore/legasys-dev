@@ -1,9 +1,11 @@
 'use client';
 
+import Link from 'next/link';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MoreVertical, Eye, Mail, FileCheck, Archive } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Lead } from "@/types/leads";
 import { toast } from "sonner";
+import SortableHeader from "@/components/ui/SortableHeader"; // ✅ reuse same sortable header
+import { useEffect, useMemo, useState } from "react";
 
 interface LeadsTableProps {
   leads: Lead[];
@@ -27,6 +31,65 @@ const statusConfig = {
 };
 
 export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
+  const router = useRouter();
+  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(null);
+  const [sortedLeads, setSortedLeads] = useState<Lead[]>(leads);
+
+  useEffect(() => {
+    setSortedLeads(leads);
+  }, [leads]);
+
+  // 🔹 Sorting handler
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDirection(sortDirection === "asc" ? "desc" : sortDirection === "desc" ? null : "asc");
+    } else {
+      setSortKey(key);
+      setSortDirection("asc");
+    }
+  };
+
+  // 🔹 Apply sorting logic
+  const displayedLeads = useMemo(() => {
+    if (!sortKey || !sortDirection) return sortedLeads;
+
+    return [...sortedLeads].sort((a, b) => {
+      let valA = a[sortKey as keyof Lead];
+      let valB = b[sortKey as keyof Lead];
+
+      if (typeof valA === "string" && typeof valB === "string") {
+        // Check if sortable as date (like dueDate)
+        const dateA = new Date(valA);
+        const dateB = new Date(valB);
+        if (dateA.toString() !== 'Invalid Date' && dateB.toString() !== 'Invalid Date') {
+          return sortDirection === "asc" ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
+        }
+
+        return sortDirection === "asc"
+          ? valA.localeCompare(valB, undefined, { sensitivity: "base" })
+          : valB.localeCompare(valA, undefined, { sensitivity: "base" });
+      }
+
+      if (typeof valA === "number" && typeof valB === "number") {
+        return sortDirection === "asc" ? valA - valB : valB - valA;
+      }
+
+      return 0;
+    });
+  }, [sortedLeads, sortKey, sortDirection]);
+
+  const handleView = (lead: Lead) => {
+  if (lead.intakeInfo?.id) {
+    router.push(`/intake-preview/${lead.intakeInfo.id}`);
+  } else {
+    toast.error("No intake information found for this lead");
+  }
+};
+
+
+  // send email
+  
   const handleResendEmail = async (lead: Lead) => {
     try {
       const response = await fetch('/api/resend-email', {
@@ -87,38 +150,78 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
         <table className="w-full">
           <thead className="bg-muted/50 dark:bg-gray-700 border-b border-border dark:border-gray-600">
             <tr>
-              {[
-                "Due Date",
-                "Client Name",
-                "Case Type",
-                "Status",
-                "Contact",
-                "Matter",
-                "Actions",
-              ].map((header) => (
-                <th
-                  key={header}
-                  className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider"
-                >
-                  {header}
+              {/* <SortableHeader
+                label="Due Date"
+                sortKey="dueDate"
+                currentSortKey={sortKey}
+                currentDirection={sortDirection}
+                onSort={handleSort}
+              /> */}
+              <th className="px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
+                  S.No
                 </th>
-              ))}
+              <SortableHeader
+                label="Client Name"
+                sortKey="name"
+                currentSortKey={sortKey}
+                currentDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <SortableHeader
+                label="Case Type"
+                sortKey="caseType"
+                currentSortKey={sortKey}
+                currentDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <SortableHeader
+                label="Status"
+                sortKey="status"
+                currentSortKey={sortKey}
+                currentDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
+                Contact
+              </th>
+              <SortableHeader
+                label="Matter"
+                sortKey="matter"
+                currentSortKey={sortKey}
+                currentDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
           </thead>
+
           <tbody className="bg-card dark:bg-gray-800 divide-y divide-border dark:divide-gray-600">
-            {leads.map((lead) => (
+            {displayedLeads.map((lead, index) => (
               <tr
                 key={lead.id}
                 className="hover:bg-primary-light/50 dark:hover:bg-gray-700 transition-fast cursor-pointer group"
               >
+                <td className="px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                    {index + 1}
+                  </td>
+                {/* <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">
+                  {new Date(lead.dueDate).toLocaleDateString("en-US")}
+                </td> */}
+                <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-900 dark:text-white font-medium">
+                      <button
+                        onClick={() => handleView(lead)}
+                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline cursor-pointer bg-transparent border-none p-0"
+                      >
+                        {lead.name}
+                      </button>
+
+                    </td>
                 <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">
-                  {new Date(lead.dueDate).toLocaleDateString('en-US')}
-                </td>
-                <td className="px-6 py-4 text-sm font-medium text-foreground dark:text-white">
-                  {lead.name}
-                </td>
-                <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">
-                  {lead.caseType ? lead.caseType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '-'}
+                  {lead.caseType
+                    ? lead.caseType.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+                    : "-"}
                 </td>
                 <td className="px-6 py-4">
                   <Badge className={statusConfig[lead.status]?.color || statusConfig.default.color}>
@@ -127,9 +230,7 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
                 </td>
                 <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">
                   <div>{lead.contact}</div>
-                  <div className="text-xs text-muted-foreground dark:text-gray-400">
-                    {lead.phone}
-                  </div>
+                  <div className="text-xs text-muted-foreground dark:text-gray-400">{lead.phone}</div>
                 </td>
                 <td className="px-6 py-4 text-sm">
                   {lead.matter !== "-" ? (

@@ -3,6 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Search, Filter, Download } from "lucide-react";
 
 interface FilterOption {
@@ -20,7 +21,11 @@ interface FilterBarProps {
   filterPlaceholder?: string;
   onMoreFilters?: () => void;
   onExport?: () => void;
+  onExportCSV?: () => void;
+  onExportExcel?: () => void;
+  onExportJSON?: () => void;
   showExport?: boolean;
+  showExportDropdown?: boolean;
 }
 
 export default function FilterBar({
@@ -33,7 +38,11 @@ export default function FilterBar({
   filterPlaceholder = "Filter by...",
   onMoreFilters,
   onExport,
+  onExportCSV,
+  onExportExcel,
+  onExportJSON,
   showExport = false,
+  showExportDropdown = false,
 }: FilterBarProps) {
   return (
     <div className="flex flex-col md:flex-row md:items-center gap-3 justify-between">
@@ -67,10 +76,38 @@ export default function FilterBar({
           </Button>
         )}
 
-        {showExport && onExport && (
+        {showExport && onExport && !showExportDropdown && (
           <Button variant="default" className="bg-green-500 hover:bg-green-600" onClick={onExport}>
             <Download className="w-4 h-4 mr-2" /> Export
           </Button>
+        )}
+
+        {showExportDropdown && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="default" className="bg-green-500 hover:bg-green-600">
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {onExportCSV && (
+                <DropdownMenuItem onClick={onExportCSV}>
+                  Export as CSV
+                </DropdownMenuItem>
+              )}
+              {onExportExcel && (
+                <DropdownMenuItem onClick={onExportExcel}>
+                  Export as Excel
+                </DropdownMenuItem>
+              )}
+              {onExportJSON && (
+                <DropdownMenuItem onClick={onExportJSON}>
+                  Export as JSON
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
     </div>

@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import SortableHeader from "../ui/SortableHeader";
 
 interface Document {
   id: string;
@@ -36,6 +37,19 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [selectedIntakeId, setSelectedIntakeId] = useState<string>("");
+  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(null);
+
+// for sorting
+const handleSort = (key: string) => {
+  if (sortKey === key) {
+    setSortDirection(sortDirection === "asc" ? "desc" : sortDirection === "desc" ? null : "asc");
+  } else {
+    setSortKey(key);
+    setSortDirection("asc");
+  }
+};
+
 
   // Update tableDocs when documents prop changes
   React.useEffect(() => {
@@ -47,7 +61,54 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
 
   const itemsPerPage = 5;
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedDocuments = tableDocs.slice(startIndex, startIndex + itemsPerPage);
+  const sortedDocuments = React.useMemo(() => {
+  if (!sortKey || !sortDirection) return tableDocs;
+
+  return [...tableDocs].sort((a, b) => {
+    let valA = a[sortKey as keyof Document];
+    let valB = b[sortKey as keyof Document];
+
+    // Convert to string for comparison safety
+    if (typeof valA === "string" && typeof valB === "string") {
+      // Handle date strings automatically (like createdDate)
+      const dateA = Date.parse(valA);
+      const dateB = Date.parse(valB);
+
+      if (!isNaN(dateA) && !isNaN(dateB)) {
+        return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+      }
+
+      // Regular case-insensitive string sorting
+      return sortDirection === "asc"
+        ? valA.localeCompare(valB, undefined, { sensitivity: "base" })
+        : valB.localeCompare(valA, undefined, { sensitivity: "base" });
+    }
+
+    // Handle Date objects directly
+    if (valA instanceof Date && valB instanceof Date) {
+      return sortDirection === "asc"
+        ? valA.getTime() - valB.getTime()
+        : valB.getTime() - valA.getTime();
+    }
+
+    // Handle numbers if any
+    if (typeof valA === "number" && typeof valB === "number") {
+      return sortDirection === "asc" ? valA - valB : valB - valA;
+    }
+
+    return 0;
+  });
+}, [tableDocs, sortKey, sortDirection]);
+
+const paginatedDocuments = React.useMemo(() => {
+  return sortedDocuments.slice(startIndex, startIndex + itemsPerPage);
+}, [sortedDocuments, startIndex, itemsPerPage]);
+
+
+const handleView = (id: string) => {
+    router.push(`/intake-preview/${id}`);
+  };
+
 
   const handlePageChange = (page: number) => setCurrentPage(page);
 
@@ -109,18 +170,40 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
                 <th className="px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                   S.No
                 </th>
-                <th className="px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
-                  Client Name
-                </th>
-                <th className="px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
-                  Case Type
-                </th>
-                <th className="px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white hidden sm:table-cell">
-                  Created Date
-                </th>
-                <th className="px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
-                  Document Status
-                </th>
+
+                <SortableHeader
+                  label="Client Name"
+                  sortKey="clientName"
+                  currentSortKey={sortKey}
+                  currentDirection={sortDirection}
+                  onSort={handleSort}
+                />
+
+                <SortableHeader
+                  label="Case Type"
+                  sortKey="caseType"
+                  currentSortKey={sortKey}
+                  currentDirection={sortDirection}
+                  onSort={handleSort}
+                />
+
+                <SortableHeader
+                  label="Created Date"
+                  sortKey="createdDate"
+                  currentSortKey={sortKey}
+                  currentDirection={sortDirection}
+                  onSort={handleSort}
+                  className="hidden sm:table-cell"
+                />
+
+                <SortableHeader
+                  label="Document Status"
+                  sortKey="documentStatus"
+                  currentSortKey={sortKey}
+                  currentDirection={sortDirection}
+                  onSort={handleSort}
+                />
+
                 <th className="px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                   Files
                 </th>
@@ -139,9 +222,14 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
                   <td className="px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                     {startIndex + index + 1}
                   </td>
-                  <td className="px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                    {doc.clientName}
-                  </td>
+                  <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-900 dark:text-white font-medium">
+                      <button
+                        onClick={() => handleView(doc.id)}
+                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline cursor-pointer bg-transparent border-none p-0"
+                      >
+                        {doc.clientName} 
+                      </button>
+                    </td>
                   <td className="px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                     {doc.caseType}
                   </td>
