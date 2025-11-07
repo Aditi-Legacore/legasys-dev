@@ -219,13 +219,13 @@ export default function LeadsPage() {
                   onMoreFilters={() => setShowFiltersSidebar(true)}
                 />
               </div>
-              <Button
+              {/* <Button
                 className="bg-green-400 hover:bg-success/90 text-success-foreground"
                 onClick={() => setShowQuickIntake(true)}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Quick Intake
-              </Button>
+              </Button> */}
             </div>
           </CardContent>
         </Card>
@@ -245,7 +245,7 @@ export default function LeadsPage() {
         />
 
         {/* Quick Intake Modal */}
-        {showQuickIntake && (
+        {/* {showQuickIntake && (
           <div className="fixed inset-0 bg-white dark:bg-gray-800 bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl w-full max-w-2xl shadow-lg h-[90vh] overflow-y-auto">
               <div className="flex justify-end mb-4">
@@ -259,7 +259,7 @@ export default function LeadsPage() {
               <QuickIntakeForm onClose={() => setShowQuickIntake(false)} />
             </div>
           </div>
-        )}
+        )} */}
 
         <FilterSidebar
           isOpen={showFiltersSidebar}

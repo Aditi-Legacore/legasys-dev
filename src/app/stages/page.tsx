@@ -138,9 +138,11 @@ export default function StagesPage() {
                 />
               </div>
             </div>
+            <div className="mt-3">
+              {/* Active Filters */}
+              <ActiveFilters filters={activeFilters} />
+            </div>
 
-            {/* Active Filters */}
-            <ActiveFilters filters={activeFilters} />
           </CardContent>
         </Card>
 

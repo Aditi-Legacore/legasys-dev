@@ -1,6 +1,7 @@
 'use client';
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
 interface ActiveFilter {
@@ -15,18 +16,20 @@ interface ActiveFiltersProps {
 export default function ActiveFilters({ filters }: ActiveFiltersProps) {
   if (filters.length === 0) return null;
 
-  return (
+return (
     <div className="flex flex-wrap gap-2 mb-4">
       {filters.map((filter, index) => (
         <Badge key={index} variant="secondary" className="flex items-center gap-1">
           {filter.label}
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-1 w-4 h-4 p-0 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600"
             onClick={filter.onRemove}
-            className="ml-1 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full p-0.5"
             aria-label={`Remove ${filter.label} filter`}
           >
             <X size={12} />
-          </button>
+          </Button>
         </Badge>
       ))}
     </div>

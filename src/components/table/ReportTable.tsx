@@ -1,5 +1,7 @@
 'use client';
 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
 interface ReportTableProps {
   columns: string[];
   data: any[];
@@ -7,27 +9,27 @@ interface ReportTableProps {
 
 export default function ReportTable({ columns, data }: ReportTableProps) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-border mt-4">
-      <table className="min-w-full divide-y divide-border">
-        <thead className="bg-muted/50">
-          <tr>
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
             {columns.map((col) => (
-              <th key={col} className="px-4 py-2 text-left text-sm font-semibold text-foreground">
+              <TableHead key={col}>
                 {col}
-              </th>
+              </TableHead>
             ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border bg-background">
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {data.length > 0 ? (
             data.map((row, idx) => (
-              <tr key={idx} className="hover:bg-muted/20 transition-colors">
+              <TableRow key={idx}>
                 {columns.map((col) => (
-                  <td key={col} className="px-4 py-2 text-sm text-muted-foreground">
+                  <TableCell key={col}>
                     {row[col.toLowerCase()] || "-"}
-                  </td>
+                  </TableCell>
                 ))}
-              </tr>
+              </TableRow>
             ))
           ) : (
             <tr>
@@ -36,8 +38,8 @@ export default function ReportTable({ columns, data }: ReportTableProps) {
               </td>
             </tr>
           )}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }

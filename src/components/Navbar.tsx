@@ -1,10 +1,13 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { Settings, Bell, Mail, Sun, Moon, Loader2, Menu, X, FileText, Calendar, ChevronDown } from "lucide-react";
+import { Settings, Bell, Mail, Sun, Moon, Loader2, Menu, X, FileText, Calendar, ChevronDown, Plus } from "lucide-react";
 import { useTheme } from "next-themes";
 import { signOut, useSession } from "next-auth/react";
 import Searchbar from "./Searchbar";
+import QuickIntakeForm from "./forms/QuickIntakeForm";
+import SettingsSidebar from "./SettingsSidebar";
+import { Button } from "./ui/button";
 
 const Navbar: React.FC = () => {
   const { theme, setTheme } = useTheme();
@@ -13,6 +16,7 @@ const Navbar: React.FC = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [quickIntakeOpen, setQuickIntakeOpen] = useState(false);
+  const [settingsSidebarOpen, setSettingsSidebarOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -67,48 +71,63 @@ const Navbar: React.FC = () => {
       <div className="hidden lg:flex items-center gap-1 xl:gap-2">
 
         {/* Theme Toggle */}
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={toggleTheme}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           aria-label="Toggle theme"
           title="Toggle theme"
         >
           {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-        </button>
+        </Button>
 
         {/* Settings */}
-        <button 
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setSettingsSidebarOpen(true)}
           aria-label="Settings"
           title="Settings"
         >
           <Settings className="w-5 h-5" />
-        </button>
+        </Button>
 
         {/* Notifications */}
-        <button 
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg relative transition-colors"
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative"
           aria-label="Notifications"
           title="Notifications"
         >
           <Bell className="w-5 h-5" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-        </button>
+        </Button>
 
         {/* Messages */}
-        <button 
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+        <Button
+          variant="ghost"
+          size="icon"
           aria-label="Messages"
           title="Messages"
         >
           <Mail className="w-5 h-5" />
-        </button>
+        </Button>
 
+        {/* Quick Intake */}
+        <Button
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+          onClick={() => setQuickIntakeOpen(true)}>
+             <Plus className="w-4 h-4 mr-2" />
+              Quick Intake
+        </Button>
+        
         {/* Profile Dropdown */}
         <div className="relative ml-2" ref={dropdownRef}>
-          <button
+          <Button
+            variant="ghost"
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="flex items-center gap-2 p-1.5"
             aria-label="User menu"
           >
             <img
@@ -116,7 +135,7 @@ const Navbar: React.FC = () => {
               alt="User Avatar"
               className="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600"
             />
-          </button>
+          </Button>
 
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden">
@@ -130,22 +149,23 @@ const Navbar: React.FC = () => {
               </div>
               <ul className="py-1">
                 <li>
-                  <button className="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm">
+                  <Button variant="ghost" className="w-full justify-start text-sm">
                     My Profile
-                  </button>
+                  </Button>
                 </li>
                 <li>
-                  <button className="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm">
+                  <Button variant="ghost" className="w-full justify-start text-sm">
                     Inbox
-                  </button>
+                  </Button>
                 </li>
                 <li>
-                  <button className="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm">
+                  <Button variant="ghost" className="w-full justify-start text-sm">
                     Settings
-                  </button>
+                  </Button>
                 </li>
                 <li className="border-t border-gray-200 dark:border-gray-700">
-                  <button
+                  <Button
+                    variant="ghost"
                     onClick={async () => {
                       setIsLoggingOut(true);
                       try {
@@ -155,7 +175,7 @@ const Navbar: React.FC = () => {
                       }
                     }}
                     disabled={isLoggingOut}
-                    className="w-full text-left px-4 py-2.5 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center gap-2 text-red-600 dark:text-red-400 text-sm disabled:opacity-50"
+                    className="w-full justify-start text-red-600 dark:text-red-400 text-sm"
                   >
                     {isLoggingOut ? (
                       <>
@@ -165,7 +185,7 @@ const Navbar: React.FC = () => {
                     ) : (
                       "Logout"
                     )}
-                  </button>
+                  </Button>
                 </li>
               </ul>
             </div>
@@ -177,28 +197,34 @@ const Navbar: React.FC = () => {
       <div className="flex lg:hidden items-center gap-1 sm:gap-2">
 
         {/* Theme Toggle - Always visible */}
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={toggleTheme}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           aria-label="Toggle theme"
         >
           {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-        </button>
+        </Button>
 
         {/* Notification Bell - Visible on tablet */}
-        <button className="hidden sm:block p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg relative transition-colors">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden sm:block relative"
+        >
           <Bell className="w-5 h-5" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-        </button>
-        
+        </Button>
+
         {/* Mobile Menu Button */}
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           aria-label="Toggle menu"
         >
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        </Button>
       </div>
 
       {/* Mobile Menu Dropdown */}
@@ -227,34 +253,45 @@ const Navbar: React.FC = () => {
 
             {/* Quick Actions */}
             <div className="space-y-1">
-              <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-left">
+              <Button
+                variant="ghost"
+                onClick={() => { setSettingsSidebarOpen(true); setMobileMenuOpen(false); }}
+                className="w-full justify-start"
+              >
                 <Settings className="w-5 h-5 flex-shrink-0" />
                 <span className="font-medium">Settings</span>
-              </button>
-              
-              <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors relative text-left sm:hidden">
+              </Button>
+
+              <Button
+                variant="ghost"
+                className="w-full justify-start relative sm:hidden"
+              >
                 <Bell className="w-5 h-5 flex-shrink-0" />
                 <span className="font-medium">Notifications</span>
                 <span className="ml-auto w-2 h-2 bg-red-500 rounded-full" />
-              </button>
-              
-              <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-left">
+              </Button>
+
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+              >
                 <Mail className="w-5 h-5 flex-shrink-0" />
                 <span className="font-medium">Messages</span>
-              </button>
+              </Button>
             </div>
 
             {/* Profile Actions */}
             <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-1">
-              <button className="w-full text-left px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+              <Button variant="ghost" className="w-full justify-start">
                 My Profile
-              </button>
-              
-              <button className="w-full text-left px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+              </Button>
+
+              <Button variant="ghost" className="w-full justify-start">
                 Inbox
-              </button>
-              
-              <button
+              </Button>
+
+              <Button
+                variant="ghost"
                 onClick={async () => {
                   setIsLoggingOut(true);
                   try {
@@ -264,7 +301,7 @@ const Navbar: React.FC = () => {
                   }
                 }}
                 disabled={isLoggingOut}
-                className="w-full text-left px-3 py-2.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex items-center gap-2 text-red-600 dark:text-red-400 font-medium disabled:opacity-50"
+                className="w-full justify-start text-red-600 dark:text-red-400 font-medium"
               >
                 {isLoggingOut ? (
                   <>
@@ -274,11 +311,36 @@ const Navbar: React.FC = () => {
                 ) : (
                   "Logout"
                 )}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Quick Intake Modal */}
+      {quickIntakeOpen && (
+        <div className="fixed inset-0 bg-transparent dark:bg-gray-800 bg-opacity-50 flex items-center backdrop-blur-md justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-semibold">Quick Intake</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setQuickIntakeOpen(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl"
+              >
+                ×
+              </Button>
+            </div>
+            <div className="p-4">
+              <QuickIntakeForm onClose={() => setQuickIntakeOpen(false)} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Sidebar */}
+      <SettingsSidebar isOpen={settingsSidebarOpen} onClose={() => setSettingsSidebarOpen(false)} />
     </nav>
   );
 };

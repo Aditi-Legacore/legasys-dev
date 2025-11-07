@@ -86,7 +86,7 @@ const Sidebar: React.FC = () => {
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     isActive
-                      ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                      ? "bg-primary text-primary-foreground"
                       : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                 >

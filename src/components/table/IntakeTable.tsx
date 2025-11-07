@@ -6,6 +6,7 @@ import { Edit, Trash2, Eye, Plus, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import Pagination from '@/components/ui/pagination';
 import NewIntakeModal from '../NewIntakeModal';
+import { Button } from '@/components/ui/button';
 
 interface CaseIntake {
   id: number | string;
@@ -134,10 +135,10 @@ const handleNewIntake = () => {
               Manage and review all case intakes
             </p>
           </div>
-          <button
+          <Button
             onClick={handleNewIntake}
             disabled={loadingNew}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2"
           >
             {loadingNew ? (
               <Loader2 size={16} className="animate-spin" />
@@ -145,7 +146,7 @@ const handleNewIntake = () => {
               <Plus size={16} />
             )}
             {loadingNew ? 'Loading...' : 'Intake'}
-          </button>
+          </Button>
         </div>
 
         {/* Desktop Table View */}
@@ -202,10 +203,11 @@ const handleNewIntake = () => {
                     <td className="px-4 lg:px-6 py-3 lg:py-4">
                       <div className="flex justify-center gap-1 lg:gap-2">
                         {/* View Button */}
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleView(intake)}
                           disabled={loadingView === intake.id}
-                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                           title="View"
                         >
                           {loadingView === intake.id ? (
@@ -213,13 +215,14 @@ const handleNewIntake = () => {
                           ) : (
                             <Eye size={16} />
                           )}
-                        </button>
+                        </Button>
 
                         {/* Edit Button */}
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleUpdate(intake.id)}
                           disabled={loadingEdit === intake.id}
-                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                           title="Edit"
                         >
                           {loadingEdit === intake.id ? (
@@ -227,13 +230,14 @@ const handleNewIntake = () => {
                           ) : (
                             <Edit size={16} />
                           )}
-                        </button>
+                        </Button>
 
                         {/* Delete Button */}
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleDelete(intake.id)}
                           disabled={loadingDelete === intake.id}
-                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                           title="Delete"
                         >
                           {loadingDelete === intake.id ? (
@@ -241,7 +245,7 @@ const handleNewIntake = () => {
                           ) : (
                             <Trash2 size={16} />
                           )}
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -278,10 +282,11 @@ const handleNewIntake = () => {
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => handleView(intake)}
                     disabled={loadingView === intake.id}
-                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                     title="View"
                   >
                     {loadingView === intake.id ? (
@@ -289,11 +294,12 @@ const handleNewIntake = () => {
                     ) : (
                       <Eye size={16} />
                     )}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => handleUpdate(intake.id)}
                     disabled={loadingEdit === intake.id}
-                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                     title="Edit"
                   >
                     {loadingEdit === intake.id ? (
@@ -301,11 +307,12 @@ const handleNewIntake = () => {
                     ) : (
                       <Edit size={16} />
                     )}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => handleDelete(intake.id)}
                     disabled={loadingDelete === intake.id}
-                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                     title="Delete"
                   >
                     {loadingDelete === intake.id ? (
@@ -313,7 +320,7 @@ const handleNewIntake = () => {
                     ) : (
                       <Trash2 size={16} />
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -347,13 +354,15 @@ const handleNewIntake = () => {
         {showModal && selectedIntake && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6 relative">
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="absolute top-4 right-4"
                 aria-label="Close modal"
               >
                 <X size={20} />
-              </button>
+              </Button>
 
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-6 pr-8">
                 Case Details
