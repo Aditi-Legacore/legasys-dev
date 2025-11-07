@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import QuickIntakeForm from "./forms/QuickIntakeForm";
+import { Button } from "@/components/ui/button";
 
 export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
   const [mode, setMode] = useState<"existing" | "new">("existing");
@@ -38,12 +39,13 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
     {/* Header */}
     <div className="flex justify-between items-center mb-4">
       <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Intake</h2>
-      <button onClick={onClose} className="text-gray-400 hover:text-red-600 text-lg">✕</button>
+      <Button variant="ghost" size="icon" onClick={onClose} className="text-gray-400 hover:text-red-600 text-lg">✕</Button>
     </div>
 
     {/* Tabs */}
     <div className="flex mb-6 border-b border-gray-200 dark:border-gray-700">
-      <button
+      <Button
+        variant="ghost"
         onClick={() => setMode("existing")}
         className={`w-1/2 py-2 text-center font-medium transition-all ${
           mode === "existing"
@@ -52,8 +54,9 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
         }`}
       >
         Existing Intake
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="ghost"
         onClick={() => setMode("new")}
         className={`w-1/2 py-2 text-center font-medium transition-all ${
           mode === "new"
@@ -62,7 +65,7 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
         }`}
       >
         New Intake
-      </button>
+      </Button>
     </div>
 
     {/* Form */}
@@ -75,12 +78,12 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
           onChange={(e) => setReferenceId(e.target.value)}
           className="border rounded-lg p-2 w-full focus:ring-2 focus:ring-blue-500"
         />
-        <button
+        <Button
           onClick={handleValidate}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition"
+          className="w-full"
         >
           Continue
-        </button>
+        </Button>
 
         <p className="text-center text-sm text-gray-500 mt-2">
           Need a new one?{" "}

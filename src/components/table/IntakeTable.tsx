@@ -2,17 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Edit, Trash2, Eye, Loader2, X, MoreVertical } from 'lucide-react';
+import { Edit, Trash2, Eye, Plus, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import Pagination from '@/components/ui/pagination';
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import SortableHeader from "../ui/SortableHeader";
+import NewIntakeModal from '../NewIntakeModal';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import CommonTable, { Column, Action } from '@/components/ui/CommonTable';
+import { Badge } from '@/components/ui/badge';
 
 interface CaseIntake {
   id: number | string;
@@ -20,27 +17,38 @@ interface CaseIntake {
   accidentDate: string;
   accidentDescription: string | null | undefined;
   isDraft: boolean;
-  Lead?: {
-    caseType: string;
-  } | null;
 }
 
-interface IntakeTableProps {
-  intakes: CaseIntake[];
-  onDelete?: (id: number | string) => void;
-}
-
-export default function IntakeTable({ intakes, onDelete }: IntakeTableProps) {
+export default function IntakeTable() {
   const router = useRouter();
+  const [intakes, setIntakes] = useState<CaseIntake[]>([]);
+  const [loading, setLoading] = useState(true);
   const [loadingView, setLoadingView] = useState<number | string | null>(null);
   const [loadingEdit, setLoadingEdit] = useState<number | string | null>(null);
   const [loadingDelete, setLoadingDelete] = useState<number | string | null>(null);
+  const [loadingNew, setLoadingNew] = useState(false); // ✅ Added loader for "New Intake"
   const [selectedIntake, setSelectedIntake] = useState<CaseIntake | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortKey, setSortKey] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(null);
+  const [showIntakeModal, setShowIntakeModal] = useState(false);
   const itemsPerPage = 5;
+
+  useEffect(() => {
+    const fetchIntakes = async () => {
+      try {
+        const res = await fetch('/api/intake');
+        if (!res.ok) throw new Error('Failed to fetch intakes');
+        const data = await res.json();
+        setIntakes(data);
+      } catch (error) {
+        console.error(error);
+        toast.error('Failed to load intakes.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchIntakes();
+  }, []);
 
   const handleView = async (intake: CaseIntake) => {
     setLoadingView(intake.id);
@@ -66,7 +74,7 @@ export default function IntakeTable({ intakes, onDelete }: IntakeTableProps) {
     try {
       const res = await fetch(`/api/intake/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete intake');
-      onDelete?.(id);
+      setIntakes(intakes.filter(i => i.id !== id));
       alert("Data deleted successfully");
       toast.success('Intake deleted successfully.');
     } catch (error) {
@@ -77,19 +85,19 @@ export default function IntakeTable({ intakes, onDelete }: IntakeTableProps) {
     }
   };
 
-
+  // const handleNewIntake = async () => {
+  //   setLoadingNew(true);
+  //   try {
+  //     router.push('/intake-form');
+  //   } finally {
+  //     setLoadingNew(false);
+  //   }
+  // };
+const handleNewIntake = () => {
+  setShowIntakeModal(true);
+};
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-  };
-
-  // for sorting
-  const handleSort = (key: string) => {
-    if (sortKey === key) {
-      setSortDirection(sortDirection === "asc" ? "desc" : sortDirection === "desc" ? null : "asc");
-    } else {
-      setSortKey(key);
-      setSortDirection("asc");
-    }
   };
 
   const formatDate = (dateString: string): string => {
@@ -106,156 +114,118 @@ export default function IntakeTable({ intakes, onDelete }: IntakeTableProps) {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
 
-  const sortedIntakes = React.useMemo(() => {
-    if (!sortKey || !sortDirection) return intakes;
-
-    return [...intakes].sort((a, b) => {
-      let valA = a[sortKey as keyof CaseIntake];
-      let valB = b[sortKey as keyof CaseIntake];
-
-      // Convert to string for comparison safety
-      if (typeof valA === "string" && typeof valB === "string") {
-        // Handle date strings automatically (like accidentDate)
-        const dateA = Date.parse(valA);
-        const dateB = Date.parse(valB);
-
-        if (!isNaN(dateA) && !isNaN(dateB)) {
-          return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
-        }
-
-        // Regular case-insensitive string sorting
-        return sortDirection === "asc"
-          ? valA.localeCompare(valB, undefined, { sensitivity: "base" })
-          : valB.localeCompare(valA, undefined, { sensitivity: "base" });
-      }
-
-      // Handle Date objects directly
-      if (valA instanceof Date && valB instanceof Date) {
-        return sortDirection === "asc"
-          ? valA.getTime() - valB.getTime()
-          : valB.getTime() - valA.getTime();
-      }
-
-      // Handle booleans (like isDraft)
-      if (typeof valA === "boolean" && typeof valB === "boolean") {
-        return sortDirection === "asc"
-          ? (valA === valB ? 0 : valA ? 1 : -1)
-          : (valA === valB ? 0 : valA ? -1 : 1);
-      }
-
-      // Handle numbers if any
-      if (typeof valA === "number" && typeof valB === "number") {
-        return sortDirection === "asc" ? valA - valB : valB - valA;
-      }
-
-      return 0;
-    });
-  }, [intakes, sortKey, sortDirection]);
-
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedIntakes = sortedIntakes.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedIntakes = intakes.slice(startIndex, startIndex + itemsPerPage);
+
+  // Define columns for CommonTable
+  const columns: Column[] = [
+    {
+      key: 'clientName',
+      label: 'Client Name',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium'
+    },
+    {
+      key: 'accidentDate',
+      label: 'Date of Loss',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      render: (value) => formatDate(value)
+    },
+    {
+      key: 'accidentDescription',
+      label: 'Accident Description',
+      className: 'px-4 py-4',
+      render: (value) => (
+        <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-medium">
+          {value}
+        </span>
+      )
+    },
+    {
+      key: 'isDraft',
+      label: 'Status',
+      className: 'px-4 py-4',
+      render: (value) => (
+        <Badge
+          className={`px-3 py-1 rounded-full text-xs font-medium ${
+            value
+              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+              : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+          }`}
+        >
+          {value ? 'Draft' : 'Complete'}
+        </Badge>
+      )
+    }
+  ];
+
+  // Define actions for CommonTable
+  const actions: Action[] = [
+    {
+      label: 'View',
+      icon: Eye,
+      onClick: (row) => handleView(row),
+      disabled: (row) => loadingView === row.id,
+      className: 'text-blue-600 dark:text-blue-400'
+    },
+    {
+      label: 'Edit',
+      icon: Edit,
+      onClick: (row) => handleUpdate(row.id),
+      disabled: (row) => loadingEdit === row.id,
+      className: 'text-green-600 dark:text-green-400'
+    },
+    {
+      label: 'Delete',
+      icon: Trash2,
+      onClick: (row) => handleDelete(row.id),
+      disabled: (row) => loadingDelete === row.id,
+      className: 'text-red-600 dark:text-red-400'
+    }
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
-     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-      <div className="overflow-x-auto">
-        {/* Desktop Table View */}
-        <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
-                    S.No
-                  </th>
-                  <SortableHeader
-                    label="Client Name"
-                    sortKey="clientName"
-                    currentSortKey={sortKey}
-                    currentDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SortableHeader
-                    label="Date of Loss"
-                    sortKey="accidentDate"
-                    currentSortKey={sortKey}
-                    currentDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SortableHeader
-                    label="Accident Description"
-                    sortKey="accidentDescription"
-                    currentSortKey={sortKey}
-                    currentDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SortableHeader
-                    label="Status"
-                    sortKey="isDraft"
-                    currentSortKey={sortKey}
-                    currentDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-center text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedIntakes.map((intake, index) => (
-                  <tr
-                    key={intake.id}
-                    className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150"
-                  >
-                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      {startIndex + index + 1}
-                    </td>
-                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-900 dark:text-white font-medium">
-                      <button
-                        onClick={() => handleView(intake)}
-                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline cursor-pointer bg-transparent border-none p-0"
-                      >
-                        {intake.clientName} - {intake.Lead?.caseType || 'N/A'}
-                      </button>
-                    </td>
-                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-600 dark:text-gray-400">
-                      {formatDate(intake.accidentDate)}
-                    </td>
-                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm">
-                      <span title={intake.accidentDescription ?? undefined} className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 lg:px-3 py-1 rounded-full text-xs font-medium">
-                        {truncateText(intake.accidentDescription, 20)}
-                      </span>
-                    </td>
-                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm">
-                      <span className={`inline-block px-2 lg:px-3 py-1 rounded-full text-xs font-medium ${intake.isDraft ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200' : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'}`}>
-                        {intake.isDraft ? 'Draft' : 'Complete'}
-                      </span>
-                    </td>
-                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-center">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleView(intake)}>
-                            <Eye className="w-4 h-4 mr-2" /> View
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleUpdate(intake.id)}>
-                            <Edit className="w-4 h-4 mr-2" /> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDelete(intake.id)}>
-                            <Trash2 className="w-4 h-4 mr-2" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+              Case Intake Management
+            </h1>
+            <p className="text-slate-600 dark:text-gray-400 text-sm">
+              Manage and review all case intakes
+            </p>
           </div>
+          <Button
+            onClick={handleNewIntake}
+            disabled={loadingNew}
+            className="flex items-center gap-2"
+          >
+            {loadingNew ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Plus size={16} />
+            )}
+            {loadingNew ? 'Loading...' : 'Intake'}
+          </Button>
         </div>
+
+        {/* Desktop Table View */}
+        <CommonTable
+          columns={columns}
+          data={paginatedIntakes}
+          actions={actions}
+          showSerialNumber={true}
+          emptyMessage="No case intakes found."
+        />
 
         {/* Mobile Card View */}
         <div className="md:hidden space-y-4">
@@ -270,12 +240,9 @@ export default function IntakeTable({ intakes, onDelete }: IntakeTableProps) {
                     <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300">
                       {startIndex + index + 1}
                     </span>
-                    <button
-                      onClick={() => handleView(intake)}
-                      className="text-base font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline cursor-pointer bg-transparent border-none p-0 truncate"
-                    >
-                      {truncateText(`${intake.clientName} - ${intake.Lead?.caseType || 'N/A'}`, 20)}
-                    </button>
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
+                      {truncateText(intake.clientName, 20)}
+                    </h3>
                   </div>
                   <div className="flex gap-2 mt-1">
                     <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-medium max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
@@ -287,10 +254,11 @@ export default function IntakeTable({ intakes, onDelete }: IntakeTableProps) {
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => handleView(intake)}
                     disabled={loadingView === intake.id}
-                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                     title="View"
                   >
                     {loadingView === intake.id ? (
@@ -298,11 +266,12 @@ export default function IntakeTable({ intakes, onDelete }: IntakeTableProps) {
                     ) : (
                       <Eye size={16} />
                     )}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => handleUpdate(intake.id)}
                     disabled={loadingEdit === intake.id}
-                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                     title="Edit"
                   >
                     {loadingEdit === intake.id ? (
@@ -310,11 +279,12 @@ export default function IntakeTable({ intakes, onDelete }: IntakeTableProps) {
                     ) : (
                       <Edit size={16} />
                     )}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => handleDelete(intake.id)}
                     disabled={loadingDelete === intake.id}
-                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                     title="Delete"
                   >
                     {loadingDelete === intake.id ? (
@@ -322,7 +292,7 @@ export default function IntakeTable({ intakes, onDelete }: IntakeTableProps) {
                     ) : (
                       <Trash2 size={16} />
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -356,13 +326,15 @@ export default function IntakeTable({ intakes, onDelete }: IntakeTableProps) {
         {showModal && selectedIntake && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6 relative">
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="absolute top-4 right-4"
                 aria-label="Close modal"
               >
                 <X size={20} />
-              </button>
+              </Button>
 
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-6 pr-8">
                 Case Details
@@ -392,7 +364,8 @@ export default function IntakeTable({ intakes, onDelete }: IntakeTableProps) {
           </div>
         )}
 
-
+        {/* New Intake Modal */}
+        {showIntakeModal && <NewIntakeModal onClose={() => setShowIntakeModal(false)} />}
       </div>
     </div>
   );

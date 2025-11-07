@@ -14,16 +14,16 @@ interface FilterOption {
 interface FilterSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  caseTypeFilter: string;
-  setCaseTypeFilter: (value: string) => void;
-  caseTypeOptions: FilterOption[];
+  caseTypeFilter?: string;
+  setCaseTypeFilter?: (value: string) => void;
+  caseTypeOptions?: FilterOption[];
   dateFromFilter: string;
   setDateFromFilter: (value: string) => void;
   dateToFilter: string;
   setDateToFilter: (value: string) => void;
-  referralSourceFilter: string;
-  setReferralSourceFilter: (value: string) => void;
-  referralSourceOptions: FilterOption[];
+  referralSourceFilter?: string;
+  setReferralSourceFilter?: (value: string) => void;
+  referralSourceOptions?: FilterOption[];
   onResetFilters: () => void;
   showCaseType?: boolean;
   showReferralSource?: boolean;
@@ -59,17 +59,18 @@ export default function FilterSidebar({
       <div className="fixed right-0 top-0 h-full w-80 bg-white dark:bg-gray-800 shadow-lg z-50 p-6 overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h4 className="text-lg font-semibold">More Filters</h4>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
             <X className="w-6 h-6" />
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-4">
           {/* Case Type Filter */}
-          {showCaseType && (
+          {showCaseType && caseTypeOptions && (
             <div>
               <Label htmlFor="caseType" className="text-sm font-medium">Case Type</Label>
               <Select value={caseTypeFilter} onValueChange={setCaseTypeFilter}>
@@ -112,7 +113,7 @@ export default function FilterSidebar({
           </div>
 
           {/* Referral Source Filter */}
-          {showReferralSource && (
+          {showReferralSource && referralSourceOptions && (
             <div>
               <Label htmlFor="referralSource" className="text-sm font-medium">Referral Source</Label>
               <Select value={referralSourceFilter} onValueChange={setReferralSourceFilter}>

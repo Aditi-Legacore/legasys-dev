@@ -6,6 +6,7 @@ import ReportTable from "@/components/table/ReportTable";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import FilterBar from "@/components/ui/FilterBar";
 import FilterSidebar from "@/components/ui/FilterSidebar";
+import ActiveFilters from "@/components/ui/ActiveFilters";
 import { Loader2 } from "lucide-react";
 import { utils, writeFile } from 'xlsx';
 
@@ -373,6 +374,49 @@ const getFormattedDate = () => {
     setReferralSourceFilter("");
   };
 
+  // Active filters for display
+  const activeFilters = useMemo(() => {
+    const filters = [];
+    if (searchQuery) {
+      filters.push({
+        label: `Search: "${searchQuery}"`,
+        onRemove: () => setSearchQuery("")
+      });
+    }
+    if (filterValue !== "all") {
+      const statusLabel = filterValue === "completed" ? "Completed" : filterValue === "new" ? "New" : filterValue === "pending" ? "Pending" : filterValue === "draft" ? "Draft" : filterValue;
+      filters.push({
+        label: `Type: ${statusLabel}`,
+        onRemove: () => setFilterValue("all")
+      });
+    }
+    if (caseTypeFilter && caseTypeFilter !== "all") {
+      filters.push({
+        label: `Case Type: ${caseTypeFilter}`,
+        onRemove: () => setCaseTypeFilter("")
+      });
+    }
+    if (referralSourceFilter && referralSourceFilter !== "all") {
+      filters.push({
+        label: `Referral Source: ${referralSourceFilter}`,
+        onRemove: () => setReferralSourceFilter("")
+      });
+    }
+    if (dateFromFilter) {
+      filters.push({
+        label: `From: ${dateFromFilter}`,
+        onRemove: () => setDateFromFilter("")
+      });
+    }
+    if (dateToFilter) {
+      filters.push({
+        label: `To: ${dateToFilter}`,
+        onRemove: () => setDateToFilter("")
+      });
+    }
+    return filters;
+  }, [searchQuery, filterValue, caseTypeFilter, referralSourceFilter, dateFromFilter, dateToFilter]);
+
   const columns = reportColumns[activeTab];
   const data = filteredData;
 
@@ -416,6 +460,8 @@ const getFormattedDate = () => {
               />
             </div>
             </div>
+            {/* Active Filters */}
+             <ActiveFilters filters={activeFilters} />
 
             {/* Loading State */}
             {loading && (

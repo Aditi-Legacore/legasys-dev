@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from './button';
 
 interface PaginationProps {
   totalItems: number;
@@ -22,7 +23,7 @@ export default function Pagination({
     const pages = [];
     const maxVisiblePages = 10;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
@@ -49,37 +50,35 @@ export default function Pagination({
 
   return (
     <div className="flex items-center justify-center space-x-2 mt-6">
-      <button
+      <Button
         onClick={handlePrevious}
         disabled={currentPage === 1}
-        className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        variant="outline"
+        className="flex items-center gap-1"
       >
         <ChevronLeft size={16} />
         Previous
-      </button>
+      </Button>
 
       {getPageNumbers().map((page) => (
-        <button
+        <Button
           key={page}
           onClick={() => onPageChange(page)}
-          className={`px-3 py-2 text-sm font-medium rounded-md ${
-            page === currentPage
-              ? 'bg-blue-600 text-white'
-              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-          }`}
+          variant={page === currentPage ? "default" : "outline"}
         >
           {page}
-        </button>
+        </Button>
       ))}
 
-      <button
+      <Button
         onClick={handleNext}
         disabled={currentPage === totalPages}
-        className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        variant="outline"
+        className="flex items-center gap-1"
       >
         Next
         <ChevronRight size={16} />
-      </button>
+      </Button>
     </div>
   );
 }

@@ -117,8 +117,9 @@ export async function POST(req: NextRequest) {
     console.log("transformedFields", transformedFields);
 
 
+    let savedIntake;
     if (existingIntake) {
-      await prisma.intakeInfo.update({
+      savedIntake = await prisma.intakeInfo.update({
         where: { id: existingIntake.id },
         data: {
           ...transformedFields,
@@ -127,7 +128,7 @@ export async function POST(req: NextRequest) {
         },
       });
     } else {
-      await prisma.intakeInfo.create({
+      savedIntake = await prisma.intakeInfo.create({
         data: {
           ...transformedFields,
           isDraft: true,
@@ -136,7 +137,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ message: "Draft saved" });
+    return NextResponse.json({ message: "Draft saved", id: savedIntake.id });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Failed to save draft" }, { status: 500 });

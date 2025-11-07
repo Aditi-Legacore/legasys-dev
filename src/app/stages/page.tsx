@@ -4,7 +4,9 @@ import { useState, useMemo, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import FilterBar from "@/components/ui/FilterBar";
+import ActiveFilters from "@/components/ui/ActiveFilters";
 import Pagination from "@/components/ui/pagination";
+import CommonTable, { Column } from "@/components/ui/CommonTable";
 
 export default function StagesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,6 +48,25 @@ export default function StagesPage() {
   const activeCount = stages.filter((s) => s.status === 'Active').length;
   const ongoingCount = stages.filter((s) => s.status === 'Ongoing').length;
   const completedCount = stages.filter((s) => s.status === 'Completed').length;
+
+  // Active filters for display
+  const activeFilters = useMemo(() => {
+    const filters = [];
+    if (searchQuery) {
+      filters.push({
+        label: `Search: "${searchQuery}"`,
+        onRemove: () => setSearchQuery("")
+      });
+    }
+    if (statusFilter !== "all") {
+      const statusLabel = statusFilter === "active" ? "Active" : statusFilter === "ongoing" ? "Ongoing" : "Completed";
+      filters.push({
+        label: `Status: ${statusLabel}`,
+        onRemove: () => setStatusFilter("all")
+      });
+    }
+    return filters;
+  }, [searchQuery, statusFilter]);
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
@@ -118,55 +139,16 @@ export default function StagesPage() {
                 />
               </div>
             </div>
+            <div className="mt-3">
+              {/* Active Filters */}
+              <ActiveFilters filters={activeFilters} />
+            </div>
+
           </CardContent>
         </Card>
 
         {/* Stages Table */}
-        <Card>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="min-w-full border border-gray-200 dark:border-gray-700 rounded-md text-sm">
-                <thead className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
-                  <tr>
-                    <th className="px-4 py-2 text-left">Stage Name</th>
-                    <th className="px-4 py-2 text-left">Description</th>
-                    <th className="px-4 py-2 text-left">Created Date</th>
-                    <th className="px-4 py-2 text-left">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedStages.map((stage) => (
-                    <tr key={stage.id} className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td className="px-4 py-2">{stage.name}</td>
-                      <td className="px-4 py-2">{stage.description}</td>
-                      <td className="px-4 py-2">{stage.created}</td>
-                      <td className="px-4 py-2">
-                        <Badge
-                          className={`${
-                            stage.status === 'Completed'
-                              ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                              : stage.status === 'Ongoing'
-                              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
-                              : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                          }`}
-                        >
-                          {stage.status}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                  {paginatedStages.length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="text-center py-6 text-gray-500 dark:text-gray-400">
-                        No stages found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+        <StagesTable stages={paginatedStages} />
 
         {/* Pagination */}
         <Pagination
@@ -178,5 +160,52 @@ export default function StagesPage() {
 
       </div>
     </main>
+  );
+}
+
+function StagesTable({ stages }: { stages: any[] }) {
+  // Define columns for CommonTable
+  const columns: Column[] = [
+    {
+      key: 'name',
+      label: 'Stage Name',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium'
+    },
+    {
+      key: 'description',
+      label: 'Description',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400'
+    },
+    {
+      key: 'created',
+      label: 'Created Date',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400'
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      className: 'px-4 py-4',
+      render: (value: string) => (
+        <Badge
+          className={`${
+            value === 'Completed'
+              ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+              : value === 'Ongoing'
+              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
+              : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+          }`}
+        >
+          {value}
+        </Badge>
+      )
+    }
+  ];
+
+  return (
+    <CommonTable
+      columns={columns}
+      data={stages}
+      emptyMessage="No stages found."
+    />
   );
 }

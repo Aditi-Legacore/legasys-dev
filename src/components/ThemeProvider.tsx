@@ -3,6 +3,7 @@
 import { ThemeProvider } from 'next-themes';
 import { SessionProvider } from 'next-auth/react';
 import { Toaster } from 'sonner';
+import { ThemeProvider as CustomThemeProvider } from '@/contexts/ThemeContext';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -17,8 +18,10 @@ export const Providers: React.FC<ProvidersProps> = ({ children }) => {
         enableSystem
         disableTransitionOnChange
       >
-        {children}
-        <Toaster />
+        <CustomThemeProvider>
+          {children}
+          <Toaster />
+        </CustomThemeProvider>
       </ThemeProvider>
     </SessionProvider>
   );
