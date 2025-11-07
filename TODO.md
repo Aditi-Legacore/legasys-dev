@@ -1,25 +1,34 @@
-# TODO: Implement Tab-Specific API Calls in Intake Preview
+# TODO: Implement Website Translation on Language Selection
 
-- [x] Add state for activeTab with default "information"
-- [x] Add onValueChange to Tabs component to update activeTab
-- [x] Remove fetchNotes, fetchActivityLogs, fetchDocuments from initial useEffect on id
-- [x] Add new useEffect that calls appropriate fetch function based on activeTab and id
-- [ ] Test tab switching to verify APIs are called only on tab change
+## Current Status
+- Language selection component exists and allows users to choose from multiple languages
+- Google Translate is integrated for page-level translation
+- Context and hooks are set up for translation functionality
 
-# Standardize Tables with CommonTable Component
+## Issues Identified
+- The translation is currently only applied at the page level using Google Translate widget
+- Individual text components are not being translated dynamically
+- The `useTranslation` hook is available but not widely used across components
 
-## Tasks to Complete
+## Next Steps
+1. **Integrate Translation into Components**: Update key UI components to use the `useTranslation` hook for dynamic text translation
+2. **Test Translation Functionality**: Verify that selecting a language translates the entire website content
+3. **Handle Edge Cases**: Ensure translation works for dynamic content, forms, and user-generated text
+4. **Performance Optimization**: Implement caching for translated text to avoid repeated API calls
 
-- [x] Refactor IntakeTable.tsx to use CommonTable instead of custom table HTML
-- [x] Refactor LeadsTable.tsx to use CommonTable, converting dropdown actions to button actions
-- [x] Update form-templates/page.tsx table to use CommonTable
-- [x] Update FormsTable in forms/page.tsx to use CommonTable
-- [x] Update stages/page.tsx table to use CommonTable
-- [x] Test each page for correct rendering and functionality
-- [x] Verify pagination, filters, and actions work properly
-- [x] Ensure mobile responsiveness is maintained
+## Components to Update
+- Navbar components
+- Sidebar navigation
+- Form labels and placeholders
+- Button texts
+- Table headers
+- Modal dialogs
+- Error messages
+- Success messages
 
-## Progress Tracking
-
-- Started: [Current Date/Time]
-- Completed: 8/8 tasks
+## Implementation Plan
+1. Start with core navigation components (Navbar, Sidebar)
+2. Move to form components and inputs
+3. Update table components and data displays
+4. Handle dynamic content and user interactions
+5. Test across different pages and scenarios

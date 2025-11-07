@@ -8,6 +8,7 @@ import Searchbar from "./Searchbar";
 import QuickIntakeForm from "./forms/QuickIntakeForm";
 import SettingsSidebar from "./SettingsSidebar";
 import { Button } from "./ui/button";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const Navbar: React.FC = () => {
   const { theme, setTheme } = useTheme();
@@ -21,6 +22,17 @@ const Navbar: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const quickIntakeRef = useRef<HTMLDivElement>(null);
+
+  // Translated texts
+  const quickIntakeText = useTranslation("Quick Intake");
+  const settingsText = useTranslation("Settings");
+  const notificationsText = useTranslation("Notifications");
+  const messagesText = useTranslation("Messages");
+  const myProfileText = useTranslation("My Profile");
+  const inboxText = useTranslation("Inbox");
+  const logoutText = useTranslation("Logout");
+  const loggingOutText = useTranslation("Logging Out...");
+  const quickIntakeTitle = useTranslation("Quick Intake");
 
   useEffect(() => setMounted(true), []);
 
@@ -119,7 +131,7 @@ const Navbar: React.FC = () => {
           className="bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={() => setQuickIntakeOpen(true)}>
              <Plus className="w-4 h-4 mr-2" />
-              Quick Intake
+              {quickIntakeText}
         </Button>
         
         {/* Profile Dropdown */}
@@ -150,17 +162,17 @@ const Navbar: React.FC = () => {
               <ul className="py-1">
                 <li>
                   <Button variant="ghost" className="w-full justify-start text-sm">
-                    My Profile
+                    {myProfileText}
                   </Button>
                 </li>
                 <li>
                   <Button variant="ghost" className="w-full justify-start text-sm">
-                    Inbox
+                    {inboxText}
                   </Button>
                 </li>
                 <li>
                   <Button variant="ghost" className="w-full justify-start text-sm">
-                    Settings
+                    {settingsText}
                   </Button>
                 </li>
                 <li className="border-t border-gray-200 dark:border-gray-700">
@@ -180,10 +192,10 @@ const Navbar: React.FC = () => {
                     {isLoggingOut ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        Logging Out...
+                        {loggingOutText}
                       </>
                     ) : (
-                      "Logout"
+                      logoutText
                     )}
                   </Button>
                 </li>
@@ -259,7 +271,7 @@ const Navbar: React.FC = () => {
                 className="w-full justify-start"
               >
                 <Settings className="w-5 h-5 flex-shrink-0" />
-                <span className="font-medium">Settings</span>
+                <span className="font-medium">{settingsText}</span>
               </Button>
 
               <Button
@@ -267,7 +279,7 @@ const Navbar: React.FC = () => {
                 className="w-full justify-start relative sm:hidden"
               >
                 <Bell className="w-5 h-5 flex-shrink-0" />
-                <span className="font-medium">Notifications</span>
+                <span className="font-medium">{notificationsText}</span>
                 <span className="ml-auto w-2 h-2 bg-red-500 rounded-full" />
               </Button>
 
@@ -276,18 +288,18 @@ const Navbar: React.FC = () => {
                 className="w-full justify-start"
               >
                 <Mail className="w-5 h-5 flex-shrink-0" />
-                <span className="font-medium">Messages</span>
+                <span className="font-medium">{messagesText}</span>
               </Button>
             </div>
 
             {/* Profile Actions */}
             <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-1">
               <Button variant="ghost" className="w-full justify-start">
-                My Profile
+                {myProfileText}
               </Button>
 
               <Button variant="ghost" className="w-full justify-start">
-                Inbox
+                {inboxText}
               </Button>
 
               <Button
@@ -306,10 +318,10 @@ const Navbar: React.FC = () => {
                 {isLoggingOut ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Logging Out...
+                    {loggingOutText}
                   </>
                 ) : (
-                  "Logout"
+                  logoutText
                 )}
               </Button>
             </div>
@@ -322,7 +334,7 @@ const Navbar: React.FC = () => {
         <div className="fixed inset-0 bg-transparent dark:bg-gray-800 bg-opacity-50 flex items-center backdrop-blur-md justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold">Quick Intake</h2>
+              <h2 className="text-lg font-semibold">{quickIntakeTitle}</h2>
               <Button
                 variant="ghost"
                 size="icon"

@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import LightDarkMode from './ui/theme/LightDarkMode';
 import ColorCustomization from './ui/theme/ColorCustomization';
 import ThemeDirection from './ui/theme/ThemeDirection';
+import LanguageSelect from './ui/theme/LanguageSelect';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface SettingsSidebarProps {
@@ -50,6 +51,9 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ isOpen, onClose }) =>
 
             {/* Direction */}
             <ThemeDirection />
+
+            {/* Language */}
+            <LanguageSelect />
 
             {/* Other Settings */}
             <div>
