@@ -205,49 +205,51 @@ export default function FormTemplatesPage() {
         <ActiveFilters filters={activeFilters} />
 
         {/* Templates Table */}
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Form Title</TableHead>
-                <TableHead>Language</TableHead>
-                <TableHead>Created By</TableHead>
-                <TableHead>Created At</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedTemplates.map((template) => (
-                <TableRow key={template.id}>
-                  <TableCell className="font-medium">{template.title}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{template.language}</Badge>
-                  </TableCell>
-                  <TableCell>{template.createdBy || 'N/A'}</TableCell>
-                  <TableCell>{new Date(template.createdAt).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => router.push(`/form-templates/${template.id}/edit`)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(template.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <Card className="card-shadow overflow-hidden hidden md:block bg-white dark:bg-gray-800">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-muted/50 dark:bg-gray-700 border-b border-border dark:border-gray-600">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Form Title</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Language</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Created By</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Created At</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-card dark:bg-gray-800 divide-y divide-border dark:divide-gray-600">
+                {paginatedTemplates.map((template) => (
+                  <tr key={template.id} className="hover:bg-primary-light/50 dark:hover:bg-gray-700 transition-fast cursor-pointer group">
+                    <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300 font-medium">{template.title}</td>
+                    <td className="px-6 py-4">
+                      <Badge variant="outline">{template.language}</Badge>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">{template.createdBy || 'N/A'}</td>
+                    <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">{new Date(template.createdAt).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex justify-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/form-templates/${template.id}/edit`)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(template.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
 
         {/* Pagination */}
         <Pagination

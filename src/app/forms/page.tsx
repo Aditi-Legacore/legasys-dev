@@ -262,48 +262,50 @@ export default function FormsPage() {
 
 function FormsTable({ submissions, showEditButton = false }: { submissions: FormSubmission[]; showEditButton?: boolean }) {
   return (
-    <div className="border rounded-lg">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Due</TableHead>
-            <TableHead>Form</TableHead>
-            <TableHead>Contact</TableHead>
-            <TableHead>Matter</TableHead>
-            <TableHead>Status</TableHead>
-            {showEditButton && <TableHead>Actions</TableHead>}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {submissions.map((submission) => (
-            <TableRow key={submission.id}>
-              <TableCell>{new Date(submission.createdAt).toLocaleDateString()}</TableCell>
-              <TableCell>{submission.template.title}</TableCell>
-              <TableCell>
-                {submission.user ? `${submission.user.firstName} ${submission.user.lastName}` : 'N/A'}
-              </TableCell>
-              <TableCell>{submission.matter?.title || 'N/A'}</TableCell>
-              <TableCell>
-                <Badge variant={submission.status === 'Pending' || submission.status === 'Draft' ? 'secondary' : 'default'}>
-                  {submission.status}
-                </Badge>
-              </TableCell>
-              {showEditButton && (
-                <TableCell>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.location.href = `/forms/${submission.id}/fill`}
-                  >
-                    Edit
-                  </Button>
-                </TableCell>
-              )}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    <Card className="card-shadow overflow-hidden hidden md:block bg-white dark:bg-gray-800">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-muted/50 dark:bg-gray-700 border-b border-border dark:border-gray-600">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Due</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Form</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Contact</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Matter</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Status</th>
+              {showEditButton && <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">Actions</th>}
+            </tr>
+          </thead>
+          <tbody className="bg-card dark:bg-gray-800 divide-y divide-border dark:divide-gray-600">
+            {submissions.map((submission) => (
+              <tr key={submission.id} className="hover:bg-primary-light/50 dark:hover:bg-gray-700 transition-fast cursor-pointer group">
+                <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">{new Date(submission.createdAt).toLocaleDateString()}</td>
+                <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">{submission.template.title}</td>
+                <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">
+                  {submission.user ? `${submission.user.firstName} ${submission.user.lastName}` : 'N/A'}
+                </td>
+                <td className="px-6 py-4 text-sm text-foreground dark:text-gray-300">{submission.matter?.title || 'N/A'}</td>
+                <td className="px-6 py-4">
+                  <Badge variant={submission.status === 'Pending' || submission.status === 'Draft' ? 'secondary' : 'default'}>
+                    {submission.status}
+                  </Badge>
+                </td>
+                {showEditButton && (
+                  <td className="px-6 py-4 text-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.location.href = `/forms/${submission.id}/fill`}
+                    >
+                      Edit
+                    </Button>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Card>
   );
 }
 

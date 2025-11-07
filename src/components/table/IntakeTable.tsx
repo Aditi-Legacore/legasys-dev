@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import Pagination from '@/components/ui/pagination';
 import NewIntakeModal from '../NewIntakeModal';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 interface CaseIntake {
   id: number | string;
@@ -150,36 +151,36 @@ const handleNewIntake = () => {
         </div>
 
         {/* Desktop Table View */}
-        <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+        <Card className="card-shadow overflow-hidden hidden md:block bg-white dark:bg-gray-800">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+              <thead className="bg-muted/50 dark:bg-gray-700 border-b border-border dark:border-gray-600">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
                     S.No
                   </th>
-                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
                     Client Name
                   </th>
-                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
                     Date of Loss
                   </th>
-                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
                     Accident Description
                   </th>
-                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-center text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                  <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-card dark:bg-gray-800 divide-y divide-border dark:divide-gray-600">
                 {paginatedIntakes.map((intake, index) => (
                   <tr
                     key={intake.id}
-                    className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150"
+                    className="hover:bg-primary-light/50 dark:hover:bg-gray-700 transition-fast cursor-pointer group"
                   >
                     <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm font-semibold text-gray-700 dark:text-gray-300">
                       {startIndex + index + 1}
@@ -253,7 +254,7 @@ const handleNewIntake = () => {
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
 
         {/* Mobile Card View */}
         <div className="md:hidden space-y-4">
