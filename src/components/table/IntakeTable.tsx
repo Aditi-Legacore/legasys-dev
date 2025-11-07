@@ -122,12 +122,15 @@ const handleNewIntake = () => {
     {
       key: 'clientName',
       label: 'Client Name',
-      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium'
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium',
+      sortable: true,
+      link: (row) => `/intake-preview/${row.id}`
     },
     {
       key: 'accidentDate',
       label: 'Date of Loss',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      sortable: true,
       render: (value) => formatDate(value)
     },
     {
@@ -144,6 +147,7 @@ const handleNewIntake = () => {
       key: 'isDraft',
       label: 'Status',
       className: 'px-4 py-4',
+      sortable: true,
       render: (value) => (
         <Badge
           className={`px-3 py-1 rounded-full text-xs font-medium ${

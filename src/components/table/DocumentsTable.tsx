@@ -73,23 +73,28 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
     {
       key: 'clientName',
       label: 'Client Name',
-      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400'
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      sortable: true,
+      link: (row) => `/documents/${row.id}`
     },
     {
       key: 'caseType',
       label: 'Case Type',
-      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400'
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      sortable: true
     },
     {
       key: 'createdDate',
       label: 'Created Date',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hidden sm:table-cell',
+      sortable: true,
       render: (value) => new Date(value).toLocaleDateString()
     },
     {
       key: 'documentStatus',
       label: 'Document Status',
       className: 'px-4 py-4',
+      sortable: true,
       render: (value) => (
         <Badge
           className={`px-3 py-1 rounded-full text-xs font-medium ${

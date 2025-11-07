@@ -88,23 +88,28 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
       key: 'dueDate',
       label: 'Due Date',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      sortable: true,
       render: (value) => new Date(value).toLocaleDateString('en-US')
     },
     {
       key: 'name',
       label: 'Client Name',
-      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium'
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium',
+      sortable: true,
+      link: (row) => `/leads/${row.id}` // Assuming lead details page
     },
     {
       key: 'caseType',
       label: 'Case Type',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      sortable: true,
       render: (value) => value ? value.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : '-'
     },
     {
       key: 'status',
       label: 'Status',
       className: 'px-4 py-4',
+      sortable: true,
       render: (value: string) => (
         <Badge className={statusConfig[value as keyof typeof statusConfig]?.color || statusConfig.default.color}>
           {statusConfig[value as keyof typeof statusConfig]?.label || statusConfig.default.label}

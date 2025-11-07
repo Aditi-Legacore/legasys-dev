@@ -1,8 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ChevronUp, ChevronDown, MoreVertical } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export interface Column {
   key: string;
@@ -10,6 +17,8 @@ export interface Column {
   render?: (value: any, row: any, index: number) => React.ReactNode;
   className?: string;
   hidden?: boolean;
+  sortable?: boolean;
+  link?: (row: any) => string; // href for link
 }
 
 export interface Action {
@@ -31,6 +40,7 @@ export interface CommonTableProps {
   className?: string;
   showSerialNumber?: boolean;
   serialNumberLabel?: string;
+  onSort?: (column: string, direction: 'asc' | 'desc') => void;
 }
 
 export default function CommonTable({
@@ -41,9 +51,21 @@ export default function CommonTable({
   emptyMessage = 'No records found',
   className = '',
   showSerialNumber = false,
-  serialNumberLabel = 'S.No'
+  serialNumberLabel = 'S.No',
+  onSort
 }: CommonTableProps) {
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
   const visibleColumns = columns.filter(col => !col.hidden);
+
+  const handleSort = (columnKey: string) => {
+    if (!onSort) return;
+    const newDirection = sortColumn === columnKey && sortDirection === 'asc' ? 'desc' : 'asc';
+    setSortColumn(columnKey);
+    setSortDirection(newDirection);
+    onSort(columnKey, newDirection);
+  };
 
   if (!data || data.length === 0) {
     return (
@@ -69,9 +91,24 @@ export default function CommonTable({
               {visibleColumns.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider ${column.className || ''}`}
+                  className={`px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider ${column.className || ''} ${column.sortable ? 'cursor-pointer hover:bg-muted/70 dark:hover:bg-gray-600' : ''}`}
+                  onClick={() => column.sortable && handleSort(column.key)}
                 >
-                  {column.label}
+                  <div className="flex items-center gap-1">
+                    {column.label}
+                    {column.sortable && (
+                      <div className="flex flex-col">
+                        <ChevronUp
+                          size={12}
+                          className={`transition-colors ${sortColumn === column.key && sortDirection === 'asc' ? 'text-primary' : 'text-muted-foreground'}`}
+                        />
+                        <ChevronDown
+                          size={12}
+                          className={`transition-colors -mt-1 ${sortColumn === column.key && sortDirection === 'desc' ? 'text-primary' : 'text-muted-foreground'}`}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </th>
               ))}
               {actions.length > 0 && (
@@ -95,42 +132,60 @@ export default function CommonTable({
                     {rowIndex + 1}
                   </td>
                 )}
-                {visibleColumns.map((column) => (
-                  <td
-                    key={column.key}
-                    className={`px-6 py-4 text-sm text-foreground dark:text-gray-300 ${column.className || ''}`}
-                  >
-                    {column.render
-                      ? column.render(row[column.key], row, rowIndex)
-                      : row[column.key] || '-'
-                    }
-                  </td>
-                ))}
+                {visibleColumns.map((column) => {
+                  const cellContent = column.render
+                    ? column.render(row[column.key], row, rowIndex)
+                    : row[column.key] || '-';
+
+                  return (
+                    <td
+                      key={column.key}
+                      className={`px-6 py-4 text-sm text-foreground dark:text-gray-300 ${column.className || ''}`}
+                    >
+                      {column.link ? (
+                        <a
+                          href={column.link(row)}
+                          className="underline text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {cellContent}
+                        </a>
+                      ) : (
+                        cellContent
+                      )}
+                    </td>
+                  );
+                })}
                 {actions.length > 0 && (
                   <td className="px-6 py-4 text-center">
-                    <div className="flex justify-center gap-2">
-                      {actions.map((action, actionIndex) => {
-                        const Icon = action.icon;
-                        const isDisabled = action.disabled?.(row) || false;
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical size={16} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {actions.map((action, actionIndex) => {
+                          const Icon = action.icon;
+                          const isDisabled = action.disabled?.(row) || false;
 
-                        return (
-                          <Button
-                            key={actionIndex}
-                            variant={action.variant || 'ghost'}
-                            size={action.size || 'icon'}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              action.onClick(row, rowIndex);
-                            }}
-                            disabled={isDisabled}
-                            className={action.className || ''}
-                          >
-                            {Icon && <Icon size={16} />}
-                            {action.label && !Icon && action.label}
-                          </Button>
-                        );
-                      })}
-                    </div>
+                          return (
+                            <DropdownMenuItem
+                              key={actionIndex}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isDisabled) action.onClick(row, rowIndex);
+                              }}
+                              disabled={isDisabled}
+                              className={action.className || ''}
+                            >
+                              {Icon && <Icon size={16} className="mr-2" />}
+                              {action.label}
+                            </DropdownMenuItem>
+                          );
+                        })}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 )}
               </tr>
