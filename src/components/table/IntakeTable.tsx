@@ -195,28 +195,8 @@ const handleNewIntake = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-              Case Intake Management
-            </h1>
-            <p className="text-slate-600 dark:text-gray-400 text-sm">
-              Manage and review all case intakes
-            </p>
-          </div>
-          <Button
-            onClick={handleNewIntake}
-            disabled={loadingNew}
-            className="flex items-center gap-2"
-          >
-            {loadingNew ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <Plus size={16} />
-            )}
-            {loadingNew ? 'Loading...' : 'Intake'}
-          </Button>
-        </div>
+             
+          
 
         {/* Desktop Table View */}
         <CommonTable
