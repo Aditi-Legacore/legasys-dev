@@ -7,6 +7,7 @@ import FilterBar from "@/components/ui/FilterBar";
 import FilterSidebar from "@/components/ui/FilterSidebar";
 import ActiveFilters from "@/components/ui/ActiveFilters";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import NewIntakeModal from '@/components/NewIntakeModal';
 import Pagination from "@/components/ui/pagination";
 
@@ -166,10 +167,10 @@ export default function IntakeList() {
             <h1 className="text-3xl font-bold text-foreground">Case Intake Management</h1>
             <p className="text-muted-foreground mt-1">Manage and track all case intakes</p>
           </div>
-          <button
+          <Button
             onClick={handleNewIntake}
             disabled={loadingNew}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+            variant="default"
           >
             {loadingNew ? (
               <Loader2 size={16} className="animate-spin" />
@@ -177,7 +178,7 @@ export default function IntakeList() {
               <Plus size={16} />
             )}
             {loadingNew ? 'Loading...' : 'Intake'}
-          </button>
+          </Button>
         </div>
 
         {/* Summary Cards */}

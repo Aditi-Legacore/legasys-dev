@@ -1,25 +1,38 @@
-# TODO: Implement Tab-Specific API Calls in Intake Preview
+# Mobile Responsiveness Implementation Plan
 
-- [x] Add state for activeTab with default "information"
-- [x] Add onValueChange to Tabs component to update activeTab
-- [x] Remove fetchNotes, fetchActivityLogs, fetchDocuments from initial useEffect on id
-- [x] Add new useEffect that calls appropriate fetch function based on activeTab and id
-- [ ] Test tab switching to verify APIs are called only on tab change
+## Current Status
+- Tables are hidden on mobile (hidden md:block in CommonTable)
+- Some responsive elements exist but need enhancement
+- Need card-based mobile layouts for tables
 
-# Standardize Tables with CommonTable Component
+## Tasks
 
-## Tasks to Complete
+### 1. Update CommonTable Component
+- [ ] Modify CommonTable.tsx to show card-based layout on mobile instead of hiding table
+- [ ] Add mobile-specific rendering logic
+- [ ] Ensure actions are accessible on mobile
 
-- [x] Refactor IntakeTable.tsx to use CommonTable instead of custom table HTML
-- [x] Refactor LeadsTable.tsx to use CommonTable, converting dropdown actions to button actions
-- [x] Update form-templates/page.tsx table to use CommonTable
-- [x] Update FormsTable in forms/page.tsx to use CommonTable
-- [x] Update stages/page.tsx table to use CommonTable
-- [x] Test each page for correct rendering and functionality
-- [x] Verify pagination, filters, and actions work properly
-- [x] Ensure mobile responsiveness is maintained
+### 2. Adjust Layout Responsiveness
+- [ ] Update layout.tsx for better mobile spacing and padding
+- [ ] Improve sidebar and navbar mobile behavior
+- [ ] Adjust main content area for mobile screens
 
-## Progress Tracking
+### 3. Enhance Form Responsiveness
+- [ ] Update IntakeForm.tsx for better mobile layout
+- [ ] Improve form steps navigation on mobile
+- [ ] Ensure form inputs are touch-friendly
 
-- Started: [Current Date/Time]
-- Completed: 8/8 tasks
+### 4. Improve Page Responsiveness
+- [ ] Update intake-list/page.tsx for mobile optimization
+- [ ] Adjust grid layouts and spacing for mobile
+- [ ] Ensure buttons and interactive elements are mobile-friendly
+
+### 5. Add Mobile-Specific Styles
+- [ ] Update globals.css with additional mobile styles
+- [ ] Add touch-friendly button sizes
+- [ ] Improve mobile typography and spacing
+
+### 6. Testing and Verification
+- [ ] Test on various screen sizes (mobile, tablet, desktop)
+- [ ] Verify touch interactions work properly
+- [ ] Check accessibility on mobile devices

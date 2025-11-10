@@ -14,7 +14,7 @@ import ActiveFilters from '@/components/ui/ActiveFilters';
 import CommonTable, { Column, Action } from '@/components/ui/CommonTable';
 
 // FormTemplatesTable component using CommonTable
-function FormTemplatesTable({ templates, onDelete, router }: { templates: FormTemplate[], onDelete: (id: string) => void, router: any }) {
+function FormTemplatesTable({ templates, onDelete, router, deletingId }: { templates: FormTemplate[], onDelete: (id: string) => void, router: any, deletingId: string | null }) {
   // Define columns for CommonTable
   const columns: Column[] = [
     {
@@ -54,6 +54,7 @@ function FormTemplatesTable({ templates, onDelete, router }: { templates: FormTe
       label: 'Delete',
       icon: Trash2,
       onClick: (row) => onDelete(row.id),
+      disabled: (row) => deletingId === row.id,
       className: 'text-red-600 dark:text-red-400'
     }
   ];
@@ -71,6 +72,7 @@ function FormTemplatesTable({ templates, onDelete, router }: { templates: FormTe
 export default function FormTemplatesPage() {
   const [templates, setTemplates] = useState<FormTemplate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [languageFilter, setLanguageFilter] = useState('all');
   const [dateFromFilter, setDateFromFilter] = useState('');
@@ -101,6 +103,7 @@ export default function FormTemplatesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this template?')) return;
 
+    setDeletingId(id);
     try {
       const response = await fetch(`/api/form-templates/${id}`, {
         method: 'DELETE',
@@ -114,6 +117,8 @@ export default function FormTemplatesPage() {
     } catch (error) {
       console.error('Error deleting template:', error);
       alert('Failed to delete template');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -202,9 +207,7 @@ export default function FormTemplatesPage() {
     return filters;
   }, [searchQuery, languageFilter, dateFromFilter, dateToFilter]);
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>;
-  }
+  // Loading state removed - now handled inline with table
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
@@ -260,11 +263,20 @@ export default function FormTemplatesPage() {
         <ActiveFilters filters={activeFilters} />
 
         {/* Templates Table */}
-        <FormTemplatesTable
-          templates={paginatedTemplates}
-          onDelete={handleDelete}
-          router={router}
-        />
+        {loading ? (
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center text-gray-500 py-10">Loading form templates...</div>
+            </CardContent>
+          </Card>
+        ) : (
+          <FormTemplatesTable
+            templates={paginatedTemplates}
+            onDelete={handleDelete}
+            router={router}
+            deletingId={deletingId}
+          />
+        )}
 
         {/* Pagination */}
         <Pagination

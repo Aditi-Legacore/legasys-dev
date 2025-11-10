@@ -7,6 +7,8 @@ import { signOut, useSession } from "next-auth/react";
 import Searchbar from "./Searchbar";
 import QuickIntakeForm from "./forms/QuickIntakeForm";
 import SettingsSidebar from "./SettingsSidebar";
+import NotificationsDropdown from "./NotificationsModal";
+import MessagesDropdown from "./MessagesModal";
 import { Button } from "./ui/button";
 
 const Navbar: React.FC = () => {
@@ -17,6 +19,8 @@ const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [quickIntakeOpen, setQuickIntakeOpen] = useState(false);
   const [settingsSidebarOpen, setSettingsSidebarOpen] = useState(false);
+  const [notificationsModalOpen, setNotificationsModalOpen] = useState(false);
+  const [messagesModalOpen, setMessagesModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -35,6 +39,14 @@ const Navbar: React.FC = () => {
       }
       if (quickIntakeRef.current && !quickIntakeRef.current.contains(event.target as Node)) {
         setQuickIntakeOpen(false);
+      }
+      // Close notifications dropdown
+      if (!(event.target as Element)?.closest('[data-notifications]') && !(event.target as Element)?.closest('[data-notifications-button]')) {
+        setNotificationsModalOpen(false);
+      }
+      // Close messages dropdown
+      if (!(event.target as Element)?.closest('[data-messages]') && !(event.target as Element)?.closest('[data-messages-button]')) {
+        setMessagesModalOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -93,26 +105,38 @@ const Navbar: React.FC = () => {
         </Button>
 
         {/* Notifications */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          aria-label="Notifications"
-          title="Notifications"
-        >
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-        </Button>
+        <div className="relative" data-notifications-button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative"
+            onClick={() => setNotificationsModalOpen(!notificationsModalOpen)}
+            aria-label="Notifications"
+            title="Notifications"
+          >
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+          </Button>
+          <div data-notifications>
+            <NotificationsDropdown isOpen={notificationsModalOpen} onClose={() => setNotificationsModalOpen(false)} />
+          </div>
+        </div>
 
         {/* Messages */}
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Messages"
-          title="Messages"
-        >
-          <Mail className="w-5 h-5" />
-        </Button>
+        <div className="relative" data-messages-button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMessagesModalOpen(!messagesModalOpen)}
+            aria-label="Messages"
+            title="Messages"
+          >
+            <Mail className="w-5 h-5" />
+          </Button>
+          <div data-messages>
+            <MessagesDropdown isOpen={messagesModalOpen} onClose={() => setMessagesModalOpen(false)} />
+          </div>
+        </div>
 
         {/* Quick Intake */}
         <Button
@@ -341,6 +365,8 @@ const Navbar: React.FC = () => {
 
       {/* Settings Sidebar */}
       <SettingsSidebar isOpen={settingsSidebarOpen} onClose={() => setSettingsSidebarOpen(false)} />
+
+
     </nav>
   );
 };

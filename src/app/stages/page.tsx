@@ -13,6 +13,7 @@ export default function StagesPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
+  const [loading, setLoading] = useState(false);
 
   const stages = [
     { id: 1, name: 'Initial Review', description: 'Collecting initial documents', created: '2025-11-01', status: 'Active' },
@@ -148,7 +149,15 @@ export default function StagesPage() {
         </Card>
 
         {/* Stages Table */}
-        <StagesTable stages={paginatedStages} />
+        {loading ? (
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center text-gray-500 py-10">Loading stages...</div>
+            </CardContent>
+          </Card>
+        ) : (
+          <StagesTable stages={paginatedStages} />
+        )}
 
         {/* Pagination */}
         <Pagination

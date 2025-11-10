@@ -234,7 +234,15 @@ export default function LeadsPage() {
         <ActiveFilters filters={activeFilters} />
 
         {/* Leads Table */}
-        <LeadsTable leads={paginatedLeads} onLeadUpdate={fetchLeads} />
+        {loading ? (
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center text-gray-500 py-10">Loading leads...</div>
+            </CardContent>
+          </Card>
+        ) : (
+          <LeadsTable leads={paginatedLeads} onLeadUpdate={fetchLeads} />
+        )}
 
         {/* Pagination */}
         <Pagination
