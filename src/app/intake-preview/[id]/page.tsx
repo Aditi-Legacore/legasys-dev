@@ -34,6 +34,9 @@ export default function IntakePreviewPage() {
   const [newActivityAction, setNewActivityAction] = useState('');
   const [newActivityDetails, setNewActivityDetails] = useState('');
   const [activeTab, setActiveTab] = useState('information');
+  const [showPlaintiffCardNotes, setShowPlaintiffCardNotes] = useState(false);
+  const [showPlaintiffCardActivity, setShowPlaintiffCardActivity] = useState(false);
+  const [showPlaintiffCardDocuments, setShowPlaintiffCardDocuments] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const id = params.id as string;
@@ -361,6 +364,9 @@ export default function IntakePreviewPage() {
                     addNote={addNote}
                     deleteNote={deleteNote}
                     formatDate={formatDate}
+                    intake={intake}
+                    showPlaintiffCard={showPlaintiffCardNotes}
+                    setShowPlaintiffCard={setShowPlaintiffCardNotes}
                   />
                 </TabsContent>
 
@@ -374,6 +380,9 @@ export default function IntakePreviewPage() {
                     setNewActivityDetails={setNewActivityDetails}
                     addActivityLog={addActivityLog}
                     formatDate={formatDate}
+                    intake={intake}
+                    showPlaintiffCard={showPlaintiffCardActivity}
+                    setShowPlaintiffCard={setShowPlaintiffCardActivity}
                   />
                 </TabsContent>
 
@@ -382,13 +391,16 @@ export default function IntakePreviewPage() {
                     documents={documents}
                     loadingDocuments={loadingDocuments}
                     formatDate={formatDate}
+                    intake={intake}
+                    showPlaintiffCard={showPlaintiffCardDocuments}
+                    setShowPlaintiffCard={setShowPlaintiffCardDocuments}
                   />
                 </TabsContent>
               </Tabs>
             </div>
 
-            {/* Right Side: Plaintiff Information */}
-            <div className="lg:col-span-1">
+            {/* Right Side: Plaintiff Information - only on desktop */}
+            <div className="hidden lg:block lg:col-span-1">
               <PlaintiffInformationCard intake={intake} formatDate={formatDate} />
             </div>
           </div>
