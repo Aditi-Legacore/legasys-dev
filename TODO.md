@@ -1,3 +1,0 @@
-- [ ] Modify GET /api/leads to accept referenceId query param and return single lead if provided
-- [ ] Update IntakeForm to fetch lead data if no draft exists and populate form fields
-- [ ] Test the flow from QuickIntakeForm to IntakeForm to ensure data is populated

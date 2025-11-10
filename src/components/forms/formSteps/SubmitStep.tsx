@@ -52,9 +52,9 @@ export default function SubmitStep({ isSubmitting = false }: SubmitStepProps) {
     <div className="space-y-3 w-full">
       {/* Radio Section */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">
+        <h6 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">
           How did you hear about us?
-        </h2>
+        </h6>
         <div className="space-y-2">
           {options.map((opt) => (
             <label

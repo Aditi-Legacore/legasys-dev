@@ -248,9 +248,9 @@ export default function DefendantInfoStep() {
         >
           {/* Header with remove button */}
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-200">
+            <h6 className="text-2xl font-semibold text-gray-700 dark:text-gray-200">
               Defendant #{index + 1}
-            </h2>
+            </h6>
 
             {/* Show remove button only if more than one defendant */}
             {defendantCount > 1 && index === defendantCount - 1 && (

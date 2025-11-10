@@ -6,9 +6,10 @@ import { toast } from "sonner"; // or any toast lib you use
 
 interface IntakeDocumentsProps {
   submittedIntakeId: string;
+  onUploadSuccess?: () => void;
 }
 
-const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId }) => {
+const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, onUploadSuccess }) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -48,6 +49,9 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId }) 
       toast.success("Documents uploaded successfully!");
       setSelectedFiles([]); // Clear after upload
 
+      // Call onUploadSuccess callback to refresh the documents table
+      onUploadSuccess?.();
+
       // Log activity for document upload
       await fetch('/api/activity-log', {
         method: 'POST',
@@ -73,9 +77,9 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId }) 
 
   return (
     <div className="w-full  bg-white dark:bg-gray-900 p-8 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+      <h6 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
         Upload Supporting Documents
-      </h1>
+      </h6>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
         You can upload multiple files (PDF, JPG, PNG). Each file must be under <b>600 KB</b>.
       </p>

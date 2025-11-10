@@ -12,9 +12,9 @@ export default function ClientInsuranceStep() {
   return (
     <div className="space-y-3 w-full">
       {/* Client Automobile Insurance */}
-      <h2 className="text-xl font-semibold pb-2 text-gray-700 dark:text-gray-200">
+      <h6 className="text-xl font-semibold pb-2 text-gray-700 dark:text-gray-200">
         Client Automobile Insurance
-      </h2>
+      </h6>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <InputField name="autoName" label="Auto Insurance Carrier Name" />
         <InputField name="autoPhone" label="Phone" />
@@ -29,9 +29,9 @@ export default function ClientInsuranceStep() {
        {/* <TextareaField name="autoAdditionalinfo" label="Additional Info" /> */}
 
       {/* Client Health Insurance */}
-      <h2 className="text-xl font-semibold pb-2 pt-6 text-gray-700 dark:text-gray-200">
+      <h6 className="text-xl font-semibold pb-2 pt-6 text-gray-700 dark:text-gray-200">
         Client Health Insurance
-      </h2>
+      </h6>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <InputField name="healthCarrier" label="Health Insurance Carrier Name" />
         <InputField name="healthPhone" label="Phone" />

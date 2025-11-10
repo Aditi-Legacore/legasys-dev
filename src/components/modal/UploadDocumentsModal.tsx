@@ -7,7 +7,7 @@ interface UploadDocumentsModalProps {
   isOpen: boolean;
   onClose: () => void;
   intakeId: string;
-  onUploadSuccess?: () => void;
+  onUploadSuccess: () => void;
 }
 
 const UploadDocumentsModal: React.FC<UploadDocumentsModalProps> = ({
