@@ -6,14 +6,18 @@ import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { IntakeData } from '@/types/intake';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import IntakePreviewHeader from '@/components/intake-preview/IntakePreviewHeader';
-import IntakeInformationTab from '@/components/intake-preview/IntakeInformationTab';
 import NotesTab from '@/components/intake-preview/NotesTab';
 import ActivityLogTab from '@/components/intake-preview/ActivityLogTab';
 import DocumentsTab from '@/components/intake-preview/DocumentsTab';
-import PlaintiffInformationCard from '@/components/intake-preview/PlaintiffInformationCard';
-import PDFPreviewModal from '@/components/intake-preview/PDFPreviewModal';
+import InformationTab from '@/components/intake-preview/InformationTab';
+import { ArrowLeft, FileText, Calendar, User, Scale, MapPin, Phone, Mail, Clock, Download, Share2, Trash2 } from "lucide-react";
 import ImagePreviewModal from '@/components/intake-preview/ImagePreviewModal';
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import PDFPreviewModal from '@/components/intake-preview/PDFPreviewModal';
 
 export default function IntakePreviewPage() {
   const params = useParams();
@@ -21,7 +25,7 @@ export default function IntakePreviewPage() {
   const { data: session } = useSession();
   const [intake, setIntake] = useState<IntakeData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [loadingDelete, setLoadingDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [showPdfPreview, setShowPdfPreview] = useState(false);
@@ -41,6 +45,7 @@ export default function IntakePreviewPage() {
   const [showPlaintiffCardActivity, setShowPlaintiffCardActivity] = useState(false);
   const [showPlaintiffCardDocuments, setShowPlaintiffCardDocuments] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+
 
   const id = params.id as string;
 
@@ -77,7 +82,7 @@ export default function IntakePreviewPage() {
     if (intake?.id && activeTab === 'notes') {
       fetchNotes();
     }
-    if (intake?.id && activeTab === 'activity') {
+    if (intake?.id && (activeTab === 'activity' || activeTab === 'information')) {
       fetchActivityLogs();
     }
     if (intake?.id && activeTab === 'documents') {
@@ -196,6 +201,8 @@ export default function IntakePreviewPage() {
     }
   };
 
+
+
   const deleteNote = async (noteId: string) => {
     if (!intake?.id) return;
     try {
@@ -240,7 +247,7 @@ export default function IntakePreviewPage() {
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this intake?') || !intake?.id) return;
 
-    setLoadingDelete(true);
+    setIsDeleting(true);
     try {
       const res = await fetch(`/api/intake/${intake.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete intake');
@@ -250,7 +257,7 @@ export default function IntakePreviewPage() {
       console.error(error);
       toast.error('Failed to delete intake.');
     } finally {
-      setLoadingDelete(false);
+      setIsDeleting(false);
     }
   };
 
@@ -416,87 +423,192 @@ export default function IntakePreviewPage() {
     );
   }
 
+
+
+  const handleBack = () => {
+    router.back();
+  };
+
+  const handleDownloadNew = async () => {
+    await handleDownload();
+  };
+
+  const handleShareNew = () => {
+    handleShare();
+  };
+
+  const handleDeleteNew = async () => {
+    if (confirm("Are you sure you want to delete this intake?")) {
+      setIsDeleting(true);
+      await handleDelete();
+      setIsDeleting(false);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "active":
+        return "bg-success text-success-foreground";
+      case "pending":
+        return "bg-warning text-warning-foreground";
+      case "closed":
+        return "bg-muted text-muted-foreground";
+      default:
+        return "bg-info text-info-foreground";
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
+
   return (
     <>
-      <div ref={contentRef} className="min-h-screen bg-white dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto">
-          <IntakePreviewHeader
-            onBack={() => router.back()}
-            onUpdate={handleUpdate}
-            onPreview={handlePreview}
-            onDelete={handleDelete}
-            loadingPdf={loadingPdf}
-            loadingDelete={loadingDelete}
-          />
-
-          {/* Main Content Grid: Left Side (Tabs) + Right Side (Plaintiff Info) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Side: Tabs with Information, Notes, Activity Log, Documents */}
-            <div className="lg:col-span-2">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="information">Information</TabsTrigger>
-                  <TabsTrigger value="notes">Notes</TabsTrigger>
-                  <TabsTrigger value="activity">Activity Log</TabsTrigger>
-                  <TabsTrigger value="documents">Documents</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="information" className="mt-4">
-                  <IntakeInformationTab intake={intake} formatDate={formatDate} />
-                </TabsContent>
-
-                <TabsContent value="notes" className="mt-4">
-                  <NotesTab
-                    notes={notes}
-                    loadingNotes={loadingNotes}
-                    newNote={newNote}
-                    setNewNote={setNewNote}
-                    addNote={addNote}
-                    deleteNote={deleteNote}
-                    formatDate={formatDate}
-                    intake={intake}
-                    showPlaintiffCard={showPlaintiffCardNotes}
-                    setShowPlaintiffCard={setShowPlaintiffCardNotes}
-                  />
-                </TabsContent>
-
-                <TabsContent value="activity" className="mt-4">
-                  <ActivityLogTab
-                    activityLogs={activityLogs}
-                    loadingActivity={loadingActivity}
-                    newActivityAction={newActivityAction}
-                    setNewActivityAction={setNewActivityAction}
-                    newActivityDetails={newActivityDetails}
-                    setNewActivityDetails={setNewActivityDetails}
-                    addActivityLog={addActivityLog}
-                    formatDate={formatDate}
-                    intake={intake}
-                    showPlaintiffCard={showPlaintiffCardActivity}
-                    setShowPlaintiffCard={setShowPlaintiffCardActivity}
-                  />
-                </TabsContent>
-
-                <TabsContent value="documents" className="mt-4">
-                  <DocumentsTab
-                    documents={documents}
-                    loadingDocuments={loadingDocuments}
-                    formatDate={formatDate}
-                    intake={intake}
-                    showPlaintiffCard={showPlaintiffCardDocuments}
-                    setShowPlaintiffCard={setShowPlaintiffCardDocuments}
-                    onPreview={handleDocumentPreview}
-                    onDelete={handleDocumentDelete}
-                    onUpload={handleDocumentUpload}
-                  />
-                </TabsContent>
-              </Tabs>
+      <div className="min-h-screen bg-background">
+        {/* Header Section */}
+        <div className="bg-primary text-primary-foreground rounded-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex items-center justify-between mb-6">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBack}
+                className="text-primary-foreground hover:bg-primary-foreground/10"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDownloadNew}
+                  className="text-primary-foreground hover:bg-primary-foreground/10"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleShareNew}
+                  className="text-primary-foreground hover:bg-primary-foreground/10"
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDeleteNew}
+                  disabled={isDeleting}
+                  className="text-primary-foreground hover:bg-destructive/90 hover:text-destructive-foreground"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </Button>
+              </div>
             </div>
 
-            {/* Right Side: Plaintiff Information - only on desktop */}
-            <div className="hidden lg:block lg:col-span-1">
-              <PlaintiffInformationCard intake={intake} formatDate={formatDate} />
+            <div className="flex items-start gap-4">
+              <Avatar className="w-20 h-20 border-4 border-primary-foreground/30 shadow-lg">
+                <AvatarFallback className="bg-gradient-to-br from-primary-foreground/20 to-primary-foreground/10 text-primary-foreground text-2xl font-bold">
+                  {getInitials(intake.clientName)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-2xl font-bold">{intake.clientName}</h1>
+                  <Badge className={getStatusColor("Active")}>
+                    Active
+                  </Badge>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-primary-foreground/90">
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    <span>{intake.gender || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Scale className="w-4 h-4" />
+                    <span>Personal Injury</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    <span>ID: {intake.id}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>Incident Date: {formatDate(intake.accidentDate)}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="information">Information</TabsTrigger>
+              <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="activity">Activity Logs</TabsTrigger>
+              <TabsTrigger value="documents">Documents</TabsTrigger>
+            </TabsList>
+            <TabsContent value="information" className="mt-6">
+              <InformationTab
+                intake={intake}
+                activityLogs={activityLogs}
+                loadingActivity={loadingActivity}
+                formatDate={formatDate}
+                setActiveTab={setActiveTab}
+              />
+            </TabsContent>
+            <TabsContent value="notes" className="mt-6">
+              <NotesTab
+                notes={notes}
+                loadingNotes={loadingNotes}
+                newNote={newNote}
+                setNewNote={setNewNote}
+                addNote={addNote}
+                deleteNote={deleteNote}
+                formatDate={formatDate} intake={intake!} showPlaintiffCard={false} setShowPlaintiffCard={function (show: boolean): void {
+                  throw new Error('Function not implemented.');
+                } }              />
+            </TabsContent>
+            <TabsContent value="activity" className="mt-6">
+              <ActivityLogTab
+                activityLogs={activityLogs}
+                loadingActivity={loadingActivity}
+                newActivityAction={newActivityAction}
+                setNewActivityAction={setNewActivityAction}
+                newActivityDetails={newActivityDetails}
+                setNewActivityDetails={setNewActivityDetails}
+                addActivityLog={addActivityLog}
+                formatDate={formatDate}
+                intake={intake}
+                showPlaintiffCard={false}
+                setShowPlaintiffCard={function (show: boolean): void {
+                  throw new Error('Function not implemented.');
+                }}
+              />
+            </TabsContent>
+            <TabsContent value="documents" className="mt-6">
+              <DocumentsTab
+                documents={documents}
+                loadingDocuments={loadingDocuments}
+                formatDate={formatDate}
+                onPreview={handleDocumentPreview}
+                onDelete={handleDocumentDelete}
+                onUpload={handleDocumentUpload} intake={intake!} showPlaintiffCard={false} setShowPlaintiffCard={function (show: boolean): void {
+                  throw new Error('Function not implemented.');
+                } }              />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
