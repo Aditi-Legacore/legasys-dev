@@ -1,8 +1,7 @@
 'use client';
 
 // import { useEffect, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Search, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 // import { FileText } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";

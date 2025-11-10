@@ -10,12 +10,10 @@ import NotesTab from '@/components/intake-preview/NotesTab';
 import ActivityLogTab from '@/components/intake-preview/ActivityLogTab';
 import DocumentsTab from '@/components/intake-preview/DocumentsTab';
 import InformationTab from '@/components/intake-preview/InformationTab';
-import { ArrowLeft, FileText, Calendar, User, Scale, MapPin, Phone, Mail, Clock, Download, Share2, Trash2 } from "lucide-react";
+import { ArrowLeft, FileText, Calendar, User, Scale, Download, Share2, Trash2 } from "lucide-react";
 import ImagePreviewModal from '@/components/intake-preview/ImagePreviewModal';
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import PDFPreviewModal from '@/components/intake-preview/PDFPreviewModal';
 
@@ -41,7 +39,6 @@ export default function IntakePreviewPage() {
   const [newActivityAction, setNewActivityAction] = useState('');
   const [newActivityDetails, setNewActivityDetails] = useState('');
   const [activeTab, setActiveTab] = useState('information');
-  const contentRef = useRef<HTMLDivElement>(null);
 
 
   const id = params.id as string;
@@ -237,9 +234,6 @@ export default function IntakePreviewPage() {
     };
   }, [pdfUrl]);
 
-  const handleUpdate = () => {
-    toast.info('Update functionality will be implemented.');
-  };
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this intake?') || !intake?.id) return;
@@ -287,15 +281,6 @@ export default function IntakePreviewPage() {
     }
   };
 
-  const handlePreview = async () => {
-    let url = pdfUrl;
-    if (!url) {
-      url = await generatePdf();
-    }
-    if (url) {
-      setShowPdfPreview(true);
-    }
-  };
 
   const handleDownload = async () => {
     let url = pdfUrl;

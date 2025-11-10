@@ -11,7 +11,7 @@ import Image from "next/image";
 import { Form, FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { User, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import LoginBg from "../../../public/assets/images/auth/login-bg.png";
 import LoginLogoBg from "../../../public/assets/images/auth/logo.png";
 import DatePicker from "react-datepicker";

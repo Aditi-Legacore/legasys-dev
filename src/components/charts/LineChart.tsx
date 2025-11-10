@@ -16,9 +16,7 @@ import {
   endOfDay,
   format,
   eachHourOfInterval,
-  eachDayOfInterval,
   eachWeekOfInterval,
-  eachMonthOfInterval,
 } from 'date-fns';
 
 interface Intake {
@@ -114,7 +112,7 @@ export default function LineChart() {
         });
         const weeks = eachWeekOfInterval({ start: startOfMonth(now), end: endOfMonth(now) });
         categories = weeks.map((week: Date, index: number) => `Week ${index + 1}`);
-        data = weeks.map((weekStart: Date, index: number) => {
+        data = weeks.map((weekStart: Date) => {
           const weekEnd = new Date(weekStart);
           weekEnd.setDate(weekEnd.getDate() + 6);
           return filteredIntakes.filter((intake) => {

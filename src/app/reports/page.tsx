@@ -7,7 +7,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import FilterBar from "@/components/ui/FilterBar";
 import FilterSidebar from "@/components/ui/FilterSidebar";
 import ActiveFilters from "@/components/ui/ActiveFilters";
-import { Loader2 } from "lucide-react";
 import { utils, writeFile } from 'xlsx';
 
 interface IntakeData {
@@ -235,7 +234,7 @@ const handleExport = (format: 'csv' | 'excel' | 'json' = 'csv') => {
   try {
     // Use the filtered aggregated data that's displayed in the table
     const dataToExport = filteredData;
-    let filename = `${activeTab}_report`;
+    const filename = `${activeTab}_report`;
 
     if (dataToExport.length === 0) {
       alert('No data to export with current filters.');

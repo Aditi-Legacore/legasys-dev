@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from "next/image";
 
 interface ImagePreviewModalProps {
   showImagePreview: boolean;
@@ -26,7 +27,7 @@ export default function ImagePreviewModal({ showImagePreview, imageUrl, onClose 
           </button>
         </div>
         <div className="flex-1 overflow-hidden flex items-center justify-center">
-          <img
+          <Image
             src={imageUrl}
             alt="Document Preview"
             className="max-w-full max-h-full object-contain"

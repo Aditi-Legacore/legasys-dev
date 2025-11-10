@@ -19,7 +19,6 @@ import { useSearchParams } from "next/navigation";
 import type { DefaultUser } from "next-auth";
 import { toast } from "sonner";
 import IntakeDocuments from "./intakeDocuments/intakeDocuments";
-import router from "next/router";
 
 declare module "next-auth" {
   interface Session {

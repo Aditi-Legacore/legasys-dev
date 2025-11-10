@@ -11,13 +11,6 @@ export default function DateInputField({
 }) {
   const { control, setValue } = useFormContext();
 
-  const formatDate = (date: Date) => {
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const day = date.getDate().toString().padStart(2, "0");
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
-  };
-
   return (
     <div className="flex flex-col space-y-1">
       <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">

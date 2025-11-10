@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ListChecks, Menu, X, FileText } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { menuItems } from "@/lib/menuItems";
 

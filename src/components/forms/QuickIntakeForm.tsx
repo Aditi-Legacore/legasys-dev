@@ -3,8 +3,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { Scale, Car, Heart, AlertTriangle, Briefcase } from 'lucide-react';
+import { Car, Heart, AlertTriangle, Briefcase } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus, Trash2, GripVertical, UserPlus, ChevronDown, ChevronRight, Eye, X } from 'lucide-react';
-import { FormField, ContactField, ContactData } from '@/types/form';
+import { FormField, ContactData } from '@/types/form';
 import { useRouter } from 'next/navigation';
 import ContactSection from '@/components/FormBuilder/ContactSection';
 

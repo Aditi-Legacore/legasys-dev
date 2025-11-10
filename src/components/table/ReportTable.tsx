@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card } from "@/components/ui/card";
 import CommonTable, { Column } from "@/components/ui/CommonTable";
 
 interface ReportTableProps {

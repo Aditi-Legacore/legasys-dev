@@ -3,7 +3,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Clock, User, FileText, Scale, MapPin, Phone, Mail, Calendar } from "lucide-react";
 import { IntakeData } from '@/types/intake';

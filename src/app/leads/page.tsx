@@ -5,13 +5,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import LeadsTable from "@/components/table/LeadsTable";
 import { Badge } from "@/components/ui/badge";
 import { Lead } from "@/types/leads";
-import { Button } from "@/components/ui/button";
-import QuickIntakeForm from "@/components/forms/QuickIntakeForm";
 import Pagination from "@/components/ui/pagination";
 import FilterBar from "@/components/ui/FilterBar";
 import FilterSidebar from "@/components/ui/FilterSidebar";
 import ActiveFilters from "@/components/ui/ActiveFilters";
-import { Plus } from "lucide-react";
 
 export default function LeadsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,7 +17,6 @@ export default function LeadsPage() {
   const [dateFromFilter, setDateFromFilter] = useState("");
   const [dateToFilter, setDateToFilter] = useState("");
   const [referralSourceFilter, setReferralSourceFilter] = useState("all");
-  const [showQuickIntake, setShowQuickIntake] = useState(false);
   const [showFiltersSidebar, setShowFiltersSidebar] = useState(false);
   const [leadsData, setLeadsData] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);

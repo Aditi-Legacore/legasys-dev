@@ -43,7 +43,7 @@ export default function AuthChoice() {
               <span className="text-xl font-semibold text-gray-900">Legasys</span>
             </div>
             <h1 className="text-3xl font-bold text-gray-900">Welcome to Legasys</h1>
-            <p className="text-gray-600">Please choose how you'd like to proceed.</p>
+            <p className="text-gray-600">Please choose how you&apos;d like to proceed.</p>
           </div>
 
           {/* Cards */}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { Settings, Bell, Mail, Sun, Moon, Loader2, Menu, X, FileText, Calendar, ChevronDown, Plus } from "lucide-react";
+import { Settings, Bell, Mail, Sun, Moon, Loader2, Menu, X, Plus } from "lucide-react";
 import { useTheme } from "next-themes";
 import { signOut, useSession } from "next-auth/react";
 import Searchbar from "./Searchbar";
@@ -56,18 +56,6 @@ const Navbar: React.FC = () => {
   if (!mounted) return null;
 
   const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
-
-  const handleQuickForm = () => {
-    setQuickIntakeOpen(false);
-    // Add your quick form logic here
-    console.log("Opening Quick Form...");
-  };
-
-  const handleQuickAppointment = () => {
-    setQuickIntakeOpen(false);
-    // Add your quick appointment logic here
-    console.log("Opening Quick Appointment...");
-  };
 
   return (
     <nav className="sticky top-0 z-30 flex justify-between items-center px-4 py-3 lg:px-6 lg:py-4 shadow-sm bg-white dark:bg-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-800">

@@ -1,7 +1,6 @@
 import { useFormContext } from "react-hook-form";
 import InputField from "../inputs/InputField";
 import RadioGroup from "../inputs/RadioGroup";
-import TextareaField from "../inputs/TextareaField";
 
 export default function ClientInsuranceStep() {
   const { watch } = useFormContext();

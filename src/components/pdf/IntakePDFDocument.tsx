@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, Image } from '@react-pdf/renderer';
 import { styles } from './styles';
 import { formatDate } from './utils';
 // import LegacoreLogo from '../../../public/assets/images/legacore/Legacore-Infomatics-logo.png';

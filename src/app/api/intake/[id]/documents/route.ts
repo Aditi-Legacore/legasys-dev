@@ -35,7 +35,6 @@ export async function POST(
       if (file.size > maxSize) continue;
 
       const timestamp = Date.now();
-      const ext = file.name.split(".").pop();
       const storedFileName = `${id}_${timestamp}_${file.name.replace(/\s+/g, "_")}`;
       const filePath = join(uploadsDir, storedFileName);
 

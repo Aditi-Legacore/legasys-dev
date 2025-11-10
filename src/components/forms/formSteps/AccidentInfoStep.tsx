@@ -3,7 +3,6 @@ import DateInputField from "../inputs/DateInputField";
 import InputField from "../inputs/InputField";
 import TextareaField from "../inputs/TextareaField";
 import RadioGroup from "../inputs/RadioGroup";
-import { useState } from "react";
 
 export default function AccidentInfoStep() {
   const { watch } = useFormContext();

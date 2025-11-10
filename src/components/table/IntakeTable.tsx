@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Edit, Trash2, Eye, Loader2 } from 'lucide-react';
+import { Edit, Trash2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import CommonTable, { Column, Action } from '@/components/ui/CommonTable';
 import { Badge } from '@/components/ui/badge';

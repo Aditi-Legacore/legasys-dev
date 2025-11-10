@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Eye, Edit, Trash2, FileText, Upload } from "lucide-react";
+import { Eye, Trash2, FileText, Upload } from "lucide-react";
 import Pagination from "@/components/ui/pagination";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
