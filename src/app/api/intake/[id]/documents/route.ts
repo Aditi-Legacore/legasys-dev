@@ -18,6 +18,8 @@ export async function POST(
     const data = await request.formData();
     const files = data.getAll("files") as File[];
     if (!files.length) return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
+    // for maximum 10 files allowed
+    if (files.length > 10) return NextResponse.json({ error: "Maximum 10 files allowed" }, { status: 400 });
 
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
     const maxSize = 600 * 1024; // 600KB
