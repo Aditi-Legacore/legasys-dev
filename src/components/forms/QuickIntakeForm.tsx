@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -63,7 +64,6 @@ export default function IntakeForm({ onClose }: { onClose: () => void }) {
         },
         body: JSON.stringify({
           ...data,
-          dateOfBirth: data.dateOfLoss,
         }),
       });
       const leadData = await leadRes.json();
