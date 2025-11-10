@@ -314,25 +314,25 @@ useEffect(() => {
 
     console.log(`📡 Sending ${method} request to ${url}`);
 
-  const payload: any = {
-  ...data,
-  phoneNumber: data.phone,
-  dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null, // ✅ only convert if dob exists
-  userId: session?.user?.id || null,
-  referenceId: referenceId || null, // Include referenceId if exists
-};
+    const payload: any = {
+      ...data,
+      phoneNumber: data.phone,
+      dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null, // ✅ convert only if dob exists
+      userId: session?.user?.id || null,
+      referenceId: referenceId || null, // Include referenceId if exists
+    };
 
-delete payload.phone;
-delete payload.dob;
+    delete payload.phone;
+    delete payload.dob;
 
-const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake`, {
-  method: intakeId ? "PUT" : "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(payload),
-});
-
+    const response = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
     console.log("Response status:", response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error("❌ Server error:", errorText);
@@ -342,15 +342,32 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
     const savedData = await response.json();
     console.log("✅ Intake form saved:", savedData);
 
-    // Email notification is handled in the API route
-
+    // ✅ Show success message
     toast.success(intakeId ? "✅ Intake updated successfully!" : "✅ Intake created successfully!");
     setIsSubmitted(true);
     setSubmittedIntakeId(savedData.id);
+
+    // ✅ Save intake ID locally if referenceId exists
     if (referenceId) {
       localStorage.setItem(`submittedIntakeId_${referenceId}`, savedData.id);
     }
-    setStep(6); // Auto-navigate to step 7 (DOCUMENT UPLOAD)
+
+    // ✅ Log the activity
+    await fetch("/api/activity-log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        refId: savedData.id,
+        activityType: "intake_submission",
+        shortDescription: "Intake Submitted",
+        longDescription: "Successfully submitted intake form",
+      }),
+    });
+
+    // ✅ Auto-navigate to step 7 (Document Upload)
+    setStep(6);
+
+    // Optionally redirect if needed later
     // router.push("/intake-list");
     // router.push("/forms");
   } catch (error) {
@@ -360,8 +377,6 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
     setIsSubmitting(false);
   }
 };
-
-
   
   // ✅ Validate current step before moving to the next
   const nextStep = async () => {
