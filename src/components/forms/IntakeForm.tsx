@@ -126,7 +126,21 @@ const handleSaveDraft = async () => {
         console.error(`Failed to save draft: ${res.status} ${res.statusText}`, errorText);
         throw new Error(`Failed to save draft: ${res.statusText}`);
       }
-      toast.success("Draft saved successfully!");
+       toast.success("Draft saved successfully!");
+      const savedData = await res.json();
+      console.log("savedData", savedData);
+      
+      // Log activity for saving draft
+      await fetch('/api/activity-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          refId: savedData.id,
+          activityType: 'save_draft',
+          shortDescription: 'Draft Saved',
+          longDescription: 'saved intake as draft',
+        }),
+      });
     } catch (err) {
       console.error(err);
       toast.error("Error saving draft.");
