@@ -1,38 +1,48 @@
-# Mobile Responsiveness Implementation Plan
+# TODO: Update Intake Preview Page to Match DB Fields and Add Activity Log Sidebar
 
-## Current Status
-- Tables are hidden on mobile (hidden md:block in CommonTable)
-- Some responsive elements exist but need enhancement
-- Need card-based mobile layouts for tables
+## 1. Update actualIntake Object
+- Add city, zip to contact info.
+- Add accidentTime, ambulance, ambulanceCompany, admitted, lengthOfStay to incident details.
+- Add fields for medical treatment (doctorHospital1/2/3, addresses, phones, treatmentDates).
+- Add defendant1 and defendant2 fields.
+- Add plaintiff auto insurance fields.
+- Add health insurance fields.
+- Add prior history fields.
+- Remove non-DB fields from insurance section.
 
-## Tasks
+## 2. Update Contact Information Card
+- Add city and zip fields.
 
-### 1. Update CommonTable Component
-- [ ] Modify CommonTable.tsx to show card-based layout on mobile instead of hiding table
-- [ ] Add mobile-specific rendering logic
-- [ ] Ensure actions are accessible on mobile
+## 3. Update Incident Details Card
+- Add accident time, ambulance details, admission status, length of stay.
 
-### 2. Adjust Layout Responsiveness
-- [ ] Update layout.tsx for better mobile spacing and padding
-- [ ] Improve sidebar and navbar mobile behavior
-- [ ] Adjust main content area for mobile screens
+## 4. Add Medical Treatment Card
+- Display doctor/hospital 1,2,3 with addresses, phones, treatment dates.
 
-### 3. Enhance Form Responsiveness
-- [ ] Update IntakeForm.tsx for better mobile layout
-- [ ] Improve form steps navigation on mobile
-- [ ] Ensure form inputs are touch-friendly
+## 5. Add Defendant Information Card
+- Display defendant 1 and 2 details (name, address, carrier, policy, vehicle info).
 
-### 4. Improve Page Responsiveness
-- [ ] Update intake-list/page.tsx for mobile optimization
-- [ ] Adjust grid layouts and spacing for mobile
-- [ ] Ensure buttons and interactive elements are mobile-friendly
+## 6. Add Plaintiff Auto Insurance Card
+- Display plaintiff's own auto insurance details.
 
-### 5. Add Mobile-Specific Styles
-- [ ] Update globals.css with additional mobile styles
-- [ ] Add touch-friendly button sizes
-- [ ] Improve mobile typography and spacing
+## 7. Add Health Insurance Card
+- Display health insurance details.
 
-### 6. Testing and Verification
-- [ ] Test on various screen sizes (mobile, tablet, desktop)
-- [ ] Verify touch interactions work properly
-- [ ] Check accessibility on mobile devices
+## 8. Add Prior History Card
+- Display prior injuries, claims, attorneys.
+
+## 9. Update Insurance & Legal Information Card
+- Remove estimated damages, police report number, witnesses, police report filed.
+- Keep insurance company and policy number.
+
+## 10. Change Layout to Include Sidebar
+- Wrap main content in grid: 2/3 for content, 1/3 for sidebar.
+
+## 11. Add Activity Log Quick View Sidebar
+- Display last 5 activity logs with short description, created at, created by.
+- Add "View All" link to switch to activity tab.
+
+## 12. Test Changes
+- Verify all fields render correctly.
+- Check sidebar displays activity logs.
+- Ensure responsive design.
