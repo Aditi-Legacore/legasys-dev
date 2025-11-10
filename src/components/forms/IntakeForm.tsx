@@ -353,16 +353,16 @@ useEffect(() => {
     }
 
     // ✅ Log the activity
-    await fetch("/api/activity-log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        refId: savedData.id,
-        activityType: "intake_submission",
-        shortDescription: "Intake Submitted",
-        longDescription: "Successfully submitted intake form",
-      }),
-    });
+    await fetch('/api/activity-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          refId: savedData.id,
+          activityType: intakeId ? 'intake_update' : 'intake_submission',
+          shortDescription: intakeId ? 'Intake Updated' : 'Intake Submitted',
+          longDescription: intakeId ? 'successfully updated intake form' : 'successfully submitted intake form',
+        }),
+      });
 
     // ✅ Auto-navigate to step 7 (Document Upload)
     setStep(6);

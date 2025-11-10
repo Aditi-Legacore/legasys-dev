@@ -13,7 +13,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id: intakeId } = await params;
+    const intakeId = (await params).id;
 
     // Verify the intake belongs to the user
     const intake = await prisma.intakeInfo.findUnique({
@@ -62,7 +62,7 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id: intakeId } = await params;
+    const intakeId = (await params).id;
     const { action, details } = await request.json();
 
     if (!action) {

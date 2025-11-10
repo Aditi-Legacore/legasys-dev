@@ -1,7 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { User, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { IntakeData } from '@/types/intake';
+import PlaintiffInformationCard from './PlaintiffInformationCard';
 
 interface IntakeInformationTabProps {
   intake: IntakeData;
@@ -9,8 +12,15 @@ interface IntakeInformationTabProps {
 }
 
 export default function IntakeInformationTab({ intake, formatDate }: IntakeInformationTabProps) {
+  const [showPlaintiffCard, setShowPlaintiffCard] = useState(false);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Plaintiff Information at the top - on responsive screens */}
+      <div className="block lg:hidden">
+        <PlaintiffInformationCard intake={intake} formatDate={formatDate} />
+      </div>
+
       {/* Accident Information */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <p className="text-xl font-bold mb-4 text-green-600">Accident Information</p>
@@ -126,6 +136,54 @@ export default function IntakeInformationTab({ intake, formatDate }: IntakeInfor
         <p className="text-black dark:text-gray-200 mb-2"><strong>Prior Insurance Claims:</strong> {intake.priorInsuranceClaims || 'N/A'}</p>
         <p className="text-black dark:text-gray-200"><strong>Prior Attorneys:</strong> {intake.priorAttorneys || 'N/A'}</p>
       </div>
+
+      {/* Sliding Plaintiff Info Card */}
+      {showPlaintiffCard && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-black bg-opacity-50"
+            onClick={() => setShowPlaintiffCard(false)}
+          />
+          {/* Small Card */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 max-h-96 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+            <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-green-600">Plaintiff Information</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPlaintiffCard(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            <div className="p-4 overflow-y-auto max-h-80">
+              <PlaintiffInformationCard intake={intake} formatDate={formatDate} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Desktop small card */}
+      {showPlaintiffCard && (
+        <div className="hidden lg:block absolute top-0 right-0 w-80 bg-white dark:bg-gray-800 shadow-lg rounded-lg transform transition-transform duration-300 ease-in-out z-10">
+          <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-green-600">Plaintiff Information</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowPlaintiffCard(false)}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+          <div className="p-4 overflow-y-auto max-h-96">
+            <PlaintiffInformationCard intake={intake} formatDate={formatDate} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
