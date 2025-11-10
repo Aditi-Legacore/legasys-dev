@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronUp, ChevronDown, MoreVertical } from 'lucide-react';
+import { ChevronUp, ChevronDown, MoreVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +56,9 @@ export default function CommonTable({
 }: CommonTableProps) {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [leftArrowVisible, setLeftArrowVisible] = useState(false);
+  const [rightArrowVisible, setRightArrowVisible] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const visibleColumns = columns.filter(col => !col.hidden);
 
@@ -67,31 +70,82 @@ export default function CommonTable({
     onSort(columnKey, newDirection);
   };
 
+  const checkOverflow = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setLeftArrowVisible(scrollLeft > 0);
+      setRightArrowVisible(scrollLeft < scrollWidth - clientWidth);
+    }
+  };
+
+  useEffect(() => {
+    checkOverflow();
+    const handleResize = () => checkOverflow();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [data, columns]);
+
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+    }
+  };
+
   if (!data || data.length === 0) {
     return (
-      <Card className={`card-shadow overflow-hidden hidden md:block bg-white dark:bg-gray-800 ${className}`}>
+      <div className={`card-shadow bg-white dark:bg-gray-800 rounded-lg border border-border ${className}`}>
         <div className="text-center py-10 text-gray-500 dark:text-gray-400">
           {emptyMessage}
         </div>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className={`card-shadow overflow-hidden hidden md:block bg-white dark:bg-gray-800 ${className}`}>
-      <div className="overflow-x-auto">
-        <table className="w-full">
+    <div className={`card-shadow bg-white dark:bg-gray-800 rounded-lg border border-border overflow-hidden ${className} relative`}>
+      {leftArrowVisible && (
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 bg-white dark:bg-gray-800 border border-border shadow-md hover:bg-gray-50 dark:hover:bg-gray-700"
+          onClick={scrollLeft}
+        >
+          <ChevronLeft size={16} />
+        </Button>
+      )}
+      {rightArrowVisible && (
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 bg-white dark:bg-gray-800 border border-border shadow-md hover:bg-gray-50 dark:hover:bg-gray-700"
+          onClick={scrollRight}
+        >
+          <ChevronRight size={16} />
+        </Button>
+      )}
+      <div
+        className="overflow-x-auto"
+        ref={scrollContainerRef}
+        onScroll={checkOverflow}
+      >
+        <table className="w-full border-collapse">
           <thead className="bg-muted/50 dark:bg-gray-700 border-b border-border dark:border-gray-600">
             <tr>
               {showSerialNumber && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider whitespace-nowrap">
                   {serialNumberLabel}
                 </th>
               )}
               {visibleColumns.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider ${column.className || ''} ${column.sortable ? 'cursor-pointer hover:bg-muted/70 dark:hover:bg-gray-600' : ''}`}
+                  className={`px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider whitespace-nowrap ${column.className || ''} ${column.sortable ? 'cursor-pointer hover:bg-muted/70 dark:hover:bg-gray-600' : ''}`}
                   onClick={() => column.sortable && handleSort(column.key)}
                 >
                   <div className="flex items-center gap-1">
@@ -112,7 +166,7 @@ export default function CommonTable({
                 </th>
               ))}
               {actions.length > 0 && (
-                <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider whitespace-nowrap">
                   Actions
                 </th>
               )}
@@ -128,7 +182,7 @@ export default function CommonTable({
                 onClick={() => onRowClick?.(row, rowIndex)}
               >
                 {showSerialNumber && (
-                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
                     {rowIndex + 1}
                   </td>
                 )}
@@ -140,7 +194,7 @@ export default function CommonTable({
                   return (
                     <td
                       key={column.key}
-                      className={`px-6 py-4 text-sm text-foreground dark:text-gray-300 ${column.className || ''}`}
+                      className={`px-6 py-4 text-sm text-foreground dark:text-gray-300 whitespace-nowrap ${column.className || ''}`}
                     >
                       {column.link ? (
                         <a
@@ -157,7 +211,7 @@ export default function CommonTable({
                   );
                 })}
                 {actions.length > 0 && (
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-6 py-4 text-center whitespace-nowrap">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -193,6 +247,6 @@ export default function CommonTable({
           </tbody>
         </table>
       </div>
-    </Card>
+    </div>
   );
 }

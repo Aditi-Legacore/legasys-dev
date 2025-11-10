@@ -277,9 +277,9 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           refId: savedData.id,
-          activityType: 'intake_submission',
-          shortDescription: 'Intake Submitted',
-          longDescription: 'successfully submitted intake form',
+          activityType: intakeId ? 'intake_update' : 'intake_submission',
+          shortDescription: intakeId ? 'Intake Updated' : 'Intake Submitted',
+          longDescription: intakeId ? 'successfully updated intake form' : 'successfully submitted intake form',
         }),
       });
 
