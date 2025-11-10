@@ -1,5 +1,3 @@
-// import { NextRequest, NextResponse } from "next/server";
-// import { prisma } from "@/lib/prisma";
 
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
@@ -65,18 +63,40 @@ export async function POST(request: NextRequest) {
 //   }
 // }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const leads = await prisma.lead.findMany({
-      orderBy: { createdAt: "desc" },
-      include: {
-        intakeInfo: {
-          select: { id: true }, // only fetch what we need
-        },
-      },
-    });
+    const { searchParams } = new URL(request.url);
+    const referenceId = searchParams.get('referenceId');
 
-    return NextResponse.json(leads, { status: 200 });
+    if (referenceId) {
+      // Fetch single lead by referenceId
+      const lead = await prisma.lead.findUnique({
+        where: { referenceId },
+        include: {
+          intakeInfo: {
+            select: { id: true },
+          },
+        },
+      });
+
+      if (!lead) {
+        return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+      }
+
+      return NextResponse.json(lead, { status: 200 });
+    } else {
+      // Fetch all leads
+      const leads = await prisma.lead.findMany({
+        orderBy: { createdAt: "desc" },
+        include: {
+          intakeInfo: {
+            select: { id: true },
+          },
+        },
+      });
+
+      return NextResponse.json(leads, { status: 200 });
+    }
   } catch (err) {
     console.error("❌ GET /api/leads error:", err);
     return NextResponse.json({ error: "Failed to fetch leads" }, { status: 500 });

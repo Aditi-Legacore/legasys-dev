@@ -13,6 +13,7 @@ import ActivityLogTab from '@/components/intake-preview/ActivityLogTab';
 import DocumentsTab from '@/components/intake-preview/DocumentsTab';
 import PlaintiffInformationCard from '@/components/intake-preview/PlaintiffInformationCard';
 import PDFPreviewModal from '@/components/intake-preview/PDFPreviewModal';
+import ImagePreviewModal from '@/components/intake-preview/ImagePreviewModal';
 
 export default function IntakePreviewPage() {
   const params = useParams();
@@ -24,9 +25,11 @@ export default function IntakePreviewPage() {
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [showPdfPreview, setShowPdfPreview] = useState(false);
+  const [showImagePreview, setShowImagePreview] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [notes, setNotes] = useState<{ id: string; content: string; createdAt: string; createdBy: string }[]>([]);
   const [activityLogs, setActivityLogs] = useState<{ id: string; shortDescription: string; longDescription?: string; createdAt: string; createdBy: string; createdByName?: string }[]>([]);
-  const [documents, setDocuments] = useState<{ id: string; name: string; type: string; uploadedAt: string }[]>([]);
+  const [documents, setDocuments] = useState<{ id: string; name: string; type: string; uploadedAt: string; filePath: string }[]>([]);
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [loadingActivity, setLoadingActivity] = useState(false);
   const [loadingDocuments, setLoadingDocuments] = useState(false);
@@ -114,21 +117,33 @@ export default function IntakePreviewPage() {
     }
   };
 
+  // added for document tab in intake-preview page
+
   const fetchDocuments = async () => {
-    if (!intake?.id) return;
-    setLoadingDocuments(true);
-    try {
-      const res = await fetch(`/api/documents?intakeId=${intake.id}`);
-      if (!res.ok) throw new Error('Failed to fetch documents');
-      const data = await res.json();
-      setDocuments(data);
-    } catch (error) {
-      console.error(error);
-      toast.error('Failed to load documents.');
-    } finally {
-      setLoadingDocuments(false);
-    }
-  };
+  if (!intake?.id) return;
+  setLoadingDocuments(true);
+  try {
+    const res = await fetch(`/api/intake/${intake.id}/documents`);
+    if (!res.ok) throw new Error("Failed to fetch documents");
+    const data = await res.json();
+
+    // Map backend response to match your table shape
+    const formattedDocs = data.map((doc: any) => ({
+      id: doc.id,
+      name: doc.fileName,
+      type: doc.mimeType?.split("/")[1]?.toUpperCase() || "N/A",
+      uploadedAt: doc.uploadedAt || new Date().toISOString(), // fallback
+      filePath: doc.filePath,
+    }));
+
+    setDocuments(formattedDocs);
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    toast.error("Failed to load documents.");
+  } finally {
+    setLoadingDocuments(false);
+  }
+};
 
   const addNote = async () => {
     if (!newNote.trim() || !intake?.id) return;
@@ -301,6 +316,81 @@ export default function IntakePreviewPage() {
     toast.success('Link copied to clipboard.');
   };
 
+  // added for viewing the image by clicking eye button in intake-preview page
+
+  const handleDocumentPreview = (filePath: string, type: string) => {
+    if (type === 'PNG' || type === 'JPEG' || type === 'JPG') {
+      setImageUrl(filePath);
+      setShowImagePreview(true);
+    } else {
+      toast.error('Preview not supported for this file type.');
+    }
+  };
+
+  const handleDocumentDelete = async (documentId: string) => {
+    if (!confirm('Are you sure you want to delete this document?') || !intake?.id) return;
+
+    try {
+      const res = await fetch(`/api/intake/${intake.id}/documents`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId }),
+      });
+      if (!res.ok) throw new Error('Failed to delete document');
+      fetchDocuments();
+      toast.success('Document deleted successfully.');
+
+      // Log activity for deleting document
+      await fetch('/api/activity-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          intakeId: intake.id,
+          activityType: 'delete_document',
+          shortDescription: 'Document Deleted',
+          longDescription: 'deleted a document',
+        }),
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to delete document.');
+    }
+  };
+
+  const handleDocumentUpload = async (files: FileList) => {
+    if (!intake?.id) return;
+
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files', files[i]);
+    }
+
+    try {
+      const res = await fetch(`/api/intake/${intake.id}/documents`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Failed to upload documents');
+      fetchDocuments();
+      toast.success('Documents uploaded successfully.');
+
+      // Log activity for uploading document
+      await fetch('/api/activity-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          intakeId: intake.id,
+          activityType: 'upload_document',
+          shortDescription: 'Document Uploaded',
+          longDescription: 'uploaded documents',
+        }),
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to upload documents.');
+    }
+  };
+
   const formatDate = (dateString: string | null): string => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -394,6 +484,9 @@ export default function IntakePreviewPage() {
                     intake={intake}
                     showPlaintiffCard={showPlaintiffCardDocuments}
                     setShowPlaintiffCard={setShowPlaintiffCardDocuments}
+                    onPreview={handleDocumentPreview}
+                    onDelete={handleDocumentDelete}
+                    onUpload={handleDocumentUpload}
                   />
                 </TabsContent>
               </Tabs>
@@ -411,6 +504,12 @@ export default function IntakePreviewPage() {
         showPdfPreview={showPdfPreview}
         pdfUrl={pdfUrl}
         onClose={() => setShowPdfPreview(false)}
+      />
+
+      <ImagePreviewModal
+        showImagePreview={showImagePreview}
+        imageUrl={imageUrl}
+        onClose={() => setShowImagePreview(false)}
       />
     </>
   );

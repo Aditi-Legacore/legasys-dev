@@ -13,12 +13,13 @@ import MedicalTreatmentStep from "./formSteps/MedicalTreatmentStep";
 // import InjuriesStep from "./formSteps/InjuriesStep";
 import SubmitStep from "./formSteps/SubmitStep";
 import { useSession } from "next-auth/react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 // Extend the session user type to include 'id'
 import type { DefaultUser } from "next-auth";
 import { toast } from "sonner";
 import IntakeDocuments from "./intakeDocuments/intakeDocuments";
+import router from "next/router";
 
 declare module "next-auth" {
   interface Session {
@@ -38,6 +39,7 @@ const steps = [
   "CLIENT INSURANCE INFORMATION",
   "MEDICAL TREATMENT",
   "Submit",
+  "DOCUMENT UPLOAD",
 ];
 
 // 👇 Define the fields to validate at each step
@@ -48,6 +50,7 @@ const stepFields: (keyof IntakeFormData)[][] = [
   [], // Step 4 (Client Insurance - no required fields)
   [], // Step 5 (Medical Treatment - no required fields)
   [], // Step 6 (Submit)
+  [], // Step 7 (Document Upload - no required fields)
 ];
 
 interface IntakeFormWizardProps {
@@ -56,9 +59,9 @@ interface IntakeFormWizardProps {
 
 export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps) {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const referenceId = searchParams.get("ref") || localStorage.getItem("referenceId");
+  const [referenceId, setReferenceId] = useState<string | null>(null);
   const [draft, setDraft] = useState<any>(null);
+  const [leadData, setLeadData] = useState<any>(null);
 
   const intakeId = searchParams.get("id");  // 👈 get ID from URL
   const [isLoadingExistingData, setIsLoadingExistingData] = useState(false);
@@ -68,7 +71,34 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedIntakeId, setSubmittedIntakeId] = useState<string | null>(null);
 
-  // Prefill draft if exists
+  // Set referenceId and submittedIntakeId on mount
+  useEffect(() => {
+    const refFromUrl = searchParams.get("ref");
+    const refFromStorage = localStorage.getItem("referenceId");
+    const ref = refFromUrl || refFromStorage;
+    setReferenceId(ref || null);
+    if (ref) {
+      const savedIntakeId = localStorage.getItem(`submittedIntakeId_${ref}`);
+      setSubmittedIntakeId(savedIntakeId || null);
+    }
+  }, [searchParams]);
+
+  // Set step based on referenceId
+  useEffect(() => {
+    if (referenceId) {
+      const savedStep = localStorage.getItem(`intakeFormStep_${referenceId}`);
+      setStep(savedStep ? parseInt(savedStep, 10) : 0);
+    }
+  }, [referenceId]);
+
+  // Persist step in localStorage
+  useEffect(() => {
+    if (referenceId) {
+      localStorage.setItem(`intakeFormStep_${referenceId}`, step.toString());
+    }
+  }, [step, referenceId]);
+
+// Prefill draft if exists
   useEffect(() => {
     const draftData = localStorage.getItem("draftData");
     if (draftData) {
@@ -76,7 +106,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
     }
   }, []);
 
-  const handleSaveDraft = async () => {
+const handleSaveDraft = async () => {
     try {
       if (!referenceId) {
         toast.error("No reference ID found. Please start a new session.");
@@ -96,8 +126,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
         console.error(`Failed to save draft: ${res.status} ${res.statusText}`, errorText);
         throw new Error(`Failed to save draft: ${res.statusText}`);
       }
-
-      toast.success("Draft saved successfully!");
+       toast.success("Draft saved successfully!");
       const savedData = await res.json();
       console.log("savedData", savedData);
       
@@ -112,7 +141,6 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
           longDescription: 'saved intake as draft',
         }),
       });
-
     } catch (err) {
       console.error(err);
       toast.error("Error saving draft.");
@@ -129,17 +157,45 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (referenceId) {
+    if (!isSubmitted && referenceId) {
+      // First, try to fetch draft
       fetch(`/api/intake/draft?referenceId=${referenceId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.draft) {
-            setDraft(data.draft);
+        .then((res) => {
+          if (res.ok) {
+            return res.json();
+          } else {
+            // Silently handle 404 or other errors without logging
+            return null;
           }
         })
-        .catch((err) => console.error("Failed to fetch draft:", err));
+        .then((data) => {
+          if (data && data.draft) {
+            setDraft(data.draft);
+          } else {
+            // If no draft, fetch lead data
+            fetch(`/api/leads?referenceId=${referenceId}`)
+              .then((res) => {
+                if (res.ok) {
+                  return res.json();
+                } else {
+                  return null;
+                }
+              })
+              .then((leadData) => {
+                if (leadData) {
+                  setLeadData(leadData);
+                }
+              })
+              .catch(() => {
+                // Silently ignore errors
+              });
+          }
+        })
+        .catch(() => {
+          // Silently ignore errors to avoid console noise
+        });
     }
-  }, [referenceId]);
+  }, [referenceId, isSubmitted]);
 
   // Populate form with draft data when draft is loaded
   useEffect(() => {
@@ -152,127 +208,152 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
         dateOfBirth: draft.dateOfBirth ? new Date(draft.dateOfBirth).toISOString().split('T')[0] : '',
       };
 
-      Object.keys(mappedData).forEach((key) => {
-        if (mappedData[key] !== null && mappedData[key] !== undefined) {
-          methods.setValue(key as keyof IntakeFormData, mappedData[key]);
+      (Object.keys(mappedData) as Array<keyof typeof mappedData>).forEach((key) => {
+        const value = mappedData[key];
+        if (value !== null && value !== undefined) {
+          methods.setValue(key as keyof IntakeFormData, value);
         }
       });
     }
   }, [draft, methods]);
 
-
+  // Populate form with lead data when lead data is loaded
   useEffect(() => {
-    if (session?.user) {
-      methods.setValue("clientName", session.user.name || "");
-      methods.setValue("email", session.user.email || "");
-    }
-    if (containerRef.current) {
-      containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-    if (intakeId) {
-      const fetchIntake = async () => {
-        try {
-          setIsLoadingExistingData(true);
-          const res = await fetch(`/api/intake/${intakeId}`);
-          if (!res.ok) throw new Error("Failed to fetch intake data");
-          const data = await res.json();
-
-          // Map database fields back to form fields
-          const mappedData = {
-            ...data,
-            phone: data.phoneNumber || '',
-            dob: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
-            phoneNumber: data.phoneNumber || '',
-            dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
-          };
-
-          Object.keys(mappedData).forEach((key) => {
-            if (mappedData[key] !== null && mappedData[key] !== undefined) {
-              methods.setValue(key as keyof IntakeFormData, mappedData[key]);
-            }
-          });
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setIsLoadingExistingData(false);
-        }
+    if (leadData && !draft) {
+      const mappedData = {
+        clientName: leadData.name || '',
+        phone: leadData.phone || '',
+        email: leadData.email || '',
+        accidentDate: leadData.dueDate ? new Date(leadData.dueDate).toISOString().split('T')[0] : '',
+        caseType: leadData.caseType || '',
+        accidentDescription: leadData.description || '',
+        referralSource: leadData.referralSource || '',
+        dob: leadData.dateOfBirth ? new Date(leadData.dateOfBirth).toISOString().split('T')[0] : '',
       };
-      fetchIntake();
+
+      (Object.keys(mappedData) as (keyof typeof mappedData)[]).forEach((key) => {
+        const value = mappedData[key];
+        if (value !== null && value !== undefined) {
+          methods.setValue(key as keyof IntakeFormData, value);
+        }
+      });
     }
-  }, [session, intakeId, methods]);  // ✅ Removed "step" here
+  }, [leadData, draft, methods]);
 
+  
+useEffect(() => {
+  // Only set from session if no referenceId (not from lead) and no intakeId (not editing existing)
+  if (session?.user && !referenceId && !intakeId) {
+    methods.setValue("clientName", session.user.name || "");
+    methods.setValue("email", session.user.email || "");
+  }
+  if (containerRef.current) {
+    containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  if (intakeId) {
+    const fetchIntake = async () => {
+      try {
+        setIsLoadingExistingData(true);
+        const res = await fetch(`/api/intake/${intakeId}`);
+        if (!res.ok) throw new Error("Failed to fetch intake data");
+        const data = await res.json();
 
+        // Map database fields back to form fields
+        const mappedData = {
+          ...data,
+          phone: data.phoneNumber || '',
+          dob: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
+          phoneNumber: data.phoneNumber || '',
+          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
+        };
+
+        (Object.keys(mappedData) as (keyof typeof mappedData)[]).forEach((key) => {
+          const value = mappedData[key];
+          if (value !== null && value !== undefined) {
+            methods.setValue(key as keyof IntakeFormData, value);
+          }
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoadingExistingData(false);
+      }
+    };
+    fetchIntake();
+  }
+}, [session, intakeId, methods, referenceId]);
+
+  
 
 
 
   // ✅ Scroll to top whenever step changes
   // 👇 Add this effect for scrolling on step change
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }, [step]);
+useEffect(() => {
+  if (containerRef.current) {
+    containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}, [step]);
 
-  useEffect(() => {
-    const draft = localStorage.getItem("draftData");
-    if (draft) {
-      setFormData(JSON.parse(draft));
-    }
-  }, []);
+
 
   // new code for update field added to fetch data from database
 
   const onSubmit = async (data: IntakeFormData) => {
-    console.log("🚀 Form submission attempted with data:", data);
-    console.log("Session user ID:", session?.user?.id);
-    setIsSubmitting(true);
+  console.log("🚀 Form submission attempted with data:", data);
+  console.log("Session user ID:", session?.user?.id);
+  setIsSubmitting(true);
 
-    try {
-      const method = intakeId ? "PUT" : "POST";
-      const url = intakeId ? `/api/intake/${intakeId}` : `/api/intake`;
+  try {
+    const method = intakeId ? "PUT" : "POST";
+    const url = intakeId ? `/api/intake/${intakeId}` : `/api/intake`;
 
-      console.log(`📡 Sending ${method} request to ${url}`);
+    console.log(`📡 Sending ${method} request to ${url}`);
 
-      const payload: any = {
-        ...data,
-        phoneNumber: data.phone,
-        dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null, // ✅ only convert if dob exists
-        userId: session?.user?.id || null,
-        referenceId: referenceId || null, // Include referenceId if exists
-      };
+    const payload: any = {
+      ...data,
+      phoneNumber: data.phone,
+      dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null, // ✅ convert only if dob exists
+      userId: session?.user?.id || null,
+      referenceId: referenceId || null, // Include referenceId if exists
+    };
 
-      delete payload.phone;
-      delete payload.dob;
+    delete payload.phone;
+    delete payload.dob;
 
-      const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake`, {
-        method: intakeId ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    const response = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
+    console.log("Response status:", response.status);
 
-      console.log("Response status:", response.status);
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("❌ Server error:", errorText);
-        throw new Error("Failed to save intake");
-      }
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ Server error:", errorText);
+      throw new Error("Failed to save intake");
+    }
 
-      const savedData = await response.json();
-      console.log("✅ Intake form saved:", savedData);
+    const savedData = await response.json();
+    console.log("✅ Intake form saved:", savedData);
 
-      // Email notification is handled in the API route
+    // ✅ Show success message
+    toast.success(intakeId ? "✅ Intake updated successfully!" : "✅ Intake created successfully!");
+    setIsSubmitted(true);
+    setSubmittedIntakeId(savedData.id);
 
-      toast.success(intakeId ? "✅ Intake updated successfully!" : "✅ Intake created successfully!");
-      setIsSubmitted(true);
-      setSubmittedIntakeId(savedData.id);
+    // ✅ Save intake ID locally if referenceId exists
+    if (referenceId) {
+      localStorage.setItem(`submittedIntakeId_${referenceId}`, savedData.id);
+    }
 
-
-      await fetch('/api/activity-log', {
+    // ✅ Log the activity
+    await fetch('/api/activity-log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -283,18 +364,20 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
         }),
       });
 
-      // router.push("/intake-list");                                                                                                                                         
-      // router.push("/forms");
-    } catch (error) {
-      console.error("❌ Error saving intake:", error);
-      toast.error("⚠️ There was an error saving the form.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    // ✅ Auto-navigate to step 7 (Document Upload)
+    setStep(6);
 
-
-
+    // Optionally redirect if needed later
+    // router.push("/intake-list");
+    // router.push("/forms");
+  } catch (error) {
+    console.error("❌ Error saving intake:", error);
+    toast.error("⚠️ There was an error saving the form.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+  
   // ✅ Validate current step before moving to the next
   const nextStep = async () => {
     const fieldsToValidate = stepFields[step];
@@ -308,7 +391,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
     }
 
     setStep((s) => s + 1);
-
+    
   };
 
 
@@ -322,8 +405,8 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
       case 2: return <DefendantInfoStep />;
       case 3: return <ClientInsuranceStep />;
       case 4: return <MedicalTreatmentStep />;
-      // case 5: return <InjuriesStep />;
       case 5: return <SubmitStep isSubmitting={isSubmitting} />;
+      case 6: return submittedIntakeId ? <IntakeDocuments submittedIntakeId={submittedIntakeId} /> : <div className="text-center">Loading document upload...</div>;
       default: return null;
     }
   };
@@ -347,33 +430,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
     );
   }
 
-  // Document upload 04-11-2025
 
-  const handleFileUpload = async (file: File) => {
-    if (!submittedIntakeId) {
-      toast.error("No intake ID available for upload.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch(`/api/intake/${submittedIntakeId}/documents`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to upload document");
-      }
-
-      toast.success("Document uploaded successfully!");
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Failed to upload document.");
-    }
-  };
 
   return (
     <FormProvider {...methods}>
@@ -381,10 +438,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
         ref={containerRef}
         className="w-full mx-auto max-h-[80vh] overflow-auto"
       >
-        {/* document upload after intake submit */}
-        {isSubmitted && submittedIntakeId ? (
-          <IntakeDocuments submittedIntakeId={submittedIntakeId} />
-        ) : (
+        <div className="max-w-4xl mx-auto border border-gray-300 dark:border-gray-600 rounded-xl">
           <form
             onSubmit={(e) => {
               console.log("Form onSubmit triggered");
@@ -396,66 +450,79 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
             }}
             className="bg-white dark:bg-gray-900 p-4 sm:p-6 lg:p-8 rounded-xl shadow-xl transition-all duration-300"
           >
-            <input type="hidden" {...methods.register("hearAboutUs")} />
-            <input type="hidden" {...methods.register("hearAboutUsDetail")} />
+          <input type="hidden" {...methods.register("hearAboutUs")} />
+          <input type="hidden" {...methods.register("hearAboutUsDetail")} />
 
-            {/* Header */}
-            <h2 className="text-center mb-8">
-              Step {step + 1}: {steps[step]}
-            </h2>
+          {/* Header */}
+          <h2 className="text-center mb-8">
+            Step {step + 1}: {steps[step]}
+          </h2>
 
-            {/* Step indicators */}
-            <div className="flex justify-between mb-6 mx-auto w-full max-w-3xl">
-              {steps.map((label, index) => (
-                <div
-                  key={label}
-                  onClick={() => setStep(index)}
-                  className={`flex-1 text-center text-sm font-semibold cursor-pointer transition
-                    ${index === step ? "block" : "hidden sm:block"}
-                    ${index <= step
+          {/* Step indicators */}
+          <div className="flex justify-between mb-6 mx-auto w-full max-w-3xl">
+            {steps.map((label, index) => (
+              <div
+                key={label}
+                onClick={() => setStep(index)}
+                className={`flex-1 text-center text-sm font-semibold cursor-pointer transition
+                  ${index === step ? "block" : "hidden sm:block"}
+                  ${
+                    index <= step
                       ? "text-indigo-500 dark:text-indigo-400"
                       : "text-gray-400"
-                    }`}
+                  }`}
+              >
+                <div
+                  className={`w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center ${
+                    index <= step
+                      ? "bg-indigo-500 text-white"
+                      : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300"
+                  }`}
                 >
-                  <div
-                    className={`w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center ${index <= step
-                        ? "bg-indigo-500 text-white"
-                        : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300"
-                      }`}
-                  >
-                    {index + 1}
-                  </div>
-                  {label}
+                  {index + 1}
                 </div>
-              ))}
-            </div>
+                {label}
+              </div>
+            ))}
+          </div>
 
-            {/* Step Content */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              {renderStep()}
-            </motion.div>
+          {/* Step Content */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            {renderStep()}
+          </motion.div>
 
-            {/* Buttons */}
-            <div className="flex justify-between pt-4 border-t mt-4 dark:border-gray-700">
-              {step > 0 && (
-                <button
-                  type="button"
-                  onClick={prevStep}
-                  className="px-5 py-2 bg-gray-300 dark:border-gray-300 text-gray-800 dark:text-gray-900 rounded-lg hover:bg-gray-400 transition"
-                >
-                  Back
-                </button>
-              )}
-              {step < steps.length - 1 && (
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  className="ml-auto px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-                >
-                  Next
-                </button>
-              )}
-              {/* 💾 Save Draft Button */}
+          {/* Buttons */}
+          <div className="flex justify-between pt-4 border-t mt-4 dark:border-gray-700">
+            {step > 0 && step < steps.length - 1 && (
+              <button
+                type="button"
+                onClick={prevStep}
+                className="px-5 py-2 bg-gray-300 dark:border-gray-300 text-gray-800 dark:text-gray-900 rounded-lg hover:bg-gray-400 transition"
+              >
+                Back
+              </button>
+            )}
+            {/* {step === steps.length - 2 && (
+              <button
+                type="button"
+                onClick={handleFinalSubmit}
+                disabled={isSubmitting}
+                className="ml-auto px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
+              >
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </button>
+            )} */}
+            {step < steps.length - 2 && (
+              <button
+                type="button"
+                onClick={nextStep}
+                className="ml-auto px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+              >
+                Next
+              </button>
+            )}
+            {/* 💾 Save Draft Button */}
+            {step < steps.length - 1 && (
               <div className="flex justify-end">
                 <button
                   type="button"
@@ -465,9 +532,10 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
                   Save Draft
                 </button>
               </div>
-            </div>
-          </form>
-        )}
+            )}
+          </div>
+        </form>
+        </div>
 
       </div>
     </FormProvider>
