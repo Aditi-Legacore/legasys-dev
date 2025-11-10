@@ -85,7 +85,7 @@ export default function DocumentsTab({
             <div className="flex justify-center">
               <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
-          ) : (
+          ) : documents.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -124,6 +124,8 @@ export default function DocumentsTab({
                 ))}
               </TableBody>
             </Table>
+          ) : (
+            <p className="text-center text-gray-500">No documents uploaded</p>
           )}
         </CardContent>
       </Card>
