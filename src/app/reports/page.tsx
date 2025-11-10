@@ -464,15 +464,13 @@ const getFormattedDate = () => {
              <ActiveFilters filters={activeFilters} />
 
             {/* Loading State */}
-            {loading && (
-              <div className="flex justify-center items-center py-8">
-                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-                <span className="ml-2 text-muted-foreground">Loading {activeTab} data...</span>
-              </div>
-            )}
-
-            {/* Error State */}
-            {error && (
+            {loading ? (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-center text-gray-500 py-10">Loading {activeTab}...</div>
+                </CardContent>
+              </Card>
+            ) : error ? (
               <div className="text-center py-8">
                 <p className="text-red-500">Error: {error}</p>
                 <button
@@ -482,10 +480,9 @@ const getFormattedDate = () => {
                   Retry
                 </button>
               </div>
+            ) : (
+              <ReportTable columns={columns} data={data} />
             )}
-
-            {/* Dynamic Report Table */}
-            {!loading && !error && <ReportTable columns={columns} data={data} />}
           </CardContent>
         </Card>
 

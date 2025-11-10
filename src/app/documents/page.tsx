@@ -184,7 +184,11 @@ export default function DocumentsPage() {
         <ActiveFilters filters={activeFilters} />
 
         {loading ? (
-          <div className="text-center text-gray-500 py-10">Loading...</div>
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center text-gray-500 py-10">Loading documents...</div>
+            </CardContent>
+          </Card>
         ) : (
           <DocumentsTable documents={filteredDocuments} />
         )}

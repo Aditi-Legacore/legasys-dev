@@ -145,9 +145,7 @@ export default function FormsPage() {
     return filters;
   }, [searchQuery, statusFilter, dateFromFilter, dateToFilter]);
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>;
-  }
+  // Loading state removed - now handled inline with table
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
@@ -226,7 +224,15 @@ export default function FormsPage() {
         <ActiveFilters filters={activeFilters} />
 
         {/* Forms Table */}
-        <FormsTable submissions={paginatedSubmissions} />
+        {loading ? (
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center text-gray-500 py-10">Loading forms...</div>
+            </CardContent>
+          </Card>
+        ) : (
+          <FormsTable submissions={paginatedSubmissions} />
+        )}
 
         {/* Pagination */}
         <Pagination
