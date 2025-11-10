@@ -61,6 +61,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   const searchParams = useSearchParams();
   const [referenceId, setReferenceId] = useState<string | null>(null);
   const [draft, setDraft] = useState<any>(null);
+  const [leadData, setLeadData] = useState<any>(null);
 
   const intakeId = searchParams.get("id");  // 👈 get ID from URL
   const [isLoadingExistingData, setIsLoadingExistingData] = useState(false);
@@ -75,7 +76,7 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
     const refFromUrl = searchParams.get("ref");
     const refFromStorage = localStorage.getItem("referenceId");
     const ref = refFromUrl || refFromStorage;
-    setReferenceId(ref);
+    setReferenceId(ref || null);
     if (ref) {
       const savedIntakeId = localStorage.getItem(`submittedIntakeId_${ref}`);
       setSubmittedIntakeId(savedIntakeId || null);
@@ -143,6 +144,7 @@ const handleSaveDraft = async () => {
 
   useEffect(() => {
     if (!isSubmitted && referenceId) {
+      // First, try to fetch draft
       fetch(`/api/intake/draft?referenceId=${referenceId}`)
         .then((res) => {
           if (res.ok) {
@@ -155,6 +157,24 @@ const handleSaveDraft = async () => {
         .then((data) => {
           if (data && data.draft) {
             setDraft(data.draft);
+          } else {
+            // If no draft, fetch lead data
+            fetch(`/api/leads?referenceId=${referenceId}`)
+              .then((res) => {
+                if (res.ok) {
+                  return res.json();
+                } else {
+                  return null;
+                }
+              })
+              .then((leadData) => {
+                if (leadData) {
+                  setLeadData(leadData);
+                }
+              })
+              .catch(() => {
+                // Silently ignore errors
+              });
           }
         })
         .catch(() => {
@@ -174,17 +194,42 @@ const handleSaveDraft = async () => {
         dateOfBirth: draft.dateOfBirth ? new Date(draft.dateOfBirth).toISOString().split('T')[0] : '',
       };
 
-      Object.keys(mappedData).forEach((key) => {
-        if (mappedData[key] !== null && mappedData[key] !== undefined) {
-          methods.setValue(key as keyof IntakeFormData, mappedData[key]);
+      (Object.keys(mappedData) as Array<keyof typeof mappedData>).forEach((key) => {
+        const value = mappedData[key];
+        if (value !== null && value !== undefined) {
+          methods.setValue(key as keyof IntakeFormData, value);
         }
       });
     }
   }, [draft, methods]);
 
+  // Populate form with lead data when lead data is loaded
+  useEffect(() => {
+    if (leadData && !draft) {
+      const mappedData = {
+        clientName: leadData.name || '',
+        phone: leadData.phone || '',
+        email: leadData.email || '',
+        accidentDate: leadData.dueDate ? new Date(leadData.dueDate).toISOString().split('T')[0] : '',
+        caseType: leadData.caseType || '',
+        accidentDescription: leadData.description || '',
+        referralSource: leadData.referralSource || '',
+        dob: leadData.dateOfBirth ? new Date(leadData.dateOfBirth).toISOString().split('T')[0] : '',
+      };
+
+      (Object.keys(mappedData) as (keyof typeof mappedData)[]).forEach((key) => {
+        const value = mappedData[key];
+        if (value !== null && value !== undefined) {
+          methods.setValue(key as keyof IntakeFormData, value);
+        }
+      });
+    }
+  }, [leadData, draft, methods]);
+
   
 useEffect(() => {
-  if (session?.user) {
+  // Only set from session if no referenceId (not from lead) and no intakeId (not editing existing)
+  if (session?.user && !referenceId && !intakeId) {
     methods.setValue("clientName", session.user.name || "");
     methods.setValue("email", session.user.email || "");
   }
@@ -210,9 +255,10 @@ useEffect(() => {
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
         };
 
-        Object.keys(mappedData).forEach((key) => {
-          if (mappedData[key] !== null && mappedData[key] !== undefined) {
-            methods.setValue(key as keyof IntakeFormData, mappedData[key]);
+        (Object.keys(mappedData) as (keyof typeof mappedData)[]).forEach((key) => {
+          const value = mappedData[key];
+          if (value !== null && value !== undefined) {
+            methods.setValue(key as keyof IntakeFormData, value);
           }
         });
       } catch (err) {
@@ -223,7 +269,7 @@ useEffect(() => {
     };
     fetchIntake();
   }
-}, [session, intakeId, methods]);  
+}, [session, intakeId, methods, referenceId]);
 
   
 
@@ -330,7 +376,6 @@ const response = await fetch(intakeId ? `/api/intake/${intakeId}` : `/api/intake
       case 2: return <DefendantInfoStep />;
       case 3: return <ClientInsuranceStep />;
       case 4: return <MedicalTreatmentStep />;
-      // case 5: return <InjuriesStep />;
       case 5: return <SubmitStep isSubmitting={isSubmitting} />;
       case 6: return submittedIntakeId ? <IntakeDocuments submittedIntakeId={submittedIntakeId} /> : <div className="text-center">Loading document upload...</div>;
       default: return null;

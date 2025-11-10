@@ -64,7 +64,6 @@ export default function IntakeForm({ onClose }: { onClose: () => void }) {
         },
         body: JSON.stringify({
           ...data,
-          dateOfBirth: data.dateOfLoss,
         }),
       });
       const leadData = await leadRes.json();
