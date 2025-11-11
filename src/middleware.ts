@@ -6,12 +6,28 @@ export default withAuth(
     const { pathname } = req.nextUrl;
     const token = req.nextauth.token;
 
-    // If user is authenticated and trying to access login or signup, redirect to dashboard
-    if (token && (pathname === "/login" || pathname === "/signup")) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+    // If the user has a valid session token
+    if (token) {
+      // Prevent logged-in users from visiting login or signup
+      if (pathname === "/login" || pathname === "/signup") {
+        return NextResponse.redirect(new URL("/", req.url));
+      }
+      return NextResponse.next();
     }
 
-    // Allow the request to proceed
+    // 🚫 No valid token (session expired or not logged in)
+    // Redirect to login page if accessing a protected route
+    if (
+      pathname !== "/login" &&
+      pathname !== "/signup" &&
+      !pathname.startsWith("/api") &&
+      !pathname.startsWith("/_next") &&
+      pathname !== "/favicon.ico"
+    ) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    // Allow unauthenticated users to access login/signup pages
     return NextResponse.next();
   },
   {
@@ -19,12 +35,12 @@ export default withAuth(
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
 
-        // Allow access to auth pages without authentication
+        // Allow access to login and signup pages
         if (pathname === "/login" || pathname === "/signup") {
           return true;
         }
 
-        // For other pages, require authentication
+        // Require authentication for other routes
         return !!token;
       },
     },

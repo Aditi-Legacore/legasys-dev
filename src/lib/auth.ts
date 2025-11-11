@@ -36,7 +36,21 @@ export const authOptions: AuthOptions = {
     //   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     // }),
   ],
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt", maxAge: 60 * 60 },
   pages: { signIn: "/login" },
   secret: process.env.NEXTAUTH_SECRET,
+  callbacks: {
+    jwt: async ({ token, user }) => {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    session: async ({ session, token }) => {
+      if (token) {
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
+  },
 };

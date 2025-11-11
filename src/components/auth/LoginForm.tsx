@@ -11,8 +11,10 @@ import Image from "next/image";
 import { Form, FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-
+import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import LoginBg from "../../../public/assets/images/auth/login-bg.png";
+import LoginLogoBg from "../../../public/assets/images/auth/logo.png";
+import LoginGoogleBg from "../../../public/assets/images/auth/google-icon.webp";
 interface LoginFormData {
   email: string;
   password: string;
@@ -22,6 +24,7 @@ export default function LoginForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
@@ -39,35 +42,41 @@ export default function LoginForm() {
   }, [form]);
 
   const onSubmit = async (values: LoginFormData) => {
-    const res = await signIn("credentials", {
-      ...values,
-      redirect: false,
-    });
+    setIsLoading(true);
+    try {
+      const res = await signIn("credentials", {
+        ...values,
+        redirect: false,
+      });
 
-    if (!res?.error) {
-      if (rememberMe) {
-        localStorage.setItem("rememberMe", "true");
-        localStorage.setItem("rememberedEmail", values.email);
+      if (!res?.error) {
+        if (rememberMe) {
+          localStorage.setItem("rememberMe", "true");
+          localStorage.setItem("rememberedEmail", values.email);
+        } else {
+          localStorage.removeItem("rememberMe");
+          localStorage.removeItem("rememberedEmail");
+        }
+        router.push("/");
+        window.location.reload();
       } else {
-        localStorage.removeItem("rememberMe");
-        localStorage.removeItem("rememberedEmail");
+        alert("Invalid credentials");
       }
-      router.push("/dashboard");
-    } else {
-      alert("Invalid credentials");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-white">
+    <div className="min-h-screen flex flex-col justify-center md:flex-row bg-white">
       {/* Left side: Illustration */}
-      <div className="md:w-1/2 relative flex items-center justify-center bg-gradient-to-br">
-        <div className="relative w-full h-[90vh]"> {/* adjust height as needed */}
+      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center bg-gradient-to-br">
+        <div className="relative w-full h-[70vh] lg:h-[80vh] xl:h-[90vh]"> {/* adjust height as needed */}
           <Image
-            src="/login-bg.webp"
+            src={LoginBg}
             alt="Login illustration"
             fill
-            className="object-contain md:object-cover"
+            className="object-cover"
             priority
           />
         </div>
@@ -75,16 +84,16 @@ export default function LoginForm() {
 
 
       {/* Right side: Form */}
-      <div className="md:w-1/2 flex items-center justify-center p-8">
+      <div className="lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md space-y-8">
           {/* Logo and Title */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 mb-6">
-               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+          <div className="space-y-2 text-center">
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <div className="w-10 h-10 md:w-[50px] md:h-[50px] bg-white rounded-lg flex items-center justify-center overflow-hidden">
                 <Image
-                  src="/legacore.png"
+                  src={LoginLogoBg}
                   alt="Logo"
-                  width={50} 
+                  width={50}
                   height={50}
                   className="object-contain"
                   priority
@@ -169,9 +178,17 @@ export default function LoginForm() {
 
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
               >
-                Login
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Logging In...
+                  </>
+                ) : (
+                  "Login"
+                )}
               </Button>
 
               <div className="relative">
@@ -191,7 +208,7 @@ export default function LoginForm() {
                   onClick={() => signIn("google", { callbackUrl: "/" })}
                 >
                   <Image
-                    src="/google-icon.webp"
+                    src={LoginGoogleBg}
                     alt="Google logo"
                     width={20}
                     height={20}

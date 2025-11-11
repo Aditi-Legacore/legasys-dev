@@ -1,242 +1,231 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Eye, Edit, Trash2, Plus, Loader2 } from 'lucide-react';
-import IntakeFormWizard from '../forms/IntakeForm';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Edit, Trash2, Eye, Plus, Loader2, X } from 'lucide-react';
+import { toast } from 'sonner';
+import Pagination from '@/components/ui/pagination';
 
-// Mock types
 interface CaseIntake {
-  id: number;
+  id: number | string;
   clientName: string;
-  dateOfLoss: string;
-  caseType: string;
+  accidentDate: string;
+  accidentDescription: string;
 }
 
-// // Mock IntakeFormWizard component
-// const IntakeFormWizard = ({ onFormSubmit }: { onFormSubmit: (data: any) => void }) => (
-//   <div className="space-y-4">
-//     <input
-//       type="text"
-//       placeholder="Client Name"
-//       className="w-full px-4 py-2 border rounded-lg"
-//       id="clientName"
-//     />
-//     <input
-//       type="date"
-//       placeholder="Accident Date"
-//       className="w-full px-4 py-2 border rounded-lg"
-//       id="accidentDate"
-//     />
-//     <input
-//       type="text"
-//       placeholder="Case Type"
-//       className="w-full px-4 py-2 border rounded-lg"
-//       id="caseType"
-//     />
-//     <button
-//       onClick={() => {
-//         onFormSubmit({
-//           clientName: (document.getElementById('clientName') as HTMLInputElement).value,
-//           accidentDate: (document.getElementById('accidentDate') as HTMLInputElement).value,
-//           caseType: (document.getElementById('caseType') as HTMLInputElement).value,
-//         });
-//       }}
-//       className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg"
-//     >
-//       Submit
-//     </button>
-//   </div>
-// );
-
-export default function CaseIntakeManagement() {
-  const [intakes, setIntakes] = useState<CaseIntake[]>([
-    {
-      id: 1,
-      clientName: 'John Anderson',
-      dateOfLoss: '2024-08-15',
-      caseType: 'Personal Injury'
-    },
-    {
-      id: 2,
-      clientName: 'Sarah Mitchell',
-      dateOfLoss: '2024-09-22',
-      caseType: 'Property Damage'
-    },
-    {
-      id: 3,
-      clientName: 'Michael Chen',
-      dateOfLoss: '2024-07-10',
-      caseType: 'Contract Dispute'
-    },
-    {
-      id: 4,
-      clientName: 'Emily Rodriguez',
-      dateOfLoss: '2024-10-05',
-      caseType: 'Employment Law'
-    }
-  ]);
-
+export default function IntakeTable() {
+  const router = useRouter();
+  const [intakes, setIntakes] = useState<CaseIntake[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingView, setLoadingView] = useState<number | string | null>(null);
+  const [loadingEdit, setLoadingEdit] = useState<number | string | null>(null);
+  const [loadingDelete, setLoadingDelete] = useState<number | string | null>(null);
+  const [loadingNew, setLoadingNew] = useState(false); // ✅ Added loader for "New Intake"
   const [selectedIntake, setSelectedIntake] = useState<CaseIntake | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [showFormModal, setShowFormModal] = useState(false);
-  
-  // Loading states
-  const [loadingView, setLoadingView] = useState<number | null>(null);
-  const [loadingEdit, setLoadingEdit] = useState<number | null>(null);
-  const [loadingDelete, setLoadingDelete] = useState<number | null>(null);
-  const [loadingCreate, setLoadingCreate] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  useEffect(() => {
+    const fetchIntakes = async () => {
+      try {
+        const res = await fetch('/api/intake');
+        if (!res.ok) throw new Error('Failed to fetch intakes');
+        const data = await res.json();
+        setIntakes(data);
+      } catch (error) {
+        console.error(error);
+        toast.error('Failed to load intakes.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchIntakes();
+  }, []);
 
   const handleView = async (intake: CaseIntake) => {
     setLoadingView(intake.id);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setSelectedIntake(intake);
-    setShowModal(true);
-    setLoadingView(null);
+    try {
+      router.push(`/intake-preview/${intake.id}`);
+    } finally {
+      setLoadingView(null);
+    }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this intake?')) {
-      setLoadingDelete(id);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setIntakes(intakes.filter((intake) => intake.id !== id));
+  const handleUpdate = async (id: number | string) => {
+    setLoadingEdit(id);
+    try {
+      router.push(`/intake-form?id=${id}`);
+    } finally {
+      setLoadingEdit(null);
+    }
+  };
+
+  const handleDelete = async (id: number | string) => {
+    if (!confirm('Are you sure you want to delete this intake?')) return;
+    setLoadingDelete(id);
+    try {
+      const res = await fetch(`/api/intake/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete intake');
+      setIntakes(intakes.filter(i => i.id !== id));
+      alert("Data deleted successfully");
+      toast.success('Intake deleted successfully.');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to delete intake.');
+    } finally {
       setLoadingDelete(null);
     }
   };
 
-  const handleUpdate = async (id: number) => {
-    setLoadingEdit(id);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    alert('Update functionality will be implemented');
-    setLoadingEdit(null);
+  const handleNewIntake = async () => {
+    setLoadingNew(true);
+    try {
+      router.push('/intake-form');
+    } finally {
+      setLoadingNew(false);
+    }
   };
 
-  const handleCreateNew = () => {
-    setShowFormModal(true);
-  };
-
-  const handleFormSubmit = async (data: any) => {
-    setLoadingCreate(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    const newIntake: CaseIntake = {
-      id: intakes.length + 1,
-      clientName: data.clientName,
-      dateOfLoss: data.accidentDate,
-      caseType: data.caseType,
-    };
-    setIntakes([...intakes, newIntake]);
-    setLoadingCreate(false);
-    setShowFormModal(false);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const formatDate = (dateString: string): string => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
+  const truncateText = (text: string, maxLength: number): string => {
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedIntakes = intakes.slice(startIndex, startIndex + itemsPerPage);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-white">Case Intake List</h1>
-            <p className="text-slate-600 dark:text-gray-400 mt-2">Manage and track case intakes</p>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+              Case Intake Management
+            </h1>
+            <p className="text-slate-600 dark:text-gray-400 text-sm">
+              Manage and review all case intakes
+            </p>
           </div>
           <button
-            onClick={handleCreateNew}
-            disabled={loadingCreate}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleNewIntake}
+            disabled={loadingNew}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
           >
-            {loadingCreate ? (
-              <>
-                <Loader2 size={20} className="animate-spin" />
-                Creating...
-              </>
+            {loadingNew ? (
+              <Loader2 size={16} className="animate-spin" />
             ) : (
-              <>
-                <Plus size={20} />
-                Create New Intake
-              </>
+              <Plus size={16} />
             )}
+            {loadingNew ? 'Loading...' : 'New Intake'}
           </button>
         </div>
 
-        {/* Table Container */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+        {/* Desktop Table View */}
+        <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">S.No</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Client Name</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Date of Loss</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Case Type</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-slate-900">Actions</th>
+                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                    S.No
+                  </th>
+                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                    Client Name
+                  </th>
+                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                    Date of Loss
+                  </th>
+                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                    Accident Description
+                  </th>
+                  <th className="px-4 lg:px-6 py-3 lg:py-4 text-center text-xs lg:text-sm font-semibold text-slate-900 dark:text-white">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {intakes.map((intake, index) => (
+                {paginatedIntakes.map((intake, index) => (
                   <tr
                     key={intake.id}
-                    className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 ${
-                      index === intakes.length - 1 ? 'border-b-0' : ''
-                    }`}
+                    className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150"
                   >
-                    <td className="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{index + 1}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-white font-medium">{intake.clientName}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{formatDate(intake.dateOfLoss)}</td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-xs font-medium">
-                        {intake.caseType}
+                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      {startIndex + index + 1}
+                    </td>
+                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-900 dark:text-white font-medium">
+                      {intake.clientName}
+                    </td>
+                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-600 dark:text-gray-400">
+                      {formatDate(intake.accidentDate)}
+                    </td>
+                    <td className="px-4 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm">
+                      <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 lg:px-3 py-1 rounded-full text-xs font-medium">
+                        {intake.accidentDescription}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-center gap-2">
+                    <td className="px-4 lg:px-6 py-3 lg:py-4">
+                      <div className="flex justify-center gap-1 lg:gap-2">
+                        {/* View Button */}
                         <button
                           onClick={() => handleView(intake)}
                           disabled={loadingView === intake.id}
-                          className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-                          className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
+                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                           title="View"
                         >
                           {loadingView === intake.id ? (
-                            <Loader2 size={18} className="animate-spin" />
+                            <Loader2 size={16} className="animate-spin" />
                           ) : (
-                            <Eye size={18} />
+                            <Eye size={16} />
                           )}
                         </button>
+
+                        {/* Edit Button */}
                         <button
                           onClick={() => handleUpdate(intake.id)}
                           disabled={loadingEdit === intake.id}
-                          className="p-2 text-slate-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-                          onClick={handleUpdate}
-                          className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
+                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                           title="Edit"
                         >
                           {loadingEdit === intake.id ? (
-                            <Loader2 size={18} className="animate-spin" />
+                            <Loader2 size={16} className="animate-spin" />
                           ) : (
-                            <Edit size={18} />
+                            <Edit size={16} />
                           )}
                         </button>
+
+                        {/* Delete Button */}
                         <button
                           onClick={() => handleDelete(intake.id)}
                           disabled={loadingDelete === intake.id}
-                          className="p-2 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-                          className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150"
+                          className="p-1.5 lg:p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
                           title="Delete"
                         >
                           {loadingDelete === intake.id ? (
-                            <Loader2 size={18} className="animate-spin" />
+                            <Loader2 size={16} className="animate-spin" />
                           ) : (
-                            <Trash2 size={18} />
+                            <Trash2 size={16} />
                           )}
                         </button>
                       </div>
@@ -246,59 +235,131 @@ export default function CaseIntakeManagement() {
               </tbody>
             </table>
           </div>
+        </div>
 
-          {/* Empty State */}
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4">
+          {paginatedIntakes.map((intake, index) => (
+            <div
+              key={intake.id}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700"
+            >
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300">
+                      {startIndex + index + 1}
+                    </span>
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
+                      {truncateText(intake.clientName, 20)}
+                    </h3>
+                  </div>
+                  <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-medium max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                    {truncateText(intake.accidentDescription, 20)}
+                  </span>
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => handleView(intake)}
+                    disabled={loadingView === intake.id}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
+                    title="View"
+                  >
+                    {loadingView === intake.id ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Eye size={16} />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleUpdate(intake.id)}
+                    disabled={loadingEdit === intake.id}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
+                    title="Edit"
+                  >
+                    {loadingEdit === intake.id ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Edit size={16} />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(intake.id)}
+                    disabled={loadingDelete === intake.id}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-150 disabled:opacity-50"
+                    title="Delete"
+                  >
+                    {loadingDelete === intake.id ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={16} />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Date of Loss: {formatDate(intake.accidentDate)}
+              </div>
+            </div>
+          ))}
+
           {intakes.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-slate-500 text-lg">No case intakes found. Create one to get started.</p>
+            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+              <p className="text-slate-500 text-base">
+                No case intakes found. Create one to get started.
+              </p>
             </div>
           )}
         </div>
 
-        {/* View Modal */}
-        {showModal && selectedIntake && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-              <h2 className="text-2xl font-bold text-slate-900 mb-4">Case Details</h2>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-slate-600">Client Name</p>
-                  <p className="text-lg font-semibold text-slate-900">{selectedIntake.clientName}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-600">Date of Loss</p>
-                  <p className="text-lg font-semibold text-slate-900">{formatDate(selectedIntake.dateOfLoss)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-600">Case Type</p>
-                  <p className="text-lg font-semibold text-slate-900">{selectedIntake.caseType}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="mt-6 w-full bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg font-semibold transition-colors duration-150"
-              >
-                Close
-              </button>
-            </div>
+        {/* Pagination */}
+        {intakes.length > itemsPerPage && (
+          <div className="mt-6">
+            <Pagination
+              totalItems={intakes.length}
+              itemsPerPage={itemsPerPage}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+            />
           </div>
         )}
 
-        {/* Form Modal */}
-        {showFormModal && (
-          <div className="fixed inset-0 bg-opacity-20 flex items-center justify-center p-4 z-50">
-            <div className="bg-white bg-opacity-90 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-slate-900">Create New Intake</h2>
-                <button
-                  onClick={() => setShowFormModal(false)}
-                  className="text-slate-600 hover:text-slate-900 text-2xl"
-                  disabled={loadingCreate}
-                >
-                  ×
-                </button>
+        {/* View Modal */}
+        {showModal && selectedIntake && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6 relative">
+              <button
+                onClick={() => setShowModal(false)}
+                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                aria-label="Close modal"
+              >
+                <X size={20} />
+              </button>
+
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-6 pr-8">
+                Case Details
+              </h2>
+
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-slate-600 dark:text-gray-400 mb-1">Client Name</p>
+                  <p className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">
+                    {selectedIntake.clientName}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600 dark:text-gray-400 mb-1">Date of Loss</p>
+                  <p className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">
+                    {formatDate(selectedIntake.accidentDate)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600 dark:text-gray-400 mb-1">Accident Description</p>
+                  <p className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">
+                    {selectedIntake.accidentDescription}
+                  </p>
+                </div>
               </div>
-              <IntakeFormWizard onFormSubmit={handleFormSubmit} />
             </div>
           </div>
         )}
