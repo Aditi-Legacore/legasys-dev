@@ -33,7 +33,7 @@ export default function IntakePreviewPage() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [notes, setNotes] = useState<{ id: string; content: string; createdAt: string; createdBy: string }[]>([]);
   const [activityLogs, setActivityLogs] = useState<{ id: string; shortDescription: string; longDescription?: string; createdAt: string; createdBy: string; createdByName?: string }[]>([]);
-  const [documents, setDocuments] = useState<{ id: string; name: string; type: string; uploadedAt: string; filePath: string }[]>([]);
+  const [documents, setDocuments] = useState<{ id: string; name: string; type: string; uploadedAt: string; filePath: string; uploadedBy: string }[]>([]);
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [loadingActivity, setLoadingActivity] = useState(false);
   const [loadingDocuments, setLoadingDocuments] = useState(false);
@@ -139,6 +139,7 @@ export default function IntakePreviewPage() {
       type: doc.mimeType?.split("/")[1]?.toUpperCase() || "N/A",
       uploadedAt: doc.uploadedAt || new Date().toISOString(), // fallback
       filePath: doc.filePath,
+      uploadedBy: doc.intake?.clientName || "Unknown",
     }));
 
     setDocuments(formattedDocs);

@@ -16,13 +16,7 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, on
   // ✅ Combine previous and new files
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newFiles = files.filter((f) => f.size <= 600 * 1024);
-
-    if (newFiles.length < files.length) {
-      toast.warning("Some files exceeded 600KB and were skipped.");
-    }
-
-    setSelectedFiles((prev) => [...prev, ...newFiles]); // ✅ append instead of replace
+    setSelectedFiles((prev) => [...prev, ...files]); // ✅ append instead of replace
   };
 
   const handleMultiFileUpload = async () => {
@@ -32,6 +26,13 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, on
     }
     if (selectedFiles.length === 0) {
       toast.error("Please select files to upload.");
+      return;
+    }
+
+    const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
+    const totalMaxSize = 5 * 1024 * 1024; // 5MB
+    if (totalSize > totalMaxSize) {
+      toast.warning("Total upload size exceeds 5MB. Please remove some files.");
       return;
     }
 
@@ -81,7 +82,7 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, on
         Upload Supporting Documents
       </h6>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-        You can upload multiple files (PDF, JPG, PNG). Each file must be under <b>600 KB</b>.
+        You can upload multiple files (PDF, JPG, PNG). Total upload size must not exceed <b>5 MB</b>.
       </p>
 
       {/* File selector */}
