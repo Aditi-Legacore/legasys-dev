@@ -29,7 +29,13 @@ declare module "next-auth" {
   }
 }
 
-
+interface Payload {
+  phoneNumber?: string;
+  dateOfBirth?: string | null;
+  userId?: string | null;
+  referenceId?: string | null;
+  [key: string]: unknown; // for any extra keys from ...data
+}
 
 const steps = [
   "PLAINTIFF INFORMATION",
@@ -313,13 +319,15 @@ useEffect(() => {
 
     console.log(`📡 Sending ${method} request to ${url}`);
 
-    const payload: any = {
-      ...data,
-      phoneNumber: data.phone,
-      dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null, // ✅ convert only if dob exists
-      userId: session?.user?.id || null,
-      referenceId: referenceId || null, // Include referenceId if exists
-    };
+  
+
+const payload: Payload = {
+  ...data,
+  phoneNumber: data.phone,
+  dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null,
+  userId: session?.user?.id || null,
+  referenceId: referenceId || null,
+};
 
     delete payload.phone;
     delete payload.dob;

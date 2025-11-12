@@ -102,7 +102,9 @@ export async function PUT(
     ];
 
     // Filter data to only include allowed fields
-    const updateData: Record<string, any> = {};
+    // const updateData: Record<string, any> = {};
+    const updateData: Record<string, unknown> = {};
+
     for (const field of allowedFields) {
       if (data[field] !== undefined) {
         if (field === 'isDraft') {

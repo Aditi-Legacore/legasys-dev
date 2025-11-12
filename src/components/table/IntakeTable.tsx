@@ -77,8 +77,8 @@ export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableP
     if (!sortColumn) return intakes;
 
     return [...intakes].sort((a, b) => {
-      let aValue = a[sortColumn as keyof CaseIntake];
-      let bValue = b[sortColumn as keyof CaseIntake];
+      const aValue = a[sortColumn as keyof CaseIntake];
+      const bValue = b[sortColumn as keyof CaseIntake];
 
       // Handle null/undefined values
       if (aValue == null && bValue == null) return 0;

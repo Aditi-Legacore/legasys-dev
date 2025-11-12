@@ -158,14 +158,7 @@ export async function DELETE(
       where: { id: documentId },
     });
 
-    // Optionally, delete the file from filesystem
-    // const fs = require('fs');
-    // const path = require('path');
-    // const filePath = path.join(process.cwd(), 'public', document.filePath);
-    // if (fs.existsSync(filePath)) {
-    //   fs.unlinkSync(filePath);
-    // }
-
+    
     return NextResponse.json({ message: "Document deleted successfully" });
   } catch (error) {
     console.error("Delete error:", error);

@@ -48,8 +48,8 @@ export default function DocumentsTable({ documents, onView, onEdit, onUploadSucc
     if (!sortColumn) return tableDocs;
 
     return [...tableDocs].sort((a, b) => {
-      let aValue = a[sortColumn as keyof Document];
-      let bValue = b[sortColumn as keyof Document];
+      const aValue = a[sortColumn as keyof Document];
+      const bValue = b[sortColumn as keyof Document];
 
       // Handle null/undefined values
       if (aValue == null && bValue == null) return 0;

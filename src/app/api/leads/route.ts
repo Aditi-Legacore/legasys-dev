@@ -45,10 +45,14 @@ export async function POST(request: NextRequest) {
 
     console.log("✅ Lead created:", lead);
     return NextResponse.json({ ...lead, referenceId }, { status: 201 });
-  } catch (err: any) {
-    console.error("❌ POST /api/leads error:", err);
-    return NextResponse.json({ error: "Failed to create lead", details: err.message }, { status: 500 });
-  }
+  } catch (err: unknown) {
+  console.error("❌ POST /api/leads error:", err);
+  const errorMessage = err instanceof Error ? err.message : "Unknown error";
+  return NextResponse.json(
+    { error: "Failed to create lead", details: errorMessage },
+    { status: 500 }
+  );
+}
 }
 
 // export async function GET() {

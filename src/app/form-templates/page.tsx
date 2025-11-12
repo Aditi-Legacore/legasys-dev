@@ -12,9 +12,10 @@ import FilterBar from '@/components/ui/FilterBar';
 import FilterSidebar from '@/components/ui/FilterSidebar';
 import ActiveFilters from '@/components/ui/ActiveFilters';
 import CommonTable, { Column, Action } from '@/components/ui/CommonTable';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
 // FormTemplatesTable component using CommonTable
-function FormTemplatesTable({ templates, onDelete, router, deletingId }: { templates: FormTemplate[], onDelete: (id: string) => void, router: any, deletingId: string | null }) {
+function FormTemplatesTable({ templates, onDelete, router, deletingId }: { templates: FormTemplate[], onDelete: (id: string) => void, router: AppRouterInstance, deletingId: string | null }) {
   // Define columns for CommonTable
   const columns: Column[] = [
     {

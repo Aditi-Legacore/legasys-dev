@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus } from 'lucide-react';
 import PrepareFormModal from '@/components/forms/PrepareFormModal';
 import NewIntakeModal from '@/components/NewIntakeModal';
-import { FormSubmission } from '@/types/form';
+import { FormSubmission, FormTemplate } from '@/types/form';
 import Pagination from '@/components/ui/pagination';
 import FilterBar from '@/components/ui/FilterBar';
 import FilterSidebar from '@/components/ui/FilterSidebar';
@@ -16,7 +16,9 @@ import CommonTable, { Column, Action } from '@/components/ui/CommonTable';
 
 export default function FormsPage() {
   const [submissions, setSubmissions] = useState<FormSubmission[]>([]);
-  const [templates, setTemplates] = useState<any[]>([]);
+  // const [templates, setTemplates] = useState<any[]>([]);
+  const [templates, setTemplates] = useState<FormTemplate[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');

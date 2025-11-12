@@ -17,8 +17,8 @@ export default function ReportTable({ columns, data }: ReportTableProps) {
     if (!sortColumn) return data;
 
     return [...data].sort((a, b) => {
-      let aValue = a[sortColumn.toLowerCase()];
-      let bValue = b[sortColumn.toLowerCase()];
+      const aValue = a[sortColumn.toLowerCase()];
+      const bValue = b[sortColumn.toLowerCase()];
 
       // Handle null/undefined values
       if (aValue == null && bValue == null) return 0;

@@ -88,8 +88,8 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
     if (!sortColumn) return leads;
 
     return [...leads].sort((a, b) => {
-      let aValue = a[sortColumn as keyof Lead];
-      let bValue = b[sortColumn as keyof Lead];
+      const aValue = a[sortColumn as keyof Lead];
+      const bValue = b[sortColumn as keyof Lead];
 
       // Handle null/undefined values
       if (aValue == null && bValue == null) return 0;
