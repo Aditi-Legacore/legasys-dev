@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import Image from "next/image";
+
+
 
 interface ImagePreviewModalProps {
   showImagePreview: boolean;
@@ -44,7 +46,9 @@ export default function ImagePreviewModal({ showImagePreview, imageUrl, onClose 
             <Image
               src={imageUrl}
               alt="Document Preview"
-              fill
+              width={800}
+              height={600}
+              unoptimized
               className="object-contain"
               onError={handleImageError}
             />

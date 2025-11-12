@@ -61,10 +61,14 @@ export default function DocumentFilesPage() {
             >
               {file.mimeType.startsWith("image/") ? (
                 <Image
-                  src={file.filePath}
-                  alt={file.fileName}
-                  className="w-full h-40 object-cover rounded-md"
-                />
+                src={file.filePath}
+                alt={file.fileName}
+                width={300}
+                height={200}
+                unoptimized
+                className="w-full h-40 object-cover rounded-md"
+              />
+
               ) : (
                 <div className="flex flex-col items-center justify-center h-40 text-gray-500 dark:text-gray-400">
                   <FileText size={32} />
