@@ -36,7 +36,9 @@ export async function POST(
       if (!allowedTypes.includes(file.type)) continue;
 
       const timestamp = Date.now();
-      const storedFileName = `${id}_${timestamp}_${file.name.replace(/\s+/g, "_")}`;
+      const sanitizeFileName = (name: string) =>
+      encodeURIComponent(name.replace(/\s+/g, "_"));
+      const storedFileName = `${id}_${timestamp}_${sanitizeFileName(file.name)}`;
       const filePath = join(uploadsDir, storedFileName);
 
       const buffer = Buffer.from(await file.arrayBuffer());
