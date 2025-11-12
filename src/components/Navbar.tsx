@@ -10,6 +10,7 @@ import SettingsSidebar from "./SettingsSidebar";
 import NotificationsDropdown from "./NotificationsModal";
 import MessagesDropdown from "./MessagesModal";
 import { Button } from "./ui/button";
+import Avatar from "../../public/avatar.png";
 import Image from "next/image";
 
 const Navbar: React.FC = () => {
@@ -144,7 +145,7 @@ const Navbar: React.FC = () => {
             aria-label="User menu"
           >
             <Image
-              src={session?.user?.image || "/avatar.png"}
+              src={session?.user?.image || Avatar}
               alt="User Avatar"
               className="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600"
             />

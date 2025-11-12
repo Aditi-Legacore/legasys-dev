@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { menuItems } from "@/lib/menuItems";
+import LoginLogoBg from "../../public/assets/images/auth/logo.png";
 import Image from "next/image";
 
 const Sidebar: React.FC = () => {
@@ -60,8 +61,10 @@ const Sidebar: React.FC = () => {
             }}
           >
             <Image
-              src="/logo.png"
+              src={LoginLogoBg}
               alt="Legacore Infomatics"
+              width={40}
+              height={40}
               className="h-8 lg:h-10"
             />
             <h1 className="text-lg lg:text-xl font-bold">
