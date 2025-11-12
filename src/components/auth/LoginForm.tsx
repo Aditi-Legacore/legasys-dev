@@ -46,23 +46,19 @@ export default function LoginForm() {
   const onSubmit = async (values: LoginFormData) => {
     setIsLoading(true);
     try {
-      const res = await signIn("credentials", {
-        ...values,
-        redirect: false,
-      });
-
-      if (!res?.error) {
-        if (rememberMe) {
-          localStorage.setItem("rememberMe", "true");
-          localStorage.setItem("rememberedEmail", values.email);
-        } else {
-          localStorage.removeItem("rememberMe");
-          localStorage.removeItem("rememberedEmail");
-        }
-        window.location.href = "/";
+      if (rememberMe) {
+        localStorage.setItem("rememberMe", "true");
+        localStorage.setItem("rememberedEmail", values.email);
       } else {
-        alert("Invalid credentials");
+        localStorage.removeItem("rememberMe");
+        localStorage.removeItem("rememberedEmail");
       }
+
+      await signIn("credentials", {
+        ...values,
+        callbackUrl: "/",
+        redirect: true,
+      });
     } finally {
       setIsLoading(false);
     }
