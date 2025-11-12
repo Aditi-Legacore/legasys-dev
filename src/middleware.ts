@@ -1,53 +1,51 @@
-import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+import type { NextRequest } from "next/server";
 
-export default withAuth(
-  function middleware(req) {
-    const { pathname } = req.nextUrl;
-    const token = req.nextauth.token;
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
 
-    // If the user has a valid session token
-    if (token) {
-      // Prevent logged-in users from visiting auth pages
-      if (pathname === "/auth-choice" || pathname === "/login" || pathname === "/signup") {
-        return NextResponse.redirect(new URL("/", req.url));
-      }
+  // Get the token directly using getToken (more reliable)
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
+  const isAuthPage = pathname === "/auth-choice" || pathname === "/login" || pathname === "/signup";
+  
+  // If user is authenticated
+  if (token) {
+    // Redirect authenticated users away from auth pages
+    if (isAuthPage) {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+    // Allow access to protected pages
+    return NextResponse.next();
+  }
+
+  // If user is NOT authenticated
+  if (!token) {
+    // Allow access to auth pages
+    if (isAuthPage) {
       return NextResponse.next();
     }
-
-    // 🚫 No valid token (session expired or not logged in)
-    // Redirect to auth-choice page if accessing a protected route
-    if (
-      pathname !== "/auth-choice" &&
-      pathname !== "/login" &&
-      pathname !== "/signup" &&
-      !pathname.startsWith("/api") &&
-      !pathname.startsWith("/_next") &&
-      pathname !== "/favicon.ico"
-    ) {
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
-
-    // Allow unauthenticated users to access auth pages
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        const { pathname } = req.nextUrl;
-
-        // Allow access to auth pages
-        if (pathname === "/auth-choice" || pathname === "/login" || pathname === "/signup") {
-          return true;
-        }
-
-        // Require authentication for other routes
-        return !!token;
-      },
-    },
+    // Redirect to login for protected pages
+    return NextResponse.redirect(new URL("/login", req.url));
   }
-);
+
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - api/auth (NextAuth routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder files
+     */
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };
