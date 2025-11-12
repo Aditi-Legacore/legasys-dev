@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus, Trash2, GripVertical, UserPlus, ChevronDown, ChevronRight, Eye, X } from 'lucide-react';
-import { FormField, FormTemplate, ContactField, ContactData } from '@/types/form';
+import { FormField, FormTemplate, ContactData } from '@/types/form';
 import ContactSection from '@/components/FormBuilder/ContactSection';
 import { v4 as uuidv4 } from 'uuid';
 

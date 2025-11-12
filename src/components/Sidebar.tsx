@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { menuItems } from "@/lib/menuItems";
+import Image from "next/image";
 
 const Sidebar: React.FC = () => {
   const [activeItem, setActiveItem] = useState("intake-list");
@@ -58,7 +59,7 @@ const Sidebar: React.FC = () => {
               setIsMobileMenuOpen(false);
             }}
           >
-            <img
+            <Image
               src="/logo.png"
               alt="Legacore Infomatics"
               className="h-8 lg:h-10"

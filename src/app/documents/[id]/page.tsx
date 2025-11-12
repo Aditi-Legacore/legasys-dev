@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, FileText } from "lucide-react";
+import Image from "next/image";
 
 interface FileItem {
   id: string;
@@ -59,7 +60,7 @@ export default function DocumentFilesPage() {
               className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 flex flex-col items-center justify-center"
             >
               {file.mimeType.startsWith("image/") ? (
-                <img
+                <Image
                   src={file.filePath}
                   alt={file.fileName}
                   className="w-full h-40 object-cover rounded-md"

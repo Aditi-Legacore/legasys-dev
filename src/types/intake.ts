@@ -6,7 +6,7 @@ export interface CaseIntake {
 }
 
 export interface IntakeData {
-  injuries: ReactNode;
+  injuries: string | null;
   id: string;
   clientName: string;
   gender: string | null;

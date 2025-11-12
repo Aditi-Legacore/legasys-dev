@@ -23,9 +23,10 @@ interface DocumentsTableProps {
   documents: Document[];
   onView?: (doc: Document) => void;
   onEdit?: (doc: Document) => void;
+  onUploadSuccess?: () => void;
 }
 
-export default function DocumentsTable({ documents, onView, onEdit }: DocumentsTableProps) {
+export default function DocumentsTable({ documents, onView, onEdit, onUploadSuccess }: DocumentsTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [tableDocs, setTableDocs] = useState<Document[]>(documents);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -235,6 +236,7 @@ export default function DocumentsTable({ documents, onView, onEdit }: DocumentsT
           intakeId={selectedDocId}
           onUploadSuccess={() => {
             // Refresh documents or handle success
+            onUploadSuccess?.();
             setUploadModalOpen(false);
             setSelectedDocId(null);
           }}

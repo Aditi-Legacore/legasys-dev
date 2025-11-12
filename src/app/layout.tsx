@@ -31,11 +31,11 @@ export default async function RootLayout({
       >
         <Providers>
           {session ? (
-            <div className="flex h-screen">
+            <div className="flex h-screen overflow-hidden">
               <Sidebar />
-              <div className="flex flex-col flex-1">
+              <div className="flex flex-col flex-1 overflow-hidden">
                 <Navbar />
-                <main className="flex-1 overflow-y-auto p-6">{children}</main>
+                <main className="flex-1 overflow-y-auto overflow-x-hidden p-6">{children}</main>
               </div>
             </div>
           ) : (

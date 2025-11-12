@@ -32,7 +32,7 @@ export default function AccidentInfoStep() {
           focus:outline-none focus:ring-2
           focus:ring-indigo-500 dark:focus:ring-indigo-400
           transition space-y-3">
-          <h3 className="font-semibold text-lg">Passenger/Child Details</h3>
+          <h6 className="font-semibold text-lg">Passenger/Child Details</h6>
 
           <InputField
             name="passengerName"

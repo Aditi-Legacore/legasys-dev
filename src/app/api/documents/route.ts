@@ -93,7 +93,7 @@ export async function DELETE(request: Request) {
         const filePath = join(process.cwd(), doc.filePath);
         try {
           await unlink(filePath);
-        } catch (err) {
+        } catch {
           console.warn(`⚠️ File ${filePath} not found, skipping.`);
         }
       }

@@ -2,6 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+
+type NoteWithCreatedBy = Prisma.NoteGetPayload<{
+  include: {
+    createdBy: {
+      select: {
+        firstName: true,
+        lastName: true,
+      },
+    },
+  },
+}>;
 
 export async function GET(
   request: NextRequest,
@@ -9,7 +21,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const notes = await prisma.note.findMany({
+    const notes: NoteWithCreatedBy[] = await prisma.note.findMany({
       where: { intakeId: id },
       include: {
         createdBy: {
@@ -20,8 +32,8 @@ export async function GET(
         },
       },
       orderBy: { createdAt: 'desc' },
-    }) as any;
-    const transformedNotes = notes.map((note: any) => ({
+    });
+    const transformedNotes = notes.map((note: NoteWithCreatedBy) => ({
       id: note.id,
       content: note.content,
       createdAt: note.createdAt,
@@ -67,8 +79,7 @@ export async function POST(
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  request: NextRequest
 ) {
   try {
     const session = await getServerSession(authOptions);

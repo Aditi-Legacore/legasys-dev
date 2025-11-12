@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
     ];
 
     // Transform draftFields to match schema field names and filter allowed fields
-    const transformedFields: any = {};
+    const transformedFields: Record<string, unknown> = {};
     for (const field of allowedFields) {
       if (field === 'phoneNumber') {
         transformedFields[field] = draftFields.phone;
@@ -116,6 +116,8 @@ export async function POST(req: NextRequest) {
 
     console.log("transformedFields", transformedFields);
 
+    type IntakeInfoCreate = Parameters<typeof prisma.intakeInfo.create>[0]['data'];
+    type IntakeInfoUpdate = Parameters<typeof prisma.intakeInfo.update>[0]['data'];
 
     let savedIntake;
     if (existingIntake) {
@@ -125,7 +127,7 @@ export async function POST(req: NextRequest) {
           ...transformedFields,
           isDraft: true,
           user: { connect: { id: serverSession.user.id } },
-        },
+        } as IntakeInfoUpdate,
       });
     } else {
       savedIntake = await prisma.intakeInfo.create({
@@ -133,7 +135,7 @@ export async function POST(req: NextRequest) {
           ...transformedFields,
           isDraft: true,
           user: { connect: { id: serverSession.user.id } },
-        },
+        } as IntakeInfoCreate,
       });
     }
 

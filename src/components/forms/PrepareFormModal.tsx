@@ -76,7 +76,6 @@ export default function PrepareFormModal({ isOpen, onClose, onSubmit, templates 
       });
 
       if (response.ok) {
-        const submission = await response.json();
         // Here you would integrate email sending
         alert('Form sent successfully!');
         onSubmit();

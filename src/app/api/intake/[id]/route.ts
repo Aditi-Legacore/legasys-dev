@@ -20,7 +20,7 @@ export async function GET(
     }
 
     return NextResponse.json(intake, { status: 200 });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(err);
     return NextResponse.json({ error: "Failed to fetch intake" }, { status: 500 });
   }
@@ -54,10 +54,11 @@ export async function DELETE(
       { message: "Intake deleted successfully" },
       { status: 200 }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
     console.error("❌ Delete error:", err);
     return NextResponse.json(
-      { error: "Failed to delete intake", details: err.message },
+      { error: "Failed to delete intake", details: errorMessage },
       { status: 500 }
     );
   }
@@ -101,7 +102,7 @@ export async function PUT(
     ];
 
     // Filter data to only include allowed fields
-    const updateData: any = {};
+    const updateData: Record<string, any> = {};
     for (const field of allowedFields) {
       if (data[field] !== undefined) {
         if (field === 'isDraft') {
@@ -132,10 +133,11 @@ export async function PUT(
     });
 
     return NextResponse.json(updated, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error("❌ Error updating intake:", error);
     return NextResponse.json(
-      { error: "Failed to update intake", details: error.message },
+      { error: "Failed to update intake", details: errorMessage },
       { status: 500 }
     );
   }

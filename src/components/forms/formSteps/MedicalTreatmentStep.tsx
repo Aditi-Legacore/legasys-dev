@@ -102,9 +102,9 @@ export default function MedicalTreatmentStep() {
       />
       {currentTreatment === "Yes" && (
         <div className="p-3 rounded-xl border border-gray-300 dark:border-gray-700 space-y-3">
-          <h3 className="font-semibold text-lg mb-2 text-gray-700 dark:text-gray-200">
+          <h6 className="font-semibold text-lg mb-2 text-gray-700 dark:text-gray-200">
             Current Treatment Details
-          </h3>
+          </h6>
 
           {[...Array(treatmentCount)].map((_, index) => {
             const suffix = getSuffix(index + 1);
@@ -113,9 +113,9 @@ export default function MedicalTreatmentStep() {
                 key={index}
                 className="p-4 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
               >
-                <h4 className="font-semibold text-md mb-3 text-gray-700 dark:text-gray-300">
+                <h6 className="font-semibold text-md mb-3 text-gray-700 dark:text-gray-300">
                   Treatment {index + 1}
-                </h4>
+                </h6>
                 <InputField
                   name={`currentDoctorHospital${suffix}`}
                   label="Doctor/Hospital Name"
@@ -176,9 +176,9 @@ export default function MedicalTreatmentStep() {
       />
       {priorInjuries === "Yes" && (
         <div className="p-3 rounded-xl border border-gray-300 dark:border-gray-700 space-y-3">
-          <h3 className="font-semibold text-lg mb-2 text-gray-700 dark:text-gray-200">
+          <h6 className="font-semibold text-lg mb-2 text-gray-700 dark:text-gray-200">
             Prior Injuries Details
-          </h3>
+          </h6>
 
           {[...Array(priorInjuryCount)].map((_, index) => {
             const suffix = getSuffix(index + 1);
@@ -187,9 +187,9 @@ export default function MedicalTreatmentStep() {
                 key={index}
                 className="p-4 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
               >
-                <h4 className="font-semibold text-md mb-3 text-gray-700 dark:text-gray-300">
+                <h6 className="font-semibold text-md mb-3 text-gray-400 dark:text-gray-300">
                   Prior Injury {index + 1}
-                </h4>
+                </h6>
                 <InputField
                   name={`priorDoctorHospital${suffix}`}
                   label="Doctor/Hospital Name"

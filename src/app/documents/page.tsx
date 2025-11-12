@@ -30,22 +30,20 @@ export default function DocumentsPage() {
   const [dateToFilter, setDateToFilter] = useState("");
   const [showFiltersSidebar, setShowFiltersSidebar] = useState(false);
 
-  useEffect(() => {
-    async function fetchDocuments() {
-      try {
-        const res = await fetch("/api/documents");
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setDocuments(data);
-        }
-      } catch (err) {
-        console.error("Error fetching documents:", err);
-      } finally {
-        setLoading(false);
+  const fetchDocuments = async () => {
+    try {
+      const res = await fetch("/api/documents");
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setDocuments(data);
       }
+    } catch (err) {
+      console.error("Error fetching documents:", err);
     }
+  };
 
-    fetchDocuments();
+  useEffect(() => {
+    fetchDocuments().finally(() => setLoading(false));
   }, []);
 
   // Get unique case types for filter options
@@ -189,7 +187,7 @@ export default function DocumentsPage() {
             </CardContent>
           </Card>
         ) : (
-          <DocumentsTable documents={filteredDocuments} />
+          <DocumentsTable documents={filteredDocuments} onUploadSuccess={fetchDocuments} />
         )}
 
         <FilterSidebar

@@ -352,16 +352,16 @@ useEffect(() => {
     }
 
     // ✅ Log the activity
-    await fetch("/api/activity-log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        refId: savedData.id,
-        activityType: "intake_submission",
-        shortDescription: "Intake Submitted",
-        longDescription: "Successfully submitted intake form",
-      }),
-    });
+    await fetch('/api/activity-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          refId: savedData.id,
+          activityType: intakeId ? 'intake_update' : 'intake_submission',
+          shortDescription: intakeId ? 'Intake Updated' : 'Intake Submitted',
+          longDescription: intakeId ? 'successfully updated intake form' : 'successfully submitted intake form',
+        }),
+      });
 
     // ✅ Auto-navigate to step 7 (Document Upload)
     setStep(6);
@@ -408,16 +408,6 @@ useEffect(() => {
       case 6: return submittedIntakeId ? <IntakeDocuments submittedIntakeId={submittedIntakeId} /> : <div className="text-center">Loading document upload...</div>;
       default: return null;
     }
-  };
-
-  const handleFinalSubmit = async () => {
-    const isValid = await methods.trigger(); // validate all known fields
-    if (!isValid) {
-      toast.error("Please fill in all required fields before submitting.");
-      return;
-    }
-
-    methods.handleSubmit(onSubmit)();
   };
 
   // 🌀 Show loader while data is loading

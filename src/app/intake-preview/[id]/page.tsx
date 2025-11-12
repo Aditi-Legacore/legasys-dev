@@ -40,7 +40,6 @@ export default function IntakePreviewPage() {
   const [newActivityDetails, setNewActivityDetails] = useState('');
   const [activeTab, setActiveTab] = useState('information');
 
-
   const id = params.id as string;
 
   useEffect(() => {
@@ -558,8 +557,9 @@ export default function IntakePreviewPage() {
                 setNewNote={setNewNote}
                 addNote={addNote}
                 deleteNote={deleteNote}
-                formatDate={formatDate}
-              />
+                formatDate={formatDate} intake={intake!} showPlaintiffCard={false} setShowPlaintiffCard={function (show: boolean): void {
+                  throw new Error('Function not implemented.');
+                } }              />
             </TabsContent>
             <TabsContent value="activity" className="mt-6">
               <ActivityLogTab
@@ -571,6 +571,11 @@ export default function IntakePreviewPage() {
                 setNewActivityDetails={setNewActivityDetails}
                 addActivityLog={addActivityLog}
                 formatDate={formatDate}
+                intake={intake}
+                showPlaintiffCard={false}
+                setShowPlaintiffCard={function (show: boolean): void {
+                  throw new Error('Function not implemented.');
+                }}
               />
             </TabsContent>
             <TabsContent value="documents" className="mt-6">
@@ -580,8 +585,9 @@ export default function IntakePreviewPage() {
                 formatDate={formatDate}
                 onPreview={handleDocumentPreview}
                 onDelete={handleDocumentDelete}
-                onUpload={handleDocumentUpload}
-              />
+                onUpload={handleDocumentUpload} intake={intake!} showPlaintiffCard={false} setShowPlaintiffCard={function (show: boolean): void {
+                  throw new Error('Function not implemented.');
+                } }              />
             </TabsContent>
           </Tabs>
         </div>

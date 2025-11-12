@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendIntakeSubmissionEmail } from "@/lib/email";
+import { IntakeFormData } from "@/types/form";
 
 // Helper to convert empty strings to null
 const toNullable = (value: string | undefined): string | null => (value === "" || value === undefined ? null : value);
 
 // Helper to build intake data object for Prisma operations
-const buildIntakeData = (data: any) => ({
+const buildIntakeData = (data: IntakeFormData) => ({
   ...(data.userId && { user: { connect: { id: data.userId } } }),
   ...(data.referenceId && { referenceId: data.referenceId }),
 
@@ -18,11 +19,11 @@ const buildIntakeData = (data: any) => ({
   address: toNullable(data.address),
   city: toNullable(data.city),
   zip: toNullable(data.zip),
-  dateOfBirth: toNullable(data.dateOfBirth) ? new Date(data.dateOfBirth) : null,
+  dateOfBirth: toNullable(data.dateOfBirth) ? new Date(toNullable(data.dateOfBirth)!) : null,
   ssn: toNullable(data.ssn),
 
   // Accident Information
-  accidentDate: toNullable(data.accidentDate) ? new Date(data.accidentDate) : null,
+  accidentDate: toNullable(data.accidentDate) ? new Date(toNullable(data.accidentDate)!) : null,
   accidentTime: toNullable(data.accidentTime),
   accidentLocation: toNullable(data.accidentLocation),
   accidentDescription: toNullable(data.accidentDescription),
@@ -111,8 +112,8 @@ const buildIntakeData = (data: any) => ({
   priorDoctorHospital: toNullable(data.priorDoctorHospital),
   priorHospitalAddressPhone: toNullable(data.priorHospitalAddressPhone),
   priorTreatmentDetails: toNullable(data.priorTreatmentDetails),
-  priorTreatmentFrom: toNullable(data.priorTreatmentFrom) ? new Date(data.priorTreatmentFrom) : null,
-  priorTreatmentTo: toNullable(data.priorTreatmentTo) ? new Date(data.priorTreatmentTo) : null,
+  priorTreatmentFrom: toNullable(data.priorTreatmentFrom) ? new Date(toNullable(data.priorTreatmentFrom)!) : null,
+  priorTreatmentTo: toNullable(data.priorTreatmentTo) ? new Date(toNullable(data.priorTreatmentTo)!) : null,
   priorInsuranceClaims: toNullable(data.priorInsuranceClaims),
   priorAttorneys: toNullable(data.priorAttorneys),
 
@@ -120,16 +121,16 @@ const buildIntakeData = (data: any) => ({
   priorDoctorHospital2: toNullable(data.priorDoctorHospital2),
   priorHospitalAddressPhone2: toNullable(data.priorHospitalAddressPhone2),
   priorTreatmentDetails2: toNullable(data.priorTreatmentDetails2),
-  priorTreatmentFrom2: toNullable(data.priorTreatmentFrom2) ? new Date(data.priorTreatmentFrom2) : null,
-  priorTreatmentTo2: toNullable(data.priorTreatmentTo2) ? new Date(data.priorTreatmentTo2) : null,
+  priorTreatmentFrom2: toNullable(data.priorTreatmentFrom2) ? new Date(toNullable(data.priorTreatmentFrom2)!) : null,
+  priorTreatmentTo2: toNullable(data.priorTreatmentTo2) ? new Date(toNullable(data.priorTreatmentTo2)!) : null,
   priorInsuranceClaims2: toNullable(data.priorInsuranceClaims2),
   priorAttorneys2: toNullable(data.priorAttorneys2),
 
   priorDoctorHospital3: toNullable(data.priorDoctorHospital3),
   priorHospitalAddressPhone3: toNullable(data.priorHospitalAddressPhone3),
   priorTreatmentDetails3: toNullable(data.priorTreatmentDetails3),
-  priorTreatmentFrom3: toNullable(data.priorTreatmentFrom3) ? new Date(data.priorTreatmentFrom3) : null,
-  priorTreatmentTo3: toNullable(data.priorTreatmentTo3) ? new Date(data.priorTreatmentTo3) : null,
+  priorTreatmentFrom3: toNullable(data.priorTreatmentFrom3) ? new Date(toNullable(data.priorTreatmentFrom3)!) : null,
+  priorTreatmentTo3: toNullable(data.priorTreatmentTo3) ? new Date(toNullable(data.priorTreatmentTo3)!) : null,
   priorInsuranceClaims3: toNullable(data.priorInsuranceClaims3),
   priorAttorneys3: toNullable(data.priorAttorneys3),
 
@@ -138,20 +139,20 @@ const buildIntakeData = (data: any) => ({
   currentDoctorHospital: toNullable(data.currentDoctorHospital),
   currentHospitalAddressPhone: toNullable(data.currentHospitalAddressPhone),
   currentTreatmentDetails: toNullable(data.currentTreatmentDetails),
-  currentTreatmentFrom: toNullable(data.currentTreatmentFrom) ? new Date(data.currentTreatmentFrom) : null,
-  currentTreatmentTo: toNullable(data.currentTreatmentTo) ? new Date(data.currentTreatmentTo) : null,
+  currentTreatmentFrom: toNullable(data.currentTreatmentFrom) ? new Date(toNullable(data.currentTreatmentFrom)!) : null,
+  currentTreatmentTo: toNullable(data.currentTreatmentTo) ? new Date(toNullable(data.currentTreatmentTo)!) : null,
 
   currentDoctorHospital2: toNullable(data.currentDoctorHospital),
   currentHospitalAddressPhone2: toNullable(data.currentHospitalAddressPhone),
   currentTreatmentDetails2: toNullable(data.currentTreatmentDetails),
-  currentTreatmentFrom2: toNullable(data.currentTreatmentFrom) ? new Date(data.currentTreatmentFrom) : null,
-  currentTreatmentTo2: toNullable(data.currentTreatmentTo) ? new Date(data.currentTreatmentTo) : null,
+  currentTreatmentFrom2: toNullable(data.currentTreatmentFrom) ? new Date(toNullable(data.currentTreatmentFrom)!) : null,
+  currentTreatmentTo2: toNullable(data.currentTreatmentTo) ? new Date(toNullable(data.currentTreatmentTo)!) : null,
 
   currentDoctorHospital3: toNullable(data.currentDoctorHospital),
   currentHospitalAddressPhone3: toNullable(data.currentHospitalAddressPhone),
   currentTreatmentDetails3: toNullable(data.currentTreatmentDetails),
-  currentTreatmentFrom3: toNullable(data.currentTreatmentFrom) ? new Date(data.currentTreatmentFrom) : null,
-  currentTreatmentTo3: toNullable(data.currentTreatmentTo) ? new Date(data.currentTreatmentTo) : null,
+  currentTreatmentFrom3: toNullable(data.currentTreatmentFrom) ? new Date(toNullable(data.currentTreatmentFrom)!) : null,
+  currentTreatmentTo3: toNullable(data.currentTreatmentTo) ? new Date(toNullable(data.currentTreatmentTo)!) : null,
 
   bodyPartsAffected: toNullable(data.bodyPartsAffected),
 
@@ -164,7 +165,7 @@ const buildIntakeData = (data: any) => ({
 
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.json();
+    const data: IntakeFormData = await request.json();
     console.log("📥 POST /api/intake - Received data:", data);
 
     // Validate userId if provided
@@ -235,7 +236,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(intake, { status: 201 });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("❌ POST /api/intake error:", err);
     return NextResponse.json({ error: "Failed to save intake info", details: err.message }, { status: 500 });
   }
