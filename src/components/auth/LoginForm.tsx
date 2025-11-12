@@ -59,8 +59,7 @@ export default function LoginForm() {
           localStorage.removeItem("rememberMe");
           localStorage.removeItem("rememberedEmail");
         }
-        router.push("/");
-        window.location.reload();
+        window.location.href = "/";
       } else {
         alert("Invalid credentials");
       }
@@ -209,7 +208,7 @@ export default function LoginForm() {
                   type="button"
                   variant="outline"
                   className="h-12 border-gray-300 hover:bg-gray-50 rounded-lg flex items-center justify-center"
-                  onClick={() => signIn("google", { callbackUrl: "/" })}
+                  onClick={() => signIn("google", { callbackUrl: "/intake-list" })}
                 >
                   <Image
                     src={LoginGoogleBg}
