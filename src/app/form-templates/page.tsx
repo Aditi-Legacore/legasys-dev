@@ -27,43 +27,43 @@ function FormTemplatesTable({ templates, onDelete, router, deletingId }: { templ
       key: 'language',
       label: 'Language',
       className: 'px-4 py-4',
-      render: (value) => <Badge variant="outline">{value}</Badge>
+      render: (value) => <Badge variant="outline">{String(value)}</Badge>
     },
     {
       key: 'createdBy',
       label: 'Created By',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
-      render: (value) => value || 'N/A'
+      render: (value) => <span>{value ? String(value) : 'N/A'}</span>
     },
     {
       key: 'createdAt',
       label: 'Created At',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
-      render: (value) => new Date(value).toLocaleDateString()
+      render: (value) => <span>{new Date(value as string).toLocaleDateString()}</span>
     }
   ];
 
   // Define actions for CommonTable
-  const actions: Action[] = [
-    {
-      label: 'Edit',
-      icon: Edit,
-      onClick: (row) => router.push(`/form-templates/${row.id}/edit`),
-      className: 'text-blue-600 dark:text-blue-400'
-    },
-    {
-      label: 'Delete',
-      icon: Trash2,
-      onClick: (row) => onDelete(row.id),
-      disabled: (row) => deletingId === row.id,
-      className: 'text-red-600 dark:text-red-400'
-    }
-  ];
+      const actions: Action[] = [
+        {
+          label: 'Edit',
+          icon: Edit,
+          onClick: (row) => router.push(`/form-templates/${(row as unknown as FormTemplate).id}/edit`),
+          className: 'text-blue-600 dark:text-blue-400'
+        },
+        {
+          label: 'Delete',
+          icon: Trash2,
+          onClick: (row) => onDelete((row as unknown as FormTemplate).id),
+          disabled: (row) => deletingId === (row as unknown as FormTemplate).id,
+          className: 'text-red-600 dark:text-red-400'
+        }
+      ];
 
   return (
     <CommonTable
       columns={columns}
-      data={templates}
+      data={templates as unknown as Record<string, unknown>[]}
       actions={actions}
       emptyMessage="No form templates found."
     />

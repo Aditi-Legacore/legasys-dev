@@ -5,7 +5,7 @@ import CommonTable, { Column } from "@/components/ui/CommonTable";
 
 interface ReportTableProps {
   columns: string[];
-  data: any[];
+  data: Record<string, unknown>[];
 }
 
 export default function ReportTable({ columns, data }: ReportTableProps) {
@@ -36,12 +36,12 @@ export default function ReportTable({ columns, data }: ReportTableProps) {
   }, [data, sortColumn, sortDirection]);
 
   // Convert columns to CommonTable format
-  const tableColumns: Column[] = columns.map(col => ({
+  const tableColumns: Column<Record<string, unknown>>[] = columns.map(col => ({
     key: col.toLowerCase(),
     label: col,
     className: 'px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider',
     sortable: true,
-    render: (value) => value || "-"
+    render: (value) => (value as React.ReactNode) || "-"
   }));
 
   return (

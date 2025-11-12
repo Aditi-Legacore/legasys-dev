@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { IntakeFormData } from '@/types/form';
 
 // Create a transporter using SMTP
 const createTransporter = (userEmail?: string) => nodemailer.createTransport({
@@ -29,7 +30,7 @@ export const sendEmail = async (to: string, subject: string, html: string, from?
   }
 };
 
-export const sendIntakeSubmissionEmail = async (formData: any) => {
+export const sendIntakeSubmissionEmail = async (formData: IntakeFormData) => {
   console.log("formData", formData);
 
   const subject = 'New Intake Form Submission';
@@ -167,11 +168,11 @@ export const sendIntakeSubmissionEmail = async (formData: any) => {
               </li>
               <li class="info-item">
                 <span class="info-label">Date of Birth:</span>
-                <span class="info-value">${formData.dob || 'N/A'}</span>
+                <span class="info-value">${formData.dateOfBirth || 'N/A'}</span>
               </li>
               <li class="info-item">
                 <span class="info-label">Phone:</span>
-                <span class="info-value">${formData.phone || 'N/A'}</span>
+                <span class="info-value">${formData.phoneNumber || 'N/A'}</span>
               </li>
               <li class="info-item">
                 <span class="info-label">Email:</span>
@@ -289,10 +290,6 @@ export const sendIntakeSubmissionEmail = async (formData: any) => {
               <li class="info-item">
                 <span class="info-label">Carrier Phone:</span>
                 <span class="info-value">${formData.defendant2CarrierPhone || 'N/A'}</span>
-              </li>
-              <li class="info-item">
-                <span class="info-label">Policy:</span>
-                <span class="info-value">${formData.defendant2Policy || 'N/A'}</span>
               </li>
               <li class="info-item">
                 <span class="info-label">Year:</span>
@@ -508,7 +505,7 @@ export const sendIntakeSubmissionEmail = async (formData: any) => {
   `;
 
   // Send to admin or specific email
-  const adminEmail = formData.email;
+  const adminEmail = formData.email || 'admin@example.com';
   // Use the user's email as the sender
   const fromEmail = process.env.EMAIL_FROM;
   return await sendEmail(adminEmail, subject, html, fromEmail);

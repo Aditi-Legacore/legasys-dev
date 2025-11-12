@@ -194,7 +194,7 @@ function StagesTable({ stages }: { stages: any[] }) {
       key: 'status',
       label: 'Status',
       className: 'px-4 py-4',
-      render: (value: string) => (
+     render: (value): React.ReactNode => (
         <Badge
           className={`${
             value === 'Completed'
@@ -204,7 +204,7 @@ function StagesTable({ stages }: { stages: any[] }) {
               : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
           }`}
         >
-          {value}
+          {value as string}
         </Badge>
       )
     }

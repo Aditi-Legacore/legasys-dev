@@ -111,7 +111,7 @@ export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableP
   }, [intakes, sortColumn, sortDirection]);
 
   // Define columns for CommonTable
-  const columns: Column[] = [
+  const columns: Column<CaseIntake>[] = [
     {
       key: 'clientName',
       label: 'Client Name',
@@ -124,18 +124,19 @@ export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableP
       label: 'Date of Loss',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value): React.ReactNode => formatDate(value as string)
     },
     {
       key: 'accidentDescription',
       label: 'Accident Description',
       className: 'px-4 py-4',
-      render: (value) => {
+      render: (value): React.ReactNode => {
+        const description = value as string | null | undefined;
         const truncatedText =
-          value && value.length > 20 ? value.substring(0, 20) + '...' : value;
+          description && description.length > 20 ? description.substring(0, 20) + '...' : description;
 
         return (
-          <div>
+          <div className="relative group inline-block">
             {/* Truncated preview */}
             <span
               className="
@@ -159,19 +160,18 @@ export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableP
                 px-3 py-2 z-50 w-[200px] whitespace-pre-wrap
               "
             >
-              {value || 'No description'}
+              {description || 'No description'}
             </div>
           </div>
         );
       },
     },
-
     {
       key: 'isDraft',
       label: 'Status',
       className: 'px-4 py-4',
       sortable: true,
-      render: (value) => (
+      render: (value): React.ReactNode => (
         <Badge
           className={`px-3 py-1 rounded-full text-xs font-medium ${
             value
@@ -186,7 +186,7 @@ export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableP
   ];
 
   // Define actions for CommonTable
-  const actions: Action[] = [
+  const actions: Action<CaseIntake>[] = [
     {
       label: 'View',
       icon: Eye,
@@ -210,8 +210,17 @@ export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableP
     }
   ];
 
+  const IntakeTable = CommonTable as unknown as React.ComponentType<{
+    columns: Column<CaseIntake>[];
+    data: CaseIntake[];
+    actions?: Action<CaseIntake>[];
+    showSerialNumber?: boolean;
+    emptyMessage?: string;
+    onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  }>;
+
   return (
-    <CommonTable
+    <IntakeTable
       columns={columns}
       data={sortedIntakes}
       actions={actions}
