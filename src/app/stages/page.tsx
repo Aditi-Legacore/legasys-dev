@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import FilterBar from "@/components/ui/FilterBar";
 import ActiveFilters from "@/components/ui/ActiveFilters";
 import Pagination from "@/components/ui/pagination";
-import CommonTable, { Column } from "@/components/ui/CommonTable";
+import CommonTable from "@/components/ui/CommonTable";
 
 export default function StagesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -171,30 +171,43 @@ export default function StagesPage() {
     </main>
   );
 }
+interface Stage {
+  id?: number; // optional, add if used
+  name: string;
+  description: string;
+  created: string;
+  status: 'Completed' | 'Ongoing' | 'Pending' | string; // can expand as needed
+}
 
-function StagesTable({ stages }: { stages: any[] }) {
-  // Define columns for CommonTable
+interface Column {
+  key: string;
+  label: string;
+  className?: string;
+  render?: (value: unknown, row: Stage, index: number) => React.ReactNode;
+}
+
+function StagesTable({ stages }: { stages: Stage[] }) {
   const columns: Column[] = [
     {
       key: 'name',
       label: 'Stage Name',
-      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium'
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium',
     },
     {
       key: 'description',
       label: 'Description',
-      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400'
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
     },
     {
       key: 'created',
       label: 'Created Date',
-      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400'
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
     },
     {
       key: 'status',
       label: 'Status',
       className: 'px-4 py-4',
-     render: (value): React.ReactNode => (
+      render: (value, row, index): React.ReactNode => (
         <Badge
           className={`${
             value === 'Completed'
@@ -204,14 +217,23 @@ function StagesTable({ stages }: { stages: any[] }) {
               : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
           }`}
         >
-          {value as string}
+          {String(value)}
         </Badge>
-      )
-    }
+      ),
+    },
   ];
 
+  const StagesTable = CommonTable as unknown as React.ComponentType<{
+    columns: Column[];
+    data: Stage[];
+    actions?:[];
+    showSerialNumber?: boolean;
+    emptyMessage?: string;
+    onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  }>;
+
   return (
-    <CommonTable
+    <StagesTable
       columns={columns}
       data={stages}
       emptyMessage="No stages found."
