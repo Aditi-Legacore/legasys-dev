@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState} from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
@@ -17,6 +17,18 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import PDFPreviewModal from '@/components/intake-preview/PDFPreviewModal';
 
+interface DocumentRecord {
+  id: string;
+  fileName: string;
+  mimeType?: string;
+  uploadedAt?: string;
+  filePath: string;
+  intake?: {
+  clientName?: string;
+  };
+}
+
+
 export default function IntakePreviewPage() {
   const params = useParams();
   const router = useRouter();
@@ -24,7 +36,7 @@ export default function IntakePreviewPage() {
   const [intake, setIntake] = useState<IntakeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [loadingPdf, setLoadingPdf] = useState(false);
+  const [loadingPdf, setLoadingPdf] = useState<boolean>(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [showPdfPreview, setShowPdfPreview] = useState(false);
   const [showImagePreview, setShowImagePreview] = useState(false);
@@ -39,6 +51,8 @@ export default function IntakePreviewPage() {
   const [newActivityAction, setNewActivityAction] = useState('');
   const [newActivityDetails, setNewActivityDetails] = useState('');
   const [activeTab, setActiveTab] = useState('information');
+
+
 
   const id = params.id as string;
 
@@ -126,7 +140,7 @@ export default function IntakePreviewPage() {
     const data = await res.json();
 
     // Map backend response to match your table shape
-    const formattedDocs = data.map((doc: any) => ({
+    const formattedDocs = data.map((doc: DocumentRecord) => ({
       id: doc.id,
       name: doc.fileName,
       type: doc.mimeType?.split("/")[1]?.toUpperCase() || "N/A",
@@ -574,7 +588,7 @@ export default function IntakePreviewPage() {
                 formatDate={formatDate}
                 intake={intake}
                 showPlaintiffCard={false}
-                setShowPlaintiffCard={function (show: boolean): void {
+                setShowPlaintiffCard={function (): void {
                   throw new Error('Function not implemented.');
                 }}
               />
@@ -586,7 +600,7 @@ export default function IntakePreviewPage() {
                 formatDate={formatDate}
                 onPreview={handleDocumentPreview}
                 onDelete={handleDocumentDelete}
-                onUpload={handleDocumentUpload} intake={intake!} showPlaintiffCard={false} setShowPlaintiffCard={function (show: boolean): void {
+                onUpload={handleDocumentUpload} intake={intake!} showPlaintiffCard={false} setShowPlaintiffCard={function (): void {
                   throw new Error('Function not implemented.');
                 } }              />
             </TabsContent>

@@ -1,10 +1,14 @@
 import React from 'react';
-import { Document, Page, Text, View, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View } from '@react-pdf/renderer';
 import { styles } from './styles';
 import { formatDate } from './utils';
+import { IntakeData } from '@/types/intake';
+import Image from "next/image";
+
+
 // import LegacoreLogo from '../../../public/assets/images/legacore/Legacore-Infomatics-logo.png';
 // const LegacoreLogo = "../../../public/assets/images/legacore/Legacore-Infomatics-logo.png";
-const InfoRow = ({ label, value }: { label: string; value: string | number }) => (
+const InfoRow = ({ label, value }: { label: string; value: string | number | null | undefined }) => (
   <View style={styles.infoItem}>
     <Text>
       <Text style={styles.label}>{label}:</Text> {value || 'N/A'}
@@ -12,7 +16,7 @@ const InfoRow = ({ label, value }: { label: string; value: string | number }) =>
   </View>
 );
 
-const InfoRowFull = ({ label, value }: { label: string; value: string | number }) => (
+const InfoRowFull = ({ label, value }: { label: string; value: string | number | null | undefined }) => (
   <View style={styles.infoItemFull}>
     <Text>
       <Text style={styles.label}>{label}:</Text> {value || 'N/A'}
@@ -20,7 +24,7 @@ const InfoRowFull = ({ label, value }: { label: string; value: string | number }
   </View>
 );
 
-const IntakePDFDocument = ({ intake }: { intake: any }) => (
+const IntakePDFDocument = ({ intake }: { intake: IntakeData }) => (
   <Document>
     <Page size="LETTER" style={styles.page}>
       {/* Header */}
@@ -28,6 +32,7 @@ const IntakePDFDocument = ({ intake }: { intake: any }) => (
         <View></View>
         <Image
           src="/Legacore-Infomatics-logo.png"
+          alt=""
           style={styles.logoImage}
         />
       </View>

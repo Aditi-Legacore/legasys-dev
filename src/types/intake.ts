@@ -21,7 +21,7 @@ export interface IntakeData {
   accidentLocation: string | null;
   accidentDescription: string | null;
   defendant1Name: string | null;
-  // defendant1Phone: string | null;
+  defendant1Phone: string | null;
   defendant1Address: string | null;
   defendant1Carrier: string | null;
   defendant1CarrierPhone: string | null;
@@ -31,7 +31,7 @@ export interface IntakeData {
   defendant1Model: string | null;
   defendant1Damage: string | null;
   defendant2Name: string | null;
-  // defendant2Phone: string | null;
+  defendant2Phone: string | null;
   defendant2Address: string | null;
   defendant2Carrier: string | null;
   defendant2CarrierPhone: string | null;

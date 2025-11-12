@@ -275,35 +275,50 @@ function FormsTable({ submissions, showEditButton = false }: { submissions: Form
       key: 'createdAt',
       label: 'Due',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
-      render: (value) => new Date(value).toLocaleDateString()
+      render: (value: unknown, _row: Record<string, unknown>, _index: number) => value ? new Date(value as string | number | Date).toLocaleDateString() : 'N/A'
     },
     {
       key: 'template',
       label: 'Form',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium',
-      render: (value) => value.title
+      render: (value: unknown, _row: Record<string, unknown>, _index: number) => {
+        const template = value as FormTemplate | undefined;
+        return template?.title ?? 'N/A';
+      }
     },
     {
       key: 'user',
       label: 'Contact',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
-      render: (value) => value ? `${value.firstName} ${value.lastName}` : 'N/A'
+      render: (value: unknown, _row: Record<string, unknown>, _index: number) => {
+        const user = value as { firstName?: string; lastName?: string } | undefined;
+        const first = user?.firstName ?? '';
+        const last = user?.lastName ?? '';
+        const full = `${first} ${last}`.trim();
+        return full || 'N/A';
+      }
     },
     {
       key: 'matter',
       label: 'Matter',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
-      render: (value) => value?.title || 'N/A'
+      render: (value: unknown, _row: Record<string, unknown>, _index: number) => {
+        const v = value as { title?: string } | null | undefined;
+        return v?.title ?? 'N/A';
+      }
     },
     {
       key: 'status',
       label: 'Status',
       className: 'px-4 py-4',
-      render: (value: string) => (
-        <Badge variant={value === 'Pending' || value === 'Draft' ? 'secondary' : 'default'}>
-          {value}
-        </Badge>
-      )
+      render: (value: unknown, _row: Record<string, unknown>, _index: number) => {
+        const val = (value as string) ?? 'N/A';
+        return (
+          <Badge variant={val === 'Pending' || val === 'Draft' ? 'secondary' : 'default'}>
+            {val}
+          </Badge>
+        );
+      }
     }
   ];
 
@@ -320,7 +335,7 @@ function FormsTable({ submissions, showEditButton = false }: { submissions: Form
   return (
     <CommonTable
       columns={columns}
-      data={submissions}
+      data={submissions as unknown as Record<string, unknown>[]}
       actions={actions}
       emptyMessage="No form submissions found."
     />

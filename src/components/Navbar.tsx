@@ -250,10 +250,12 @@ const Navbar: React.FC = () => {
           <div className="p-4 space-y-3">
             {/* User Info Section */}
             <div className="flex items-center gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
-              <img
+              <Image
                 src={session?.user?.image || "/avatar.png"}
                 alt="User Avatar"
-                className="w-12 h-12 rounded-full border-2 border-gray-300 dark:border-gray-600"
+                width={48} // 12 * 4 = 48px
+                height={48}
+                className="rounded-full border-2 border-gray-300 dark:border-gray-600"
               />
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-900 dark:text-white truncate">

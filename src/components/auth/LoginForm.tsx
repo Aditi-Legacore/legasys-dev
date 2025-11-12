@@ -15,6 +15,8 @@ import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import LoginBg from "../../../public/assets/images/auth/login-bg.png";
 import LoginLogoBg from "../../../public/assets/images/auth/logo.png";
 import LoginGoogleBg from "../../../public/assets/images/auth/google-icon.webp";
+import { ControllerRenderProps, FieldValues } from "react-hook-form";
+
 interface LoginFormData {
   email: string;
   password: string;
@@ -109,57 +111,59 @@ export default function LoginForm() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               <FormField
-                control={form.control}
-                name="email"
-                render={({ field }: { field: any }) => (
-                  <FormItem>
-                    <FormControl>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <Input
-                          {...field}
-                          type="email"
-                          placeholder="example@gmail.com"
-                          className="pl-11 h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+  control={form.control}
+  name="email"
+  render={({ field }) => (
+    <FormItem>
+      <FormControl>
+        <div className="relative">
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Input
+            {...field}
+            type="email"
+            placeholder="example@gmail.com"
+            className="pl-11 h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
 
               <FormField
-                control={form.control}
-                name="password"
-                render={({ field }: { field: any }) => (
-                  <FormItem>
-                    <FormControl>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <Input
-                          {...field}
-                          type={showPassword ? "text" : "password"}
-                          placeholder="password"
-                          className="pl-11 pr-11 h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                        {showPassword ? (
-                          <EyeOff
-                            className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 cursor-pointer"
-                            onClick={() => setShowPassword(false)}
-                          />
-                        ) : (
-                          <Eye
-                            className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 cursor-pointer"
-                            onClick={() => setShowPassword(true)}
-                          />
-                        )}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+  control={form.control}
+  name="password"
+  render={({ field }) => (
+    <FormItem>
+      <FormControl>
+        <div className="relative">
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Input
+            {...field}
+            type={showPassword ? "text" : "password"}
+            placeholder="password"
+            className="pl-11 pr-11 h-12 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          {showPassword ? (
+            <EyeOff
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 cursor-pointer"
+              onClick={() => setShowPassword(false)}
+            />
+          ) : (
+            <Eye
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 cursor-pointer"
+              onClick={() => setShowPassword(true)}
+            />
+          )}
+        </div>
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
 
               <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -220,7 +224,8 @@ export default function LoginForm() {
               </div>
 
               <div className="text-center">
-                <span className="text-sm text-gray-600">Don't have an account? </span>
+                <span className="text-sm text-gray-600">Don&apos;t have an account? </span>
+
                 <Link href="/signup" className="text-sm text-blue-600 hover:underline font-medium">
                   Sign Up
                 </Link>

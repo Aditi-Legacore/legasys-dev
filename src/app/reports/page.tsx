@@ -35,6 +35,13 @@ interface DocumentData {
   createdDate: string;
 }
 
+interface ReportItem {
+  name: string;
+  count: number;
+  status: string;
+}
+
+
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState<"intakes" | "leads" | "documents">("intakes");
   const [searchQuery, setSearchQuery] = useState("");
@@ -261,7 +268,7 @@ const handleExport = (format: 'csv' | 'excel' | 'json' = 'csv') => {
 };
 
 // Enhanced CSV Export function
-const exportToCSV = (data: any[], filename: string) => {
+const exportToCSV = (data: ReportItem[], filename: string) => {
   const headers = ['Report Item', 'Count', 'Status'];
   
   const csvHeaders = headers.join(',');
@@ -280,7 +287,7 @@ const exportToCSV = (data: any[], filename: string) => {
 };
 
 // Enhanced Excel Export with Better Formatting
-const exportToExcel = (data: any[], filename: string) => {
+const exportToExcel = (data: ReportItem[], filename: string) => {
   // Prepare the data for Excel
   const excelData = data.map(item => ({
     'Report Item': item.name,
@@ -339,7 +346,7 @@ const exportToExcel = (data: any[], filename: string) => {
 };
 
 // JSON Export function (unchanged)
-const exportToJSON = (data: any[], filename: string) => {
+const exportToJSON = (data: ReportItem[], filename: string) => {
   const jsonContent = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonContent], { type: 'application/json' });
   downloadBlob(blob, `${filename}_${getFormattedDate()}.json`);

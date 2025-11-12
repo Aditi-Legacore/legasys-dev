@@ -30,7 +30,7 @@ export default function IntakeList() {
   const [dateFromFilter, setDateFromFilter] = useState("");
   const [dateToFilter, setDateToFilter] = useState("");
   const [showFiltersSidebar, setShowFiltersSidebar] = useState(false);
-  const [loadingNew, setLoadingNew] = useState(false);
+  const [loadingNew] = useState(false);
   const [showIntakeModal, setShowIntakeModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);

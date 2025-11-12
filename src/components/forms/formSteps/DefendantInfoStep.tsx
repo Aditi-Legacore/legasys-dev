@@ -57,6 +57,20 @@ interface DefendantVehicle {
   make: string;
   model: string;
 }
+interface NHTSAYear {
+  modelYear: string;
+}
+
+interface NHTSAMake {
+  makeName?: string;
+  make?: string;
+}
+
+interface NHTSAModel {
+  modelName?: string;
+  model?: string;
+}
+
 
 export default function DefendantInfoStep() {
   const { setValue, watch } = useFormContext();
@@ -93,19 +107,18 @@ export default function DefendantInfoStep() {
     fetch("https://api.nhtsa.gov/products/vehicle/modelYears?issueType=c")
       .then((res) => res.json())
       .then((data) => {
-        // The API returns objects, extract the modelYear property
-        const yearObjects = data.results;
-        const extractedYears = yearObjects.map((item: any) => item.modelYear || item);
+      const yearObjects: NHTSAYear[] = data.results;
+      const extractedYears = yearObjects.map((item) => item.modelYear || "");
+      
+      const sortedYears = extractedYears.sort((a, b) => {
+        const yearA = parseInt(a);
+        const yearB = parseInt(b);
+        return yearB - yearA;
+      });
 
-        // Sort years in descending order
-        const sortedYears = extractedYears.sort((a: any, b: any) => {
-          const yearA = typeof a === "string" ? parseInt(a) : a;
-          const yearB = typeof b === "string" ? parseInt(b) : b;
-          return yearB - yearA;
-        });
+      setYears(sortedYears.map(String));
+    })
 
-        setYears(sortedYears.map(String));
-      })
       .catch((err) => console.error("Error fetching years:", err));
   }, []);
 
@@ -122,7 +135,10 @@ export default function DefendantInfoStep() {
       const data = await response.json();
 
       // Map objects to extract make names
-      const makesList = data.results.map((item: any) => item.makeName || item.make || item);
+      const makesList = (data.results as NHTSAMake[]).map(
+      (item) => item.makeName || item.make || ""
+    );
+
 
       setMakesData((prev) => ({ ...prev, [index]: makesList }));
 
@@ -155,7 +171,11 @@ export default function DefendantInfoStep() {
       const data = await response.json();
 
       // Map objects to extract model names
-      const modelsList = data.results.map((item: any) => item.modelName || item.model || item);
+      // const modelsList = data.results.map((item: any) => item.modelName || item.model || item);
+      const modelsList = (data.results as NHTSAModel[]).map(
+        (item) => item.modelName || item.model || ""
+      );
+
 
       setModelsData((prev) => ({ ...prev, [index]: modelsList }));
 

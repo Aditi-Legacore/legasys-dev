@@ -13,6 +13,15 @@ import LoginLogoBg from '../../../public/assets/images/auth/logo.png';
 import InputField from './inputs/InputField';
 import TextareaField from './inputs/TextareaField';
 
+type LeadFormData = {
+  fullName: string;
+  dateOfLoss: string;
+  caseType: string;
+  email: string;
+  [key: string]: unknown; // allows extra optional fields if needed
+};
+
+
 const caseTypes = [
   { value: 'personal_injury', label: 'Personal Injury', icon: AlertTriangle },
   { value: 'auto_accident', label: 'Auto Accident', icon: Car },
@@ -29,7 +38,7 @@ const referralSources = [
   { value: 'other', label: 'Other' },
 ];
 
-export default function IntakeForm({ onClose }: { onClose: () => void }) {
+export default function IntakeForm({ }: { onClose: () => void }) {
   const [referenceId, setReferenceId] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
@@ -49,7 +58,7 @@ export default function IntakeForm({ onClose }: { onClose: () => void }) {
   const description = watch('description');
   const charCount = description ? description.length : 0;
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: LeadFormData) => {
     if (!data.fullName || !data.dateOfLoss || !data.caseType || !data.email) {
       setError("Please fill all required fields.");
       return;
@@ -114,7 +123,8 @@ export default function IntakeForm({ onClose }: { onClose: () => void }) {
             </div>
             <h1 className="text-lg font-bold text-foreground">Lega<span className="font-semibold text-green-300">sys</span></h1>
           </div>
-          <h2 className="text-xl font-bold text-muted-foreground mb-1">Let's Get Started</h2>
+        <h2 className="text-xl font-bold text-muted-foreground mb-1">Let&apos;s Get Started</h2>
+
           <p className="text-sm text-muted-foreground">Tell us about your case — takes 2 minutes</p>
         </div>
 

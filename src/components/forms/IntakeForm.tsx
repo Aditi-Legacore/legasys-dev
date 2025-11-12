@@ -19,6 +19,7 @@ import { useSearchParams } from "next/navigation";
 import type { DefaultUser } from "next-auth";
 import { toast } from "sonner";
 import IntakeDocuments from "./intakeDocuments/intakeDocuments";
+import { Lead } from "@/types/leads";
 
 declare module "next-auth" {
   interface Session {
@@ -62,17 +63,20 @@ interface IntakeFormWizardProps {
   onFormSubmit?: (data: IntakeFormData) => void;
 }
 
-export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps) {
+
+export default function IntakeFormWizard({ }: IntakeFormWizardProps) {
   const searchParams = useSearchParams();
   const [referenceId, setReferenceId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<any>(null);
-  const [leadData, setLeadData] = useState<any>(null);
+  // const [draft, setDraft] = useState<any>(null);
+  // const [leadData, setLeadData] = useState<any>(null);
+  const [draft, setDraft] = useState<Record<string, unknown> | null>(null);
+const [leadData, setLeadData] = useState<Lead | null>(null);
 
   const intakeId = searchParams.get("id");  // 👈 get ID from URL
   const [isLoadingExistingData, setIsLoadingExistingData] = useState(false);
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({});
+  // const [ setFormData] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedIntakeId, setSubmittedIntakeId] = useState<string | null>(null);
 
@@ -107,7 +111,10 @@ export default function IntakeFormWizard({ onFormSubmit }: IntakeFormWizardProps
   useEffect(() => {
     const draftData = localStorage.getItem("draftData");
     if (draftData) {
-      setFormData(JSON.parse(draftData));
+      const parsedDraft = JSON.parse(draftData);
+      Object.keys(parsedDraft).forEach((key) => {
+        methods.setValue(key as keyof IntakeFormData, parsedDraft[key]);
+      });
     }
   }, []);
 
@@ -205,12 +212,24 @@ const handleSaveDraft = async () => {
   // Populate form with draft data when draft is loaded
   useEffect(() => {
     if (draft) {
+      // Safely parse values that may be unknown coming from the draft object.
+      const parseDateString = (d: unknown) => {
+        if (!d) return '';
+        if (typeof d === 'string' || typeof d === 'number' || d instanceof Date) {
+          const date = new Date(d);
+          if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
+        }
+        return '';
+      };
+
+      const getString = (v: unknown) => (typeof v === 'string' ? v : '');
+
       const mappedData = {
         ...draft,
-        phone: draft.phoneNumber || '',
-        dob: draft.dateOfBirth ? new Date(draft.dateOfBirth).toISOString().split('T')[0] : '',
-        phoneNumber: draft.phoneNumber || '',
-        dateOfBirth: draft.dateOfBirth ? new Date(draft.dateOfBirth).toISOString().split('T')[0] : '',
+        phone: getString((draft as Record<string, unknown>).phoneNumber) || getString((draft as Record<string, unknown>).phone),
+        dob: parseDateString((draft as Record<string, unknown>).dateOfBirth ?? (draft as Record<string, unknown>).dob),
+        phoneNumber: getString((draft as Record<string, unknown>).phoneNumber),
+        dateOfBirth: parseDateString((draft as Record<string, unknown>).dateOfBirth ?? (draft as Record<string, unknown>).dob),
       };
 
       (Object.keys(mappedData) as Array<keyof typeof mappedData>).forEach((key) => {

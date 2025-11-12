@@ -15,12 +15,29 @@ interface PrepareFormModalProps {
   templates: FormTemplate[];
 }
 
+interface User {
+  lastName: string;
+  firstName: string;
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface Submission {
+  id: string;
+  templateId: string;
+  matterId: string;
+  userId: string | null;
+  createdAt: string;
+}
+
+
 export default function PrepareFormModal({ isOpen, onClose, onSubmit, templates }: PrepareFormModalProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [selectedMatter, setSelectedMatter] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [matters, setMatters] = useState<Matter[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -103,7 +120,7 @@ export default function PrepareFormModal({ isOpen, onClose, onSubmit, templates 
       const existingResponse = await fetch('/api/forms');
       if (existingResponse.ok) {
         const submissions = await existingResponse.json();
-        const existingSubmission = submissions.find((s: any) =>
+        const existingSubmission = submissions.find((s: Submission) =>
           s.templateId === selectedTemplate &&
           s.matterId === selectedMatter &&
           s.userId === (selectedUser || null)

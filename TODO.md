@@ -1,20 +1,23 @@
-# Task: Include intakeInfo table in GET() to fetch ClientName and add "Uploaded by" column in DocumentsTab.tsx
+# Task: Fix Next.js Image missing width property error in DocumentsTab.tsx
 
 ## Steps to Complete
 
-1. **Update API GET() in route.ts**
-   - Modify the Prisma query to include the intake relation with clientName in the select.
+1. **Edit ImagePreviewModal.tsx**
+   - Add `fill` prop to the Image component.
+   - Add `relative` class to the parent div for proper positioning.
 
-2. **Update Document interface in DocumentsTab.tsx**
-   - Add `uploadedBy: string;` to the Document interface.
+2. **Test the changes**
+   - Run the app and check for console errors.
+   - Verify image preview modal works correctly.
 
-3. **Update parent component (page.tsx)**
-   - In `fetchDocuments`, map the API response to include `uploadedBy: doc.intake.clientName`.
+## Completed Steps
 
-4. **Add "Uploaded by" column to the table in DocumentsTab.tsx**
-   - Add the column header and body cell in the Table component.
+- [x] Edit ImagePreviewModal.tsx
+  - [x] Added `fill` prop to the Image component.
+  - [x] Added `relative` class to the parent div for proper positioning.
+  - [x] Added error handling for invalid images with fallback UI.
 
-5. **Test the changes**
-   - Verify the API returns clientName.
-   - Check the table displays the new column correctly.
-   - Ensure no TypeScript errors.
+- [x] Test the changes
+  - [x] Ran the app and confirmed the original console error about missing "width" property is no longer appearing.
+  - [x] The Image component now uses fill mode, resolving the Next.js optimization requirement.
+  - [x] Added graceful error handling for corrupted or invalid image files.

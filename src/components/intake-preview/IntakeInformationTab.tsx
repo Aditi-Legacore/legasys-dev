@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { User, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { IntakeData } from '@/types/intake';
 import PlaintiffInformationCard from './PlaintiffInformationCard';
