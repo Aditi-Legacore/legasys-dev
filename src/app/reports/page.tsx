@@ -230,10 +230,15 @@ export default function ReportsPage() {
    // ... your existing code above ...
   
   // added in 06-11-2025
+interface ReportItem {
+  name: string;
+  count: number;
+  status: string;
+}
+
 const handleExport = (format: 'csv' | 'excel' | 'json' = 'csv') => {
   try {
-    // Use the filtered aggregated data that's displayed in the table
-    const dataToExport = filteredData;
+    const dataToExport = filteredData as ReportItem[];
     const filename = `${activeTab}_report`;
 
     if (dataToExport.length === 0) {
@@ -241,7 +246,6 @@ const handleExport = (format: 'csv' | 'excel' | 'json' = 'csv') => {
       return;
     }
 
-    // Export in chosen format
     switch (format) {
       case 'csv':
         exportToCSV(dataToExport, filename);
@@ -261,15 +265,15 @@ const handleExport = (format: 'csv' | 'excel' | 'json' = 'csv') => {
 };
 
 // Enhanced CSV Export function
-const exportToCSV = (data: any[], filename: string) => {
+const exportToCSV = (data: ReportItem[], filename: string) => {
   const headers = ['Report Item', 'Count', 'Status'];
-  
+
   const csvHeaders = headers.join(',');
   const csvRows = data.map(item => {
     const row = [
-      `"${String(item.name).replace(/"/g, '""')}"`,
+      `"${item.name.replace(/"/g, '""')}"`,
       item.count.toString(),
-      `"${String(item.status).replace(/"/g, '""')}"`
+      `"${item.status.replace(/"/g, '""')}"`
     ];
     return row.join(',');
   });
@@ -280,70 +284,41 @@ const exportToCSV = (data: any[], filename: string) => {
 };
 
 // Enhanced Excel Export with Better Formatting
-const exportToExcel = (data: any[], filename: string) => {
-  // Prepare the data for Excel
+const exportToExcel = (data: ReportItem[], filename: string) => {
   const excelData = data.map(item => ({
     'Report Item': item.name,
     'Count': item.count,
     'Status': item.status
   }));
 
-  // Create worksheet from data
   const worksheet = utils.json_to_sheet(excelData);
-  
-  // Create workbook
   const workbook = utils.book_new();
-  
-  // Add title row
+
   const title = `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Report - ${new Date().toLocaleDateString()}`;
   utils.sheet_add_aoa(worksheet, [[title]], { origin: 'A1' });
-  utils.sheet_add_aoa(worksheet, [[]], { origin: 'A2' }); // Empty row
+  utils.sheet_add_aoa(worksheet, [[]], { origin: 'A2' });
   utils.sheet_add_json(worksheet, excelData, { origin: 'A3', skipHeader: false });
 
-  // Merge title cells
   if (!worksheet['!merges']) worksheet['!merges'] = [];
   worksheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } });
 
-  // Set column widths
   worksheet['!cols'] = [
-    { wch: 40 }, // Report Item
-    { wch: 15 }, // Count
-    { wch: 25 }  // Status
+    { wch: 40 },
+    { wch: 15 },
+    { wch: 25 }
   ];
 
-  // Apply styles
-  const titleCell = worksheet['A1'];
-  if (titleCell) {
-    titleCell.s = {
-      font: { bold: true, sz: 14 },
-      alignment: { horizontal: 'center' }
-    };
-  }
-
-  // Style header row (row 3)
-  ['A3', 'B3', 'C3'].forEach(cell => {
-    if (worksheet[cell]) {
-      worksheet[cell].s = {
-        font: { bold: true, color: { rgb: "FFFFFF" } },
-        fill: { fgColor: { rgb: "4472C4" } }, // Blue background
-        alignment: { horizontal: 'center' }
-      };
-    }
-  });
-
-  // Add the worksheet to the workbook
   utils.book_append_sheet(workbook, worksheet, 'Report');
-
-  // Write the file
   writeFile(workbook, `${filename}_${getFormattedDate()}.xlsx`);
 };
 
-// JSON Export function (unchanged)
-const exportToJSON = (data: any[], filename: string) => {
+// JSON Export function
+const exportToJSON = (data: ReportItem[], filename: string) => {
   const jsonContent = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonContent], { type: 'application/json' });
   downloadBlob(blob, `${filename}_${getFormattedDate()}.json`);
 };
+
 
 // Generic download function for non-Excel formats
 const downloadBlob = (blob: Blob, filename: string) => {

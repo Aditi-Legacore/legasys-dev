@@ -13,11 +13,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import ContactSection from '@/components/FormBuilder/ContactSection';
 import { FormSubmission, FormField, ContactData } from '@/types/form';
 
+type FormDataMap = Record<string, string | string[] | boolean | File | null>;
+
 export default function FillFormPage() {
   const params = useParams();
   const router = useRouter();
   const [submission, setSubmission] = useState<FormSubmission | null>(null);
-  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formData, setFormData] = useState<FormDataMap>({});
   const [contacts, setContacts] = useState<{ id: string; data: ContactData; selectedFields: { dateOfBirth: boolean; company: boolean; phone: boolean; address: boolean } }[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -34,7 +36,7 @@ export default function FillFormPage() {
         const data = await response.json();
         setSubmission(data);
         // Initialize form data with empty values or existing data
-        const initialData: Record<string, any> = {};
+        const initialData: FormDataMap = {};
         const templateFields = data.template.fields;
         const fields = Array.isArray(templateFields) ? templateFields : (templateFields.fields || []);
         const fieldMap = new Map<string, FormField>();
@@ -105,16 +107,18 @@ export default function FillFormPage() {
     }
   };
 
-  const handleInputChange = (fieldLabel: string, value: any) => {
-    setFormData(prev => ({ ...prev, [fieldLabel]: value }));
-  };
+ const handleInputChange = (fieldLabel: string, value: string | boolean | File | string[] | null) => {
+  setFormData(prev => ({ ...prev, [fieldLabel]: value }));
+};
+
 
   const handleMultiSelectChange = (fieldLabel: string, option: string, checked: boolean) => {
     setFormData(prev => ({
       ...prev,
       [fieldLabel]: checked
-        ? [...(prev[fieldLabel] || []), option]
-        : (prev[fieldLabel] || []).filter((opt: string) => opt !== option)
+  ? [...((prev[fieldLabel] as string[]) || []), option]
+  : ((prev[fieldLabel] as string[]) || []).filter(opt => opt !== option)
+
     }));
   };
 
@@ -130,13 +134,7 @@ export default function FillFormPage() {
     setSubmitting(true);
     try {
       // Convert formData back to field IDs for storage
-      const dataToStore: Record<string, any> = {};
-      Object.keys(formData).forEach(label => {
-        const field = Array.from(fieldMap.values()).find(f => f.label === label);
-        if (field) {
-          dataToStore[field.id] = formData[label];
-        }
-      });
+      const dataToStore: Record<string, string | boolean | File | string[] | null> = {};
 
       const response = await fetch(`/api/forms/${params.id}`, {
         method: 'PUT',
@@ -172,7 +170,11 @@ export default function FillFormPage() {
     const templateFields = submission?.template.fields;
     const fields = Array.isArray(templateFields) ? templateFields : (templateFields?.fields || []);
     const missingFields = fields.filter(field =>
-      field.required && (!formData[field.label] || formData[field.label].length === 0)
+      field.required && (
+        formData[field.label] == null ||
+        (typeof formData[field.label] === 'string' && (formData[field.label] as string).length === 0) ||
+        (Array.isArray(formData[field.label]) && (formData[field.label] as string[]).length === 0)
+      )
     );
 
     if (missingFields && missingFields.length > 0) {
@@ -183,7 +185,7 @@ export default function FillFormPage() {
     setSubmitting(true);
     try {
       // Convert formData back to field IDs for storage
-      const dataToStore: Record<string, any> = {};
+      const dataToStore: Record<string, string | boolean | File | string[] | null> = {};
       console.log("formData", formData);
 
       Object.keys(formData).forEach(label => {
@@ -231,7 +233,7 @@ export default function FillFormPage() {
         return (
           <Input
             id={field.id}
-            value={value}
+            value={(value as string) || ''}
             onChange={(e) => handleInputChange(field.label, e.target.value)}
             placeholder={field.placeholder}
             required={field.required}
@@ -243,7 +245,7 @@ export default function FillFormPage() {
         return (
           <Textarea
             id={field.id}
-            value={value}
+            value={(value as string) || ''}
             onChange={(e) => handleInputChange(field.label, e.target.value)}
             placeholder={field.placeholder}
             required={field.required}
@@ -254,7 +256,7 @@ export default function FillFormPage() {
       case 'multiple_choice':
         return (
           <RadioGroup
-            value={value}
+            value={typeof value === 'string' ? value : ''}
             onValueChange={(val) => handleInputChange(field.label, val)}
             className="space-y-3"
           >
@@ -274,7 +276,7 @@ export default function FillFormPage() {
               <div key={option} className="flex items-center space-x-3">
                 <Checkbox
                   id={`${field.id}-${option}`}
-                  checked={value?.includes(option) || false}
+                  checked={Array.isArray(value) ? (value as string[]).includes(option) : false}
                   onCheckedChange={(checked) =>
                     handleMultiSelectChange(field.label, option, checked as boolean)
                   }
@@ -288,7 +290,7 @@ export default function FillFormPage() {
 
       case 'dropdown':
         return (
-          <Select value={value} onValueChange={(val) => handleInputChange(field.label, val)}>
+          <Select value={(value as string) || ''} onValueChange={(val) => handleInputChange(field.label, val)}>
             <SelectTrigger className="h-11 text-base">
               <SelectValue placeholder="Select an option" />
             </SelectTrigger>
@@ -307,8 +309,8 @@ export default function FillFormPage() {
           <div className="flex items-center space-x-3">
             <Checkbox
               id={field.id}
-              checked={value}
-              onCheckedChange={(checked) => handleInputChange(field.label, checked)}
+              checked={!!value}
+              onCheckedChange={(checked) => handleInputChange(field.label, checked === 'indeterminate' ? false : Boolean(checked))}
               className="h-5 w-5"
             />
             <Label htmlFor={field.id} className="text-base font-normal cursor-pointer">Yes</Label>
@@ -320,7 +322,7 @@ export default function FillFormPage() {
           <Input
             id={field.id}
             type="date"
-            value={value}
+            value={(value as string) || ''}
             onChange={(e) => handleInputChange(field.label, e.target.value)}
             required={field.required}
             className="h-11 text-base"
@@ -342,7 +344,7 @@ export default function FillFormPage() {
         return (
           <Input
             id={field.id}
-            value={value}
+            value={(value as string) || ''}
             onChange={(e) => handleInputChange(field.label, e.target.value)}
             placeholder={field.placeholder}
             required={field.required}
