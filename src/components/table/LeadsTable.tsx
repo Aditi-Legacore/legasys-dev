@@ -2,9 +2,7 @@
 
 import React, { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { MoreVertical, Eye, Mail, FileCheck, Archive } from "lucide-react";
+import { Eye, Mail, FileCheck, Archive } from "lucide-react";
 import { Lead } from "@/types/leads";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -88,8 +86,8 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
     if (!sortColumn) return leads;
 
     return [...leads].sort((a, b) => {
-      let aValue = a[sortColumn as keyof Lead];
-      let bValue = b[sortColumn as keyof Lead];
+      const aValue = a[sortColumn as keyof Lead];
+      const bValue = b[sortColumn as keyof Lead];
 
       // Handle null/undefined values
       if (aValue == null && bValue == null) return 0;
@@ -122,55 +120,58 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
   }, [leads, sortColumn, sortDirection]);
 
   // Define columns for CommonTable
-  const columns: Column[] = [
+  const columns: Column<Lead>[] = [
     {
       key: 'dueDate',
       label: 'Date Of Loss',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
       sortable: true,
-      render: (value) => new Date(value).toLocaleDateString('en-US')
+      render: (value): React.ReactNode => new Date(value as string).toLocaleDateString('en-US')
     },
     {
       key: 'name',
       label: 'Client Name',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium',
       sortable: true,
-      render: (value, row) => row.intakeInfo ? (
+      render: (value, row): React.ReactNode => row.intakeInfo ? (
         <a
           href={`/intake-preview/${row.intakeInfo.id}`}
           className="underline text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
         >
-          {value}
+          {value as string}
         </a>
-      ) : value
+      ) : value as string
     },
     {
       key: 'caseType',
       label: 'Case Type',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
       sortable: true,
-      render: (value) => value ? value.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : '-'
+      render: (value): React.ReactNode => value ? String(value).replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : '-'
     },
     {
       key: 'status',
       label: 'Status',
       className: 'px-4 py-4',
       sortable: true,
-      render: (value: string) => (
-        <Badge className={statusConfig[value as keyof typeof statusConfig]?.color || statusConfig.default.color}>
-          {statusConfig[value as keyof typeof statusConfig]?.label || statusConfig.default.label}
-        </Badge>
-      )
+      render: (value): React.ReactNode => {
+        const status = value as string;
+        return (
+          <Badge className={statusConfig[status as keyof typeof statusConfig]?.color || statusConfig.default.color}>
+            {statusConfig[status as keyof typeof statusConfig]?.label || statusConfig.default.label}
+          </Badge>
+        );
+      }
     },
     {
       key: 'contact',
       label: 'Contact',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
-      render: (value, row) => (
+      render: (value, row): React.ReactNode => (
         <div>
-          <div>{value}</div>
+          <div>{value as string}</div>
           <div className="text-xs text-muted-foreground dark:text-gray-400">
-            {row.phone}
+            {row.phone as string}
           </div>
         </div>
       )
@@ -179,9 +180,9 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
       key: 'matter',
       label: 'Matter',
       className: 'px-4 py-4 text-xs sm:text-sm',
-      render: (value) => (
+      render: (value): React.ReactNode => (
         value !== "-" ? (
-          <span className="text-primary dark:text-blue-400 font-medium">{value}</span>
+          <span className="text-primary dark:text-blue-400 font-medium">{value as string}</span>
         ) : (
           <span className="text-muted-foreground dark:text-gray-400">-</span>
         )
@@ -190,7 +191,7 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
   ];
 
   // Define actions for CommonTable
-  const actions: Action[] = [
+  const actions: Action<Lead>[] = [
     {
       label: 'View Details',
       icon: Eye,
@@ -217,8 +218,16 @@ export default function LeadsTable({ leads, onLeadUpdate }: LeadsTableProps) {
     }
   ];
 
+  const LeadTable = CommonTable as unknown as React.ComponentType<{
+    columns: Column<Lead>[];
+    data: Lead[];
+    actions?: Action<Lead>[];
+    emptyMessage?: string;
+    onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  }>;
+
   return (
-    <CommonTable
+    <LeadTable
       columns={columns}
       data={sortedLeads}
       actions={actions}

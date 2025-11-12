@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
     if (data.userId) {
       const userExists = await prisma.user.findUnique({ where: { id: data.userId }, select: { id: true } });
       if (!userExists) {
-        data.userId = null; // Set to null if user doesn't exist
+        data.userId = undefined; // Set to undefined if user doesn't exist
       }
     }
 
@@ -238,7 +238,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(intake, { status: 201 });
   } catch (err: unknown) {
     console.error("❌ POST /api/intake error:", err);
-    return NextResponse.json({ error: "Failed to save intake info", details: err.message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to save intake info", details: err instanceof Error ? err.message : "Unknown error" }, { status: 500 });
   }
 }
 

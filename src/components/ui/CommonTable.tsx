@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronUp, ChevronDown, MoreVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
@@ -11,31 +10,31 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-export interface Column {
+export interface Column<T = Record<string, unknown>> {
   key: string;
   label: string;
-  render?: (value: any, row: any, index: number) => React.ReactNode;
+  render?: (value: unknown, row: T, index: number) => React.ReactNode;
   className?: string;
   hidden?: boolean;
   sortable?: boolean;
-  link?: (row: any) => string; // href for link
+  link?: (row: T) => string; // href for link
 }
 
-export interface Action {
+export interface Action<T = Record<string, unknown>> {
   label: string;
   icon?: React.ComponentType<{ size?: number; className?: string }>;
-  onClick: (row: any, index: number) => void;
+  onClick: (row: T, index: number) => void;
   variant?: 'default' | 'outline' | 'ghost' | 'destructive';
   size?: 'sm' | 'default' | 'lg' | 'icon';
-  disabled?: (row: any) => boolean;
+  disabled?: (row: T) => boolean;
   className?: string;
 }
 
-export interface CommonTableProps {
-  columns: Column[];
-  data: any[];
-  actions?: Action[];
-  onRowClick?: (row: any, index: number) => void;
+export interface CommonTableProps<T = Record<string, unknown>> {
+  columns: Column<T>[];
+  data: T[];
+  actions?: Action<T>[];
+  onRowClick?: (row: T, index: number) => void;
   emptyMessage?: string;
   className?: string;
   showSerialNumber?: boolean;
@@ -175,7 +174,7 @@ export default function CommonTable({
           <tbody className="bg-card dark:bg-gray-800 divide-y divide-border dark:divide-gray-600">
             {data.map((row, rowIndex) => (
               <tr
-                key={row.id || rowIndex}
+                key={('id' in row ? String(row.id) : undefined) || rowIndex}
                 className={`hover:bg-primary-light/50 dark:hover:bg-gray-700 transition-fast ${
                   onRowClick ? 'cursor-pointer' : ''
                 } group`}
@@ -187,9 +186,14 @@ export default function CommonTable({
                   </td>
                 )}
                 {visibleColumns.map((column) => {
+                  const value = (row as Record<string, unknown>)[column.key];
                   const cellContent = column.render
-                    ? column.render(row[column.key], row, rowIndex)
-                    : row[column.key] || '-';
+                    ? column.render(value, row, rowIndex)
+                    : (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') 
+                      ? String(value) 
+                      : value == null 
+                      ? '-' 
+                      : '-';
 
                   return (
                     <td
@@ -207,7 +211,7 @@ export default function CommonTable({
                       ) : (
                         cellContent
                       )}
-                    </td>  
+                    </td>
                   );
                 })}
 

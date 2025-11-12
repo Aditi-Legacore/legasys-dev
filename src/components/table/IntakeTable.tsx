@@ -77,8 +77,8 @@ export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableP
     if (!sortColumn) return intakes;
 
     return [...intakes].sort((a, b) => {
-      let aValue = a[sortColumn as keyof CaseIntake];
-      let bValue = b[sortColumn as keyof CaseIntake];
+      const aValue = a[sortColumn as keyof CaseIntake];
+      const bValue = b[sortColumn as keyof CaseIntake];
 
       // Handle null/undefined values
       if (aValue == null && bValue == null) return 0;
@@ -111,7 +111,7 @@ export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableP
   }, [intakes, sortColumn, sortDirection]);
 
   // Define columns for CommonTable
-  const columns: Column[] = [
+  const columns: Column<CaseIntake>[] = [
     {
       key: 'clientName',
       label: 'Client Name',
@@ -124,54 +124,54 @@ export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableP
       label: 'Date of Loss',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
       sortable: true,
-      render: (value) => formatDate(value)
+      render: (value): React.ReactNode => formatDate(value as string)
     },
-  {
-  key: 'accidentDescription',
-  label: 'Accident Description',
-  className: 'px-4 py-4',
-  render: (value) => {
-    const truncatedText =
-      value && value.length > 20 ? value.substring(0, 20) + '...' : value;
+    {
+      key: 'accidentDescription',
+      label: 'Accident Description',
+      className: 'px-4 py-4',
+      render: (value): React.ReactNode => {
+        const description = value as string | null | undefined;
+        const truncatedText =
+          description && description.length > 20 ? description.substring(0, 20) + '...' : description;
 
-    return (
-      <div className="relative group inline-block">
-        {/* Truncated preview */}
-        <span
-          className="
-            inline-block 
-            bg-blue-100 dark:bg-blue-900 
-            text-blue-800 dark:text-blue-200 
-            px-2 py-1 rounded-full 
-            text-xs font-medium cursor-pointer
-          "
-        >
-          {truncatedText || 'No description'}
-        </span>
+        return (
+          <div className="relative group inline-block">
+            {/* Truncated preview */}
+            <span
+              className="
+                inline-block 
+                bg-blue-100 dark:bg-blue-900 
+                text-blue-800 dark:text-blue-200 
+                px-2 py-1 rounded-full 
+                text-xs font-medium cursor-pointer
+              "
+            >
+              {truncatedText || 'No description'}
+            </span>
 
-        {/* Hover tooltip with full text */}
-        <div
-          className="
-            absolute left-1/2 -translate-x-1/2 mt-2
-            hidden group-hover:block
-            bg-white text-black dark:bg-gray-800 dark:text-white
-            text-xs rounded-lg shadow-lg border border-gray-200 dark:border-gray-700
-            px-3 py-2 z-50 w-[200px] whitespace-pre-wrap
-          "
-        >
-          {value || 'No description'}
-        </div>
-      </div>
-    );
-  },
-},
-
+            {/* Hover tooltip with full text */}
+            <div
+              className="
+                absolute left-1/2 -translate-x-1/2 mt-2
+                hidden group-hover:block
+                bg-white text-black dark:bg-gray-800 dark:text-white
+                text-xs rounded-lg shadow-lg border border-gray-200 dark:border-gray-700
+                px-3 py-2 z-50 w-[200px] whitespace-pre-wrap
+              "
+            >
+              {description || 'No description'}
+            </div>
+          </div>
+        );
+      },
+    },
     {
       key: 'isDraft',
       label: 'Status',
       className: 'px-4 py-4',
       sortable: true,
-      render: (value) => (
+      render: (value): React.ReactNode => (
         <Badge
           className={`px-3 py-1 rounded-full text-xs font-medium ${
             value
@@ -186,7 +186,7 @@ export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableP
   ];
 
   // Define actions for CommonTable
-  const actions: Action[] = [
+  const actions: Action<CaseIntake>[] = [
     {
       label: 'View',
       icon: Eye,
@@ -210,8 +210,17 @@ export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableP
     }
   ];
 
+  const IntakeTable = CommonTable as unknown as React.ComponentType<{
+    columns: Column<CaseIntake>[];
+    data: CaseIntake[];
+    actions?: Action<CaseIntake>[];
+    showSerialNumber?: boolean;
+    emptyMessage?: string;
+    onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  }>;
+
   return (
-    <CommonTable
+    <IntakeTable
       columns={columns}
       data={sortedIntakes}
       actions={actions}

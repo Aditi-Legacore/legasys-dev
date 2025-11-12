@@ -22,11 +22,10 @@ interface Document {
 interface DocumentsTableProps {
   documents: Document[];
   onView?: (doc: Document) => void;
-  onEdit?: (doc: Document) => void;
   onUploadSuccess?: () => void;
 }
 
-export default function DocumentsTable({ documents, onView, onEdit, onUploadSuccess }: DocumentsTableProps) {
+export default function DocumentsTable({ documents, onView, onUploadSuccess }: DocumentsTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [tableDocs, setTableDocs] = useState<Document[]>(documents);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -48,8 +47,8 @@ export default function DocumentsTable({ documents, onView, onEdit, onUploadSucc
     if (!sortColumn) return tableDocs;
 
     return [...tableDocs].sort((a, b) => {
-      let aValue = a[sortColumn as keyof Document];
-      let bValue = b[sortColumn as keyof Document];
+      const aValue = a[sortColumn as keyof Document];
+      const bValue = b[sortColumn as keyof Document];
 
       // Handle null/undefined values
       if (aValue == null && bValue == null) return 0;
@@ -113,7 +112,7 @@ export default function DocumentsTable({ documents, onView, onEdit, onUploadSucc
   };
 
   // Define columns
-  const columns: Column[] = [
+  const columns: Column<Document>[] = [
     {
       key: 'clientName',
       label: 'Client Name',
@@ -132,14 +131,14 @@ export default function DocumentsTable({ documents, onView, onEdit, onUploadSucc
       label: 'Created Date',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hidden sm:table-cell',
       sortable: true,
-      render: (value) => new Date(value).toLocaleDateString()
+      render: (value): React.ReactNode => new Date(value as string).toLocaleDateString()
     },
     {
       key: 'documentStatus',
       label: 'Document Status',
       className: 'px-4 py-4',
       sortable: true,
-      render: (value) => (
+      render: (value): React.ReactNode => (
         <Badge
           className={`px-3 py-1 rounded-full text-xs font-medium ${
             value === "submitted"
@@ -149,7 +148,7 @@ export default function DocumentsTable({ documents, onView, onEdit, onUploadSucc
               : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
           }`}
         >
-          {value}
+          {value as string}
         </Badge>
       )
     },
@@ -157,7 +156,7 @@ export default function DocumentsTable({ documents, onView, onEdit, onUploadSucc
       key: 'files',
       label: 'Files',
       className: 'px-4 py-4 text-center',
-      render: (value, row) => (
+      render: (value, row): React.ReactNode => (
         row.documentStatus === "submitted" ? (
           <button
             onClick={() => router.push(`/documents/${row.id}`)}
@@ -174,7 +173,7 @@ export default function DocumentsTable({ documents, onView, onEdit, onUploadSucc
   ];
 
   // Define actions
-  const actions: Action[] = [
+  const actions: Action<Document>[] = [
     {
       label: 'View',
       icon: Eye,
@@ -199,9 +198,18 @@ export default function DocumentsTable({ documents, onView, onEdit, onUploadSucc
     }
   ];
 
+  const DocumentTable = CommonTable as unknown as React.ComponentType<{
+    columns: Column<Document>[];
+    data: Document[];
+    actions?: Action<Document>[];
+    showSerialNumber?: boolean;
+    emptyMessage?: string;
+    onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  }>;
+
   return (
     <>
-      <CommonTable
+      <DocumentTable
         columns={columns}
         data={paginatedDocuments}
         actions={actions}
