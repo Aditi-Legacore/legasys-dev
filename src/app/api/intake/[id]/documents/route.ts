@@ -18,13 +18,15 @@ export async function POST(
     const data = await request.formData();
     const files = data.getAll("files") as File[];
     if (!files.length) return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
-    // for maximum 10 files allowed
-    if (files.length > 10) return NextResponse.json({ error: "Maximum 10 files allowed" }, { status: 400 });
 
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
-    const maxSize = 600 * 1024; // 600KB
+    const totalMaxSize = 5 * 1024 * 1024; // 5MB
     // const uploadsDir = join(process.cwd(), "uploads", "documents");
     const uploadsDir = join(process.cwd(), "public", "uploads", "documents");
+
+    // Calculate total size
+    const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+    if (totalSize > totalMaxSize) return NextResponse.json({ error: "Total upload size exceeds 5MB" }, { status: 400 });
 
     await mkdir(uploadsDir, { recursive: true });
 
@@ -32,7 +34,6 @@ export async function POST(
 
     for (const file of files) {
       if (!allowedTypes.includes(file.type)) continue;
-      if (file.size > maxSize) continue;
 
       const timestamp = Date.now();
       const storedFileName = `${id}_${timestamp}_${file.name.replace(/\s+/g, "_")}`;
@@ -111,6 +112,11 @@ export async function GET(
         filePath: true,
         mimeType: true,
         uploadedAt: true, // ✅ add this line
+        intake: {
+          select: {
+            clientName: true,
+          },
+        },
       },
       orderBy: { uploadedAt: "desc" }, // optional, newest first
     });

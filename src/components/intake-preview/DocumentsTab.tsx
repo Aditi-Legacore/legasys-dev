@@ -14,6 +14,7 @@ interface Document {
   type: string;
   uploadedAt: string;
   filePath: string;
+  uploadedBy: string;
 }
 
 interface DocumentsTabProps {
@@ -152,8 +153,9 @@ export default function DocumentsTab({
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
+                  {/* <TableHead>Type</TableHead> */}
                   <TableHead>Uploaded At</TableHead>
+                  <TableHead>Uploaded by</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -161,8 +163,9 @@ export default function DocumentsTab({
                 {documents.map((doc) => (
                   <TableRow key={doc.id}>
                     <TableCell>{doc.name}</TableCell>
-                    <TableCell>{doc.type}</TableCell>
+                    {/* <TableCell>{doc.type}</TableCell> */}
                     <TableCell>{formatDate(doc.uploadedAt)}</TableCell>
+                    <TableCell>{doc.uploadedBy}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button

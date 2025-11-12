@@ -126,45 +126,45 @@ export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableP
       sortable: true,
       render: (value) => formatDate(value)
     },
-  {
-  key: 'accidentDescription',
-  label: 'Accident Description',
-  className: 'px-4 py-4',
-  render: (value) => {
-    const truncatedText =
-      value && value.length > 20 ? value.substring(0, 20) + '...' : value;
+    {
+      key: 'accidentDescription',
+      label: 'Accident Description',
+      className: 'px-4 py-4',
+      render: (value) => {
+        const truncatedText =
+          value && value.length > 20 ? value.substring(0, 20) + '...' : value;
 
-    return (
-      <div className="relative group inline-block">
-        {/* Truncated preview */}
-        <span
-          className="
-            inline-block 
-            bg-blue-100 dark:bg-blue-900 
-            text-blue-800 dark:text-blue-200 
-            px-2 py-1 rounded-full 
-            text-xs font-medium cursor-pointer
-          "
-        >
-          {truncatedText || 'No description'}
-        </span>
+        return (
+          <div>
+            {/* Truncated preview */}
+            <span
+              className="
+                inline-block 
+                bg-blue-100 dark:bg-blue-900 
+                text-blue-800 dark:text-blue-200 
+                px-2 py-1 rounded-full 
+                text-xs font-medium cursor-pointer
+              "
+            >
+              {truncatedText || 'No description'}
+            </span>
 
-        {/* Hover tooltip with full text */}
-        <div
-          className="
-            absolute left-1/2 -translate-x-1/2 mt-2
-            hidden group-hover:block
-            bg-white text-black dark:bg-gray-800 dark:text-white
-            text-xs rounded-lg shadow-lg border border-gray-200 dark:border-gray-700
-            px-3 py-2 z-50 w-[200px] whitespace-pre-wrap
-          "
-        >
-          {value || 'No description'}
-        </div>
-      </div>
-    );
-  },
-},
+            {/* Hover tooltip with full text */}
+            <div
+              className="
+                absolute left-1/2 -translate-x-1/2 mt-2
+                hidden group-hover:block
+                bg-white text-black dark:bg-gray-800 dark:text-white
+                text-xs rounded-lg shadow-lg border border-gray-200 dark:border-gray-700
+                px-3 py-2 z-50 w-[200px] whitespace-pre-wrap
+              "
+            >
+              {value || 'No description'}
+            </div>
+          </div>
+        );
+      },
+    },
 
     {
       key: 'isDraft',
