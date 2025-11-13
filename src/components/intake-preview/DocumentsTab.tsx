@@ -81,24 +81,24 @@ export default function DocumentsTab({
       </div>
 
     <>
-      <div
-        className="border-2 border-dashed border-gray-300 rounded-lg p-6 mb-4 text-center"
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-      >
-        <p className="text-gray-600 mb-4">Drag and drop files here or click to upload</p>
-        <Button onClick={handleButtonClick} className="mx-auto">
-          <Upload className="w-4 h-4 mr-2" />
-          Upload Documents
-        </Button>
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          multiple
-          className="hidden"
-        />
-      </div>
+        <div
+          className="border-2 border-dashed border-gray-300 rounded-lg p-6 mb-4 text-center"
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
+          <p className="text-gray-600 mb-4">Drag and drop files here or click to upload</p>
+          <Button onClick={handleButtonClick} className="mx-auto">
+            <Upload className="w-4 h-4 mr-2" />
+            Upload Documents
+          </Button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            multiple
+            className="hidden"
+          />
+        </div>
       <Card>
         <CardHeader>
           <CardTitle>Documents</CardTitle>

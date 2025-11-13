@@ -39,37 +39,55 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, on
     const formData = new FormData();
     selectedFiles.forEach((file) => formData.append("files", file));
 
-    try {
-      setIsUploading(true);
-      const response = await fetch(`/api/intake/${submittedIntakeId}/documents`, {
-        method: "POST",
-        body: formData,
-      });
-      if (!response.ok) throw new Error("Upload failed");
+  try {
+  setIsUploading(true);
 
-      toast.success("Documents uploaded successfully!");
-      setSelectedFiles([]); // Clear after upload
+  const response = await fetch(`/api/intake/${submittedIntakeId}/documents`, {
+    method: "POST",
+    body: formData,
+  });
 
-      // Call onUploadSuccess callback to refresh the documents table
-      onUploadSuccess?.();
+  const data = await response.json();
 
-      // Log activity for document upload
-      await fetch('/api/activity-log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          refId: submittedIntakeId,
-          activityType: 'document_upload',
-          shortDescription: 'Document Uploaded',
-          longDescription: `uploaded ${selectedFiles.length} document(s)`,
-        }),
-      });
-    } catch (err) {
-      console.error("Upload error:", err);
-      toast.error("Failed to upload files.");
-    } finally {
-      setIsUploading(false);
-    }
+  if (response.status === 409 && data.duplicates?.length) {
+    toast.warning(
+      `⚠️ Duplicate files detected: ${data.duplicates.join(", ")}`
+    );
+  } else if (response.status === 207 && data.duplicates?.length) {
+    toast.success("✅ Some files uploaded successfully!");
+    toast.warning(
+      `⚠️ Skipped duplicates: ${data.duplicates.join(", ")}`
+    );
+  } else if (response.ok) {
+    toast.success("✅ Documents uploaded successfully!");
+  } else {
+    toast.error(`❌ Upload failed: ${data.message || data.error || "Unknown error"}`);
+  }
+
+  setSelectedFiles([]);
+  onUploadSuccess?.();
+
+  // Log activity only if some were uploaded
+  if (response.ok || response.status === 207) {
+    await fetch("/api/activity-log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        refId: submittedIntakeId,
+        activityType: "document_upload",
+        shortDescription: "Document Uploaded",
+        longDescription: `uploaded ${selectedFiles.length} document(s)`,
+      }),
+    });
+  }
+} catch (err) {
+  console.error(err);
+  toast.error("❌ Failed to upload files. Please try again.");
+} finally {
+  setIsUploading(false);
+}
+
+
   };
 
   const handleRemoveFile = (index: number) => {

@@ -374,12 +374,25 @@ export default function IntakePreviewPage() {
         body: formData,
       });
       if (!res.ok) {
-        const errorText = await res.text();
-        console.error('Upload failed:', res.status, res.statusText, errorText);
-        throw new Error(`Failed to upload documents: ${res.status} ${res.statusText} - ${errorText}`);
-      }
-      fetchDocuments();
-      toast.success('Documents uploaded successfully.');
+  const data = await res.json().catch(() => ({}));
+
+  if (res.status === 409 && data.duplicates?.length) {
+    toast.warning(`⚠️ Duplicate files detected: ${data.duplicates.join(", ")}`);
+  } else if (res.status === 207 && data.duplicates?.length) {
+    toast.success("✅ Some files uploaded successfully!");
+    toast.warning(`⚠️ Skipped duplicates: ${data.duplicates.join(", ")}`);
+  } else {
+    toast.error(`❌ Upload failed: ${data.message || data.error || "Unknown error"}`);
+  }
+
+  // Stop execution — don’t throw or log console error
+  return;
+}
+
+// ✅ Success
+toast.success("✅ Documents uploaded successfully!");
+fetchDocuments();
+
 
       // Log activity for uploading document
       await fetch('/api/activity-log', {
