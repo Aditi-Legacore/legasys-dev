@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
+import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 
 // for uploading documents to db and uploads/documents folder
@@ -21,14 +20,10 @@ export async function POST(
 
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
     const totalMaxSize = 5 * 1024 * 1024; // 5MB
-    // const uploadsDir = join(process.cwd(), "uploads", "documents");
-    const uploadsDir = join(process.cwd(), "public", "uploads", "documents");
 
     // Calculate total size
     const totalSize = files.reduce((sum, file) => sum + file.size, 0);
     if (totalSize > totalMaxSize) return NextResponse.json({ error: "Total upload size exceeds 5MB" }, { status: 400 });
-
-    await mkdir(uploadsDir, { recursive: true });
 
     const uploadedDocs = [];
 
@@ -39,16 +34,17 @@ export async function POST(
       const sanitizeFileName = (name: string) =>
       encodeURIComponent(name.replace(/\s+/g, "_"));
       const storedFileName = `${id}_${timestamp}_${sanitizeFileName(file.name)}`;
-      const filePath = join(uploadsDir, storedFileName);
 
-      const buffer = Buffer.from(await file.arrayBuffer());
-      await writeFile(filePath, buffer);
+      // Upload to Vercel Blob
+      const blob = await put(storedFileName, file, {
+        access: 'public',
+      });
 
       const doc = await prisma.document.create({
         data: {
           intakeId: id,
           fileName: file.name,
-          filePath: `/uploads/documents/${storedFileName}`,
+          filePath: blob.url,
           mimeType: file.type,
         },
       });
@@ -155,12 +151,14 @@ export async function DELETE(
       return NextResponse.json({ error: "Document not found" }, { status: 404 });
     }
 
+    // Delete from Vercel Blob
+    await del(document.filePath);
+
     // Delete the document from database
     await prisma.document.delete({
       where: { id: documentId },
     });
 
-    
     return NextResponse.json({ message: "Document deleted successfully" });
   } catch (error) {
     console.error("Delete error:", error);
