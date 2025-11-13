@@ -38,17 +38,13 @@ export async function POST(
       }
 
       const timestamp = Date.now();
-      const sanitizeFileName = (name: string) =>
-      encodeURIComponent(name.replace(/\s+/g, "_"));
-      const storedFileName = `${id}_${timestamp}_${sanitizeFileName(file.name)}`;
-      console.log("Stored filename:", storedFileName);
+      const storedFileName = `${id}_${timestamp}_${file.name.replace(/\s+/g, "_")}`;
 
       // Upload to Vercel Blob
-      console.log("Uploading to Vercel Blob...");
       const blob = await put(storedFileName, file, {
         access: 'public',
+        token: process.env.legasys_dev_blob_READ_WRITE_TOKEN,
       });
-      console.log("Blob upload successful, URL:", blob.url);
 
       console.log("Creating document record in database...");
       const doc = await prisma.document.create({
@@ -174,7 +170,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Document not found" }, { status: 404 });
     }
 
-    // Delete from Vercel Blob
+    // Delete the blob from Vercel Blob
     await del(document.filePath);
 
     // Delete the document from database
