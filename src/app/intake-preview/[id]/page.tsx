@@ -373,7 +373,11 @@ export default function IntakePreviewPage() {
         method: 'POST',
         body: formData,
       });
-      if (!res.ok) throw new Error('Failed to upload documents');
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Upload failed:', res.status, res.statusText, errorText);
+        throw new Error(`Failed to upload documents: ${res.status} ${res.statusText} - ${errorText}`);
+      }
       fetchDocuments();
       toast.success('Documents uploaded successfully.');
 
@@ -511,10 +515,12 @@ export default function IntakePreviewPage() {
             </div>
 
             <div className="flex items-start gap-4">
-              <Avatar className="w-20 h-20 border-4 border-primary-foreground/30 shadow-lg">
-                <AvatarFallback className="bg-gradient-to-br from-primary-foreground/20 to-primary-foreground/10 text-primary-foreground text-2xl font-bold">
-                  {getInitials(intake.clientName)}
-                </AvatarFallback>
+              <Avatar className="w-20 h-20">
+                <div className="w-full h-full rounded-full border-4 border-white/30 shadow-lg flex items-center justify-center bg-white/20">
+                  <span className="text-white text-4xl font-bold leading-none">
+                    {getInitials(intake.clientName)}
+                  </span>
+                </div>
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">

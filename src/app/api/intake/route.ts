@@ -238,6 +238,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(intake, { status: 201 });
   } catch (err: unknown) {
     console.error("❌ POST /api/intake error:", err);
+    if (err instanceof Error && 'code' in err && err.code === 'EROFS') {
+      return NextResponse.json({ error: "File system is read-only. Please try again later." }, { status: 500 });
+    }
     return NextResponse.json({ error: "Failed to save intake info", details: err instanceof Error ? err.message : "Unknown error" }, { status: 500 });
   }
 }
@@ -261,6 +264,9 @@ export async function GET() {
     return NextResponse.json(allIntakes, { status: 200 });
   } catch (err) {
     console.error(err);
+    if (err instanceof Error && 'code' in err && err.code === 'EROFS') {
+      return NextResponse.json({ error: "File system is read-only. Please try again later." }, { status: 500 });
+    }
     return NextResponse.json({ error: "Failed to fetch intake info" }, { status: 500 });
   }
 }

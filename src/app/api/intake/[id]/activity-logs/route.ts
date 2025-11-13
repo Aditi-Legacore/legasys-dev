@@ -48,6 +48,9 @@ export async function GET(
     return NextResponse.json(logsWithUserNames);
   } catch (error) {
     console.error('Error fetching activity logs:', error);
+    if (error instanceof Error && 'code' in error && error.code === 'EROFS') {
+      return NextResponse.json({ error: "File system is read-only. Please try again later." }, { status: 500 });
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -103,6 +106,9 @@ export async function POST(
     return NextResponse.json(activityLog);
   } catch (error) {
     console.error('Error creating activity log:', error);
+    if (error instanceof Error && 'code' in error && error.code === 'EROFS') {
+      return NextResponse.json({ error: "File system is read-only. Please try again later." }, { status: 500 });
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
