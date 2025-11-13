@@ -58,6 +58,9 @@ export async function POST(
     );
   } catch (error) {
     console.error("Upload error:", error);
+    if (error instanceof Error && 'code' in error && error.code === 'EROFS') {
+      return NextResponse.json({ error: "File system is read-only. Please try again later." }, { status: 500 });
+    }
     return NextResponse.json({ error: "Failed to upload documents" }, { status: 500 });
   }
 }
