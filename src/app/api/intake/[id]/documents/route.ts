@@ -36,6 +36,7 @@ export async function POST(
       // Upload to Vercel Blob
       const blob = await put(storedFileName, file, {
         access: 'public',
+        token: process.env.legasys_dev_blob_READ_WRITE_TOKEN,
       });
 
       const doc = await prisma.document.create({
