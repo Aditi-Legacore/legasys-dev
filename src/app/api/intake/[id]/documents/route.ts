@@ -97,6 +97,9 @@ export async function POST(
 //   }
 // }
 
+// for viewing the uploaded documents image in page.tsx
+
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
