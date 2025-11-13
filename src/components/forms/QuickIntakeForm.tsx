@@ -3,7 +3,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Car, Heart, AlertTriangle, Briefcase } from 'lucide-react';
+import { Car, Heart, AlertTriangle, Briefcase, Copy, Check } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -41,6 +41,7 @@ const referralSources = [
 export default function IntakeForm({ }: { onClose: () => void }) {
   const [referenceId, setReferenceId] = useState("");
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
   const router = useRouter();
   const methods = useForm({
     defaultValues: {
@@ -103,6 +104,16 @@ export default function IntakeForm({ }: { onClose: () => void }) {
 
   const handleNext = () => {
     router.push(`/intake-form?ref=${referenceId}`);
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(referenceId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+    }
   };
 
   return (
@@ -232,8 +243,19 @@ export default function IntakeForm({ }: { onClose: () => void }) {
           ) : (
             <div className="text-center">
               <p className="font-bold text-lg text-blue-700">Your Reference ID:</p>
-              <p className="text-2xl font-extrabold mt-2">{referenceId}</p>
-              <p className="text-sm text-gray-500">
+              <div className="flex items-center justify-center gap-2 mt-2">
+                <p className="text-2xl font-extrabold">{referenceId}</p>
+                <Button
+                  onClick={handleCopy}
+                  variant="outline"
+                  size="sm"
+                  className="p-2"
+                >
+                  {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                </Button>
+              </div>
+
+              <p className="text-sm text-gray-500 mt-2">
                 ⚠️ Please save this ID for later access.
               </p>
               <Button
