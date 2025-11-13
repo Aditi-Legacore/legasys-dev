@@ -321,14 +321,53 @@ export default function IntakePreviewPage() {
 
   // added for viewing the image by clicking eye button in intake-preview page
 
+  // const handleDocumentPreview = (filePath: string, type: string) => {
+  //   if (type === 'PNG' || type === 'JPEG' || type === 'JPG') {
+  //     setImageUrl(filePath);
+  //     setShowImagePreview(true);
+  //   } else {
+  //     toast.error('Preview not supported for this file type.');
+  //   }
+  // };
   const handleDocumentPreview = (filePath: string, type: string) => {
-    if (type === 'PNG' || type === 'JPEG' || type === 'JPG') {
-      setImageUrl(filePath);
-      setShowImagePreview(true);
-    } else {
-      toast.error('Preview not supported for this file type.');
-    }
-  };
+  const normalizedType = type.toLowerCase();
+
+  // ✅ Image Preview
+  if (["image/png", "image/jpeg", "image/jpg"].includes(normalizedType)) {
+    setImageUrl(filePath);
+    setShowImagePreview(true);
+    return;
+  }
+
+  // ✅ PDF Preview
+  if (normalizedType === "application/pdf" || filePath.endsWith(".pdf")) {
+    window.open(filePath, "_blank"); // open directly in a new tab
+    return;
+  }
+
+  // ✅ Plain Text Preview
+  if (normalizedType === "text/plain" || filePath.endsWith(".txt")) {
+    window.open(filePath, "_blank");
+    return;
+  }
+
+  // ✅ Word Docs (open in Office Viewer)
+  if (
+    normalizedType === "application/msword" ||
+    normalizedType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    filePath.endsWith(".doc") ||
+    filePath.endsWith(".docx")
+  ) {
+    // Use Office Online Viewer for a better experience
+    const officeViewerUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(filePath)}`;
+    window.open(officeViewerUrl, "_blank");
+    return;
+  }
+
+  // ⚠️ Unsupported File Type
+  toast.error("Preview not supported for this file type.");
+};
+
 
   const handleDocumentDelete = async (documentId: string) => {
     if (!confirm('Are you sure you want to delete this document?') || !intake?.id) return;

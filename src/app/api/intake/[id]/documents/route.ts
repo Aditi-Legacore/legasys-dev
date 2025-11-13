@@ -24,7 +24,17 @@ export async function POST(
     if (!files.length)
       return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
 
-    const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
+    const allowedTypes = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "application/msword", // .doc
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+  "application/vnd.ms-excel", // .xls
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+  "text/plain", // .txt
+];
+
     const totalMaxSize = 5 * 1024 * 1024; // 5MB
     const totalSize = files.reduce((sum, file) => sum + file.size, 0);
 
