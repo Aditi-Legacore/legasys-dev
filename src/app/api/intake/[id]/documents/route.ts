@@ -141,7 +141,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Document ID is required" }, { status: 400 });
     }
 
-    // Check if the document belongs to the intake
+    // ✅ Verify the document exists for this intake
     const document = await prisma.document.findFirst({
       where: { id: documentId, intakeId: id },
     });
@@ -150,10 +150,12 @@ export async function DELETE(
       return NextResponse.json({ error: "Document not found" }, { status: 404 });
     }
 
-    // Delete the blob from Vercel Blob
-    await del(document.filePath);
+    // ✅ Delete file from Vercel Blob storage
+    await del(document.filePath, {
+      token: process.env.legasys_dev_blob_READ_WRITE_TOKEN, // ✅ same token as POST route
+    });
 
-    // Delete the document from database
+    // ✅ Remove database record
     await prisma.document.delete({
       where: { id: documentId },
     });
