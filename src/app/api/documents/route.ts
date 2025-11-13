@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { unlink } from "fs/promises";
-import { join } from "path";
 
 // for fetching uploaded documents in table
 
@@ -59,6 +57,9 @@ export async function GET() {
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error fetching documents:", error);
+    if (error instanceof Error && 'code' in error && error.code === 'EROFS') {
+      return NextResponse.json({ error: "File system is read-only. Please try again later." }, { status: 500 });
+    }
     return NextResponse.json(
       { error: "Failed to fetch documents" },
       { status: 500 }
@@ -87,19 +88,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Intake not found" }, { status: 404 });
     }
 
-    // 🗂️ Try deleting physical files (if filePath exists)
-    for (const doc of intake.Document) {
-      if (doc.filePath) {
-        const filePath = join(process.cwd(), doc.filePath);
-        try {
-          await unlink(filePath);
-        } catch {
-          console.warn(`⚠️ File ${filePath} not found, skipping.`);
-        }
-      }
-    }
-
-    // 🗑️ Delete all associated documents
+    // 🗑️ Delete all associated documents from database (files are in Vercel Blob, deleted via individual document API)
     await prisma.document.deleteMany({ where: { intakeId: id } });
 
     // 🧾 Finally, delete intake record
@@ -108,6 +97,9 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ message: "Intake and related documents deleted successfully." });
   } catch (error) {
     console.error("Error deleting intake & documents:", error);
+    if (error instanceof Error && 'code' in error && error.code === 'EROFS') {
+      return NextResponse.json({ error: "File system is read-only. Please try again later." }, { status: 500 });
+    }
     return NextResponse.json({ error: "Failed to delete intake" }, { status: 500 });
   }
 }
@@ -140,6 +132,9 @@ export async function PUT(request: Request) {
     });
   } catch (error) {
     console.error("Error updating document:", error);
+    if (error instanceof Error && 'code' in error && error.code === 'EROFS') {
+      return NextResponse.json({ error: "File system is read-only. Please try again later." }, { status: 500 });
+    }
     return NextResponse.json({ error: "Failed to update document" }, { status: 500 });
   }
 }
