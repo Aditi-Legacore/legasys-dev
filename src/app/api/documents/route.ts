@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse, } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { del } from "@vercel/blob"; 
 
 // for fetching uploaded documents in table
 
@@ -67,9 +68,9 @@ export async function GET() {
   }
 }
 
+// delete all document for the user in document table
 
-// 🗑️ DELETE entire intake + related documents
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -78,7 +79,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Intake ID required" }, { status: 400 });
     }
 
-    // 🧾 Find intake and associated documents
+    // 🧾 Check if intake exists
     const intake = await prisma.intakeInfo.findUnique({
       where: { id },
       include: { Document: true },
@@ -88,19 +89,41 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Intake not found" }, { status: 404 });
     }
 
-    // 🗑️ Delete all associated documents from database (files are in Vercel Blob, deleted via individual document API)
-    await prisma.document.deleteMany({ where: { intakeId: id } });
-
-    // 🧾 Finally, delete intake record
-    await prisma.intakeInfo.delete({ where: { id } });
-
-    return NextResponse.json({ message: "Intake and related documents deleted successfully." });
-  } catch (error) {
-    console.error("Error deleting intake & documents:", error);
-    if (error instanceof Error && 'code' in error && error.code === 'EROFS') {
-      return NextResponse.json({ error: "File system is read-only. Please try again later." }, { status: 500 });
+    // 🗑️ If there are no documents
+    if (!intake.Document.length) {
+      return NextResponse.json({ message: "No documents found for this intake." });
     }
-    return NextResponse.json({ error: "Failed to delete intake" }, { status: 500 });
+
+    // ✅ Optionally delete each file from Vercel Blob storage
+    for (const doc of intake.Document) {
+      try {
+        await del(doc.filePath, {
+          token: process.env.legasys_dev_blob_READ_WRITE_TOKEN,
+        });
+      } catch (err) {
+        console.warn(`Failed to delete blob for ${doc.fileName}:`, err);
+      }
+    }
+
+    // 🗑️ Delete all document records for this intake from DB
+    await prisma.document.deleteMany({
+      where: { intakeId: id },
+    });
+
+    return NextResponse.json({
+      message: "All documents deleted successfully for this intake.",
+    });
+  } catch (error) {
+    console.error("Error deleting intake documents:", error);
+
+    if (error instanceof Error && "code" in error && (error as any).code === "EROFS") {
+      return NextResponse.json(
+        { error: "File system is read-only. Please try again later." },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ error: "Failed to delete documents" }, { status: 500 });
   }
 }
 

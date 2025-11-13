@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Eye, Trash2, FileText, Upload } from "lucide-react";
+import { Eye, Trash2, FileText, Upload, Loader2 } from "lucide-react";
 import Pagination from "@/components/ui/pagination";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -88,7 +88,7 @@ export default function DocumentsTable({ documents, onView, onUploadSuccess }: D
 
   // Delete handler
   const handleDelete = async (doc: Document) => {
-    const confirmed = confirm(`Are you sure you want to delete "${doc.clientName}"?`);
+    const confirmed = confirm(`Are you sure you want to delete "${doc.clientName}" s document?`);
     if (!confirmed) return;
 
     setDeletingId(doc.id);
@@ -98,7 +98,8 @@ export default function DocumentsTable({ documents, onView, onUploadSuccess }: D
 
       if (res.ok) {
         setTableDocs((prev) => prev.filter((d) => d.id !== doc.id));
-        toast.success(`Deleted "${doc.clientName}" successfully.`);
+        toast.success(`Deleted "${doc.clientName}"s document successfully.`);
+        onUploadSuccess?.();
       } else {
         const data = await res.json();
         toast.error(data.error || "Failed to delete document.");
