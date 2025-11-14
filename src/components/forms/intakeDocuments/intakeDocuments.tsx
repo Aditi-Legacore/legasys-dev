@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner"; // or any toast lib you use
 
@@ -10,6 +11,7 @@ interface IntakeDocumentsProps {
 }
 
 const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, onUploadSuccess }) => {
+  const router = useRouter();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -79,6 +81,9 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, on
         longDescription: `uploaded ${selectedFiles.length} document(s)`,
       }),
     });
+
+    // Redirect to intake-list after successful upload
+    router.push("/intake-list");
   }
 } catch (err) {
   console.error(err);
@@ -100,7 +105,7 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, on
         Upload Supporting Documents
       </h6>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-        You can upload multiple files (PDF, JPG, PNG). Total upload size must not exceed <b>5 MB</b>.
+        You can upload multiple files (PDF,word, JPG, PNG). Total upload size must not exceed <b>5 MB</b>.
       </p>
 
       {/* File selector */}
