@@ -29,14 +29,13 @@ const buildIntakeData = (data: IntakeFormData) => ({
   accidentDescription: toNullable(data.accidentDescription),
   passenger: toNullable(data.passenger),
   passengerName: toNullable(data.passengerName),
-  passengerAge: toNullable(data.passengerName),
-  relationshipToYou: toNullable(data.passengerName),
-  injuryDescription: toNullable(data.passengerName),
-  hospitalized: toNullable(data.passengerName),
-  hospitalName: toNullable(data.passengerName),
-  treatmentDetails: toNullable(data.passengerName),
-  seatbeltUsed: toNullable(data.passengerName),
-
+  passengerAge: toNullable(data.passengerAge),
+  relationshipToYou: toNullable(data.relationshipToYou),
+  injuryDescription: toNullable(data.injuryDescription),
+  hospitalized: toNullable(data.hospitalized),
+  hospitalName: toNullable(data.hospitalName),
+  treatmentDetails: toNullable(data.treatmentDetails),
+  seatbeltUsed: toNullable(data.seatbeltUsed),
   workAtAccident: toNullable(data.workAtAccident),
 
   // Defendant 1
