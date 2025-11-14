@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendIntakeSubmissionEmail } from "@/lib/email";
 import { IntakeFormData } from "@/types/form";
 import { hashReferenceId } from "@/lib/hashReferenceId";
 
@@ -9,7 +8,6 @@ const toNullable = (value: string | undefined): string | null => (value === "" |
 
 // Helper to build intake data object for Prisma operations
 const buildIntakeData = (data: IntakeFormData) => ({
-  ...(data.userId && { user: { connect: { id: data.userId } } }),
   ...(data.referenceId && { referenceId: data.referenceId }),
 
   // Plaintiff Information
@@ -98,15 +96,6 @@ const buildIntakeData = (data: IntakeFormData) => ({
   ambulanceCompany: toNullable(data.ambulanceCompany),
   admitted: toNullable(data.admitted),
   lengthOfStay: toNullable(data.lengthOfStay),
-  // doctorHospital1: toNullable(data.doctorHospital1),
-  // address1: toNullable(data.address1),
-  // phone1: toNullable(data.phone1),
-  // treatmentDate1: toNullable(data.treatmentDate1) ? new Date(data.treatmentDate1) : null,
-  // doctorHospital2: toNullable(data.doctorHospital2),
-  // address2: toNullable(data.address2),
-  // phone2: toNullable(data.phone2),
-  // treatmentDate2: toNullable(data.treatmentDate2) ? new Date(data.treatmentDate2) : null,
-  // hospitalName: toNullable(data.hospitalName),
 
   // Prior Injuries
   priorInjuries: toNullable(data.priorInjuries),
@@ -118,7 +107,6 @@ const buildIntakeData = (data: IntakeFormData) => ({
   priorInsuranceClaims: toNullable(data.priorInsuranceClaims),
   priorAttorneys: toNullable(data.priorAttorneys),
 
-  
   priorDoctorHospital2: toNullable(data.priorDoctorHospital2),
   priorHospitalAddressPhone2: toNullable(data.priorHospitalAddressPhone2),
   priorTreatmentDetails2: toNullable(data.priorTreatmentDetails2),
@@ -167,107 +155,58 @@ const buildIntakeData = (data: IntakeFormData) => ({
 export async function POST(request: NextRequest) {
   try {
     const data: IntakeFormData = await request.json();
-    console.log("📥 POST /api/intake - Received data:", data);
+    console.log("📥 POST /api/intake/create-public-hash - Received data:", data);
 
-    // Validate userId if provided
-    if (data.userId) {
-      const userExists = await prisma.user.findUnique({ where: { id: data.userId }, select: { id: true } });
-      if (!userExists) {
-        data.userId = undefined; // Set to undefined if user doesn't exist
+    // For hashed reference IDs, we need to unhash to get the plain referenceId
+    let plainReferenceId = data.referenceId;
+    if (data.referenceId && data.referenceId.length > 20) {
+      // It's hashed, find the plain one
+      const leads = await prisma.lead.findMany();
+      const lead = leads.find(l => hashReferenceId(l.referenceId!) === data.referenceId);
+      if (lead) {
+        plainReferenceId = lead.referenceId!;
       }
     }
 
     // Set LeadId if referenceId is provided
-    if (data.referenceId) {
+    if (plainReferenceId) {
       const lead = await prisma.lead.findUnique({
-        where: { referenceId: data.referenceId },
+        where: { referenceId: plainReferenceId },
         select: { id: true },
       });
       if (lead) {
         data.LeadId = lead.id;
+        data.referenceId = plainReferenceId; // Use plain referenceId for storage
       }
     }
 
-    let intake;
-    if (data.referenceId) {
-      const existingIntake = await prisma.intakeInfo.findFirst({
-        where: { referenceId: data.referenceId },
-      });
+    // Create new intake record
+    const intake = await prisma.intakeInfo.create({
+      data: buildIntakeData(data),
+    });
 
-      console.log("existingIntake", existingIntake);
-
-      if (existingIntake) {
-        intake = await prisma.intakeInfo.update({
-          where: { id: existingIntake.id },
-          data: buildIntakeData(data),
-        });
-      } else {
-        intake = await prisma.intakeInfo.create({
-          data: buildIntakeData(data),
-        });
-      }
-    } else {
-      intake = await prisma.intakeInfo.create({
-        data: buildIntakeData(data),
-      });
-    }
-
-    console.log("data", data);
+    console.log("Created intake:", intake);
 
     // Update lead status to completed if referenceId exists
-    if (data.referenceId) {
+    if (plainReferenceId) {
       try {
         await prisma.lead.updateMany({
-          where: { referenceId: data.referenceId },
+          where: { referenceId: plainReferenceId },
           data: { status: "completed" },
         });
-        console.log(`✅ Updated lead status to completed for referenceId: ${data.referenceId}`);
+        console.log(`✅ Updated lead status to completed for referenceId: ${plainReferenceId}`);
       } catch (leadUpdateError) {
         console.error("Failed to update lead status:", leadUpdateError);
-        // Don't fail the submission if lead update fails
+        // Don't fail the creation if lead update fails
       }
-    }
-
-    // Send email notification after successful submission
-    try {
-      await sendIntakeSubmissionEmail(data);
-    } catch (emailError) {
-      console.error("Failed to send email notification:", emailError);
-      // Don't fail the submission if email fails
     }
 
     return NextResponse.json(intake, { status: 201 });
   } catch (err: unknown) {
-    console.error("❌ POST /api/intake error:", err);
+    console.error("❌ POST /api/intake/create-public-hash error:", err);
     if (err instanceof Error && 'code' in err && err.code === 'EROFS') {
       return NextResponse.json({ error: "File system is read-only. Please try again later." }, { status: 500 });
     }
-    return NextResponse.json({ error: "Failed to save intake info", details: err instanceof Error ? err.message : "Unknown error" }, { status: 500 });
-  }
-}
-
-// for fetching all intakes and showing in Intaketable
-
-export async function GET() {
-  try {
-
-    const allIntakes = await prisma.intakeInfo.findMany({
-      // where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
-      include: {
-        Lead: {
-          select: {
-            caseType: true,
-          },
-        },
-      },
-    });
-    return NextResponse.json(allIntakes, { status: 200 });
-  } catch (err) {
-    console.error(err);
-    if (err instanceof Error && 'code' in err && err.code === 'EROFS') {
-      return NextResponse.json({ error: "File system is read-only. Please try again later." }, { status: 500 });
-    }
-    return NextResponse.json({ error: "Failed to fetch intake info" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create intake info", details: err instanceof Error ? err.message : "Unknown error" }, { status: 500 });
   }
 }

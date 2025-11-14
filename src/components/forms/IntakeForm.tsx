@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { IntakeFormData, intakeFormSchema } from "../../lib/formValidationSchemas";
+import { IntakeFormData, intakeFormSchema } from "@/types/form";
 import PlaintiffInfoStep from "./formSteps/PlaintiffInfoStep";
 import AccidentInfoStep from "./formSteps/AccidentInfoStep";
 import DefendantInfoStep from "./formSteps/DefendantInfoStep";
@@ -127,10 +127,14 @@ const handleSaveDraft = async () => {
 
       const currentFormData = methods.getValues();
 
-      const res = await fetch("/api/intake/draft", {
+      // Determine if this is a public submission (hashed reference ID)
+      const isPublicSubmission = referenceId && referenceId.length > 20;
+
+      const apiEndpoint = isPublicSubmission ? "/api/intake/draft-public-hash" : "/api/intake/draft-public";
+      const res = await fetch(apiEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ referenceId, ...currentFormData }),
+        body: JSON.stringify({ referenceId: referenceId, ...currentFormData }),
       });
 
       if (!res.ok) {
@@ -141,18 +145,20 @@ const handleSaveDraft = async () => {
        toast.success("Draft saved successfully!");
       const savedData = await res.json();
       console.log("savedData", savedData);
-      
-      // Log activity for saving draft
-      await fetch('/api/activity-log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          refId: savedData.id,
-          activityType: 'save_draft',
-          shortDescription: 'Draft Saved',
-          longDescription: 'saved intake as draft',
-        }),
-      });
+
+      // Log activity for saving draft (only for authenticated submissions)
+      if (!isPublicSubmission) {
+        await fetch('/api/activity-log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            refId: savedData.id,
+            activityType: 'save_draft',
+            shortDescription: 'Draft Saved',
+            longDescription: 'saved intake as draft',
+          }),
+        });
+      }
     } catch (err) {
       console.error(err);
       toast.error("Error saving draft.");
@@ -170,8 +176,12 @@ const handleSaveDraft = async () => {
 
   useEffect(() => {
     if (!isSubmitted && referenceId) {
-      // First, try to fetch draft
-      fetch(`/api/intake/draft?referenceId=${referenceId}`)
+      // For hashed referenceIds (intake-form-hash), we need to get the plain ref first
+      const isHashedRef = referenceId && referenceId.length > 20;
+      const draftReferenceId = referenceId;
+
+      const apiEndpoint = isHashedRef ? "/api/intake/draft-public-hash" : "/api/intake/draft-public";
+      fetch(`${apiEndpoint}?referenceId=${referenceId}`)
         .then((res) => {
           if (res.ok) {
             return res.json();
@@ -333,20 +343,35 @@ useEffect(() => {
   setIsSubmitting(true);
 
   try {
-    const method = intakeId ? "PUT" : "POST";
-    const url = intakeId ? `/api/intake/${intakeId}` : `/api/intake`;
+    // Determine if this is a public submission (hashed reference ID)
+    const isPublicSubmission = referenceId && referenceId.length > 20;
+
+    let method: string;
+    let url: string;
+
+    if (isPublicSubmission) {
+      // Public submission using hashed reference ID
+      method = "POST";
+      url = "/api/intake/submit-public-hash";
+    } else {
+      // Authenticated submission
+      method = intakeId ? "PUT" : "POST";
+      url = intakeId ? `/api/intake/${intakeId}` : `/api/intake`;
+    }
 
     console.log(`📡 Sending ${method} request to ${url}`);
 
-  
+    const payload: Payload = {
+      ...data,
+      phoneNumber: data.phone,
+      dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null,
+      referenceId: referenceId || null,
+    };
 
-const payload: Payload = {
-  ...data,
-  phoneNumber: data.phone,
-  dateOfBirth: data.dob ? new Date(data.dob).toISOString() : null,
-  userId: session?.user?.id || null,
-  referenceId: referenceId || null,
-};
+    // Only include userId for authenticated submissions
+    if (!isPublicSubmission) {
+      payload.userId = session?.user?.id || null;
+    }
 
     delete payload.phone;
     delete payload.dob;
@@ -378,8 +403,9 @@ const payload: Payload = {
       localStorage.setItem(`submittedIntakeId_${referenceId}`, savedData.id);
     }
 
-    // ✅ Log the activity
-    await fetch('/api/activity-log', {
+    // ✅ Log the activity (only for authenticated submissions)
+    if (!isPublicSubmission) {
+      await fetch('/api/activity-log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -389,6 +415,7 @@ const payload: Payload = {
           longDescription: intakeId ? 'successfully updated intake form' : 'successfully submitted intake form',
         }),
       });
+    }
 
     // ✅ Auto-navigate to step 7 (Document Upload)
     setStep(6);

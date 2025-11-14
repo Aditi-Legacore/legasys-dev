@@ -1,10 +1,7 @@
-# TODO: Fix File Upload Error on Vercel Server
+# TODO: Optimize hashedReferenceId lookup in leads
 
-## Steps to Complete
-- [x] Add @vercel/blob dependency to package.json
-- [x] Update POST method in src/app/api/intake/[id]/documents/route.ts to use Vercel Blob for file uploads
-- [x] Update DELETE method in src/app/api/intake/[id]/documents/route.ts to use Vercel Blob for file deletions
-- [x] Remove file system operations from src/app/api/documents/route.ts DELETE method (files are now in Vercel Blob)
-- [x] Run npm install to install the new dependency (completed)
-- [x] Set BLOB_READ_WRITE_TOKEN environment variable in Vercel dashboard (user action required)
-- [x] Deploy to Vercel and test file uploads (user action required)
+## Tasks
+- [x] Modify GET method in draft-public-hash/route.ts to build hash map for O(1) lookup
+- [x] Modify POST method in draft-public-hash/route.ts to build hash map for O(1) lookup
+- [x] Remove debugging console.log statements
+- [x] Test the endpoint to ensure correct lead finding

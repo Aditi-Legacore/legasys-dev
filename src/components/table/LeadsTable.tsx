@@ -7,6 +7,7 @@ import { Lead } from "@/types/leads";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import CommonTable, { Column, Action } from "@/components/ui/CommonTable";
+import { hashReferenceId } from "@/lib/hashReferenceId";
 
 interface LeadsTableProps {
   leads: Lead[];

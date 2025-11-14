@@ -6,6 +6,11 @@ export default withAuth(
     const { pathname } = req.nextUrl;
     const token = req.nextauth.token;
 
+    // Allow access to intake-form-hash without authentication
+    if (pathname.startsWith("/intake-form-hash")) {
+      return NextResponse.next();
+    }
+
     // If the user has a valid session token
     if (token) {
       // Prevent logged-in users from visiting auth pages
@@ -35,6 +40,11 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
+
+        // Allow access to intake-form-hash without authentication
+        if (pathname.startsWith("/intake-form-hash")) {
+          return true;
+        }
 
         // Allow access to auth pages
         if (pathname === "/auth-choice" || pathname === "/login" || pathname === "/signup") {

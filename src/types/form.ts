@@ -85,48 +85,143 @@ export interface Matter {
   updatedAt: string;
 }
 
-export interface IntakeFormData {
+import { z } from "zod";
+
+export const intakeFormSchema = z.object({
+  // Step 1 - Plaintiff Info
+  clientName: z.string().min(1, "Client name is required"),
+  gender: z.enum(["Male", "Female"]).refine((val) => val !== undefined, { message: "Gender is required" }),
+  dob: z.string().optional(),
+  phone: z.string().min(10, "Enter a valid phone number"),
+  email: z.string().email("Invalid email address"),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  zip: z.string().optional(),
+  ssn: z.string().optional(),
+
+  // Step 2 - Accident Info
+  accidentDate: z.string().min(1, "Accident date required"),
+  accidentTime: z.string().optional(),
+  accidentLocation: z.string().min(1, "Accident location required"),
+  accidentDescription: z.string().min(10, "Description required"),
+
+  passenger: z.enum(["Yes", "No"]).optional(),
+  passengerName: z.string().optional(),
+  passengerAge: z.string().optional(),
+  relationshipToYou: z.string().optional(),
+  injuryDescription: z.string().optional(),
+  hospitalized: z.string().optional(),
+  hospitalName: z.string().optional(),
+  treatmentDetails: z.string().optional(),
+  seatbeltUsed: z.string().optional(),
+
+  workAtAccident: z.string().optional(),
+
+  // Step 3 - Defendant Information (optional)
+  defendant1Name: z.string().optional(),
+  defendant1Address: z.string().optional(),
+  defendant1Carrier: z.string().optional(),
+  defendant1CarrierPhone: z.string().optional(),
+  // defendant1Policy: z.string().optional(),
+  defendant1Year: z.string().optional(),
+  defendant1Make: z.string().optional(),
+  defendant1Model: z.string().optional(),
+  defendant1Damage: z.string().optional(),
+  defendant2Name: z.string().optional(),
+  defendant2Address: z.string().optional(),
+  defendant2Carrier: z.string().optional(),
+  defendant2CarrierPhone: z.string().optional(),
+  defendant2Policy: z.string().optional(),
+  defendant2Year: z.string().optional(),
+  defendant2Make: z.string().optional(),
+  defendant2Model: z.string().optional(),
+  defendant2Damage: z.string().optional(),
+
+  // Step 4 - Client Automobile & Health Insurance
+  autoName: z.string().optional(),
+  autoPhone: z.string().optional(),
+  autoAddress: z.string().optional(),
+  autoAgent: z.string().optional(),
+  autoPolicy: z.string().optional(),
+  autoClaim: z.string().optional(),
+  autoAdditionalinfo: z.string().optional(),
+
+  healthCarrier: z.string().optional(),
+  healthPhone: z.string().optional(),
+  healthAddress: z.string().optional(),
+  healthAgent: z.string().optional(),
+  healthPolicy: z.string().optional(),
+  healthClaim: z.string().optional(),
+  healthAdjuster: z.string().optional(),
+  medicare: z.enum(["Yes", "No"]).optional(),
+  medicareNumber: z.string().optional(),
+  medicaid: z.enum(["Yes", "No"]).optional(),
+  medicaidNumber: z.string().optional(),
+  healthAdditionalinfo: z.string().optional(),
+
+  // Step 5 - Medical Treatment
+  ambulance: z.enum(["Yes", "No"]).optional(),
+  admitted: z.enum(["Yes", "No"]).optional(),
+  ambulanceCompany: z.string().optional(),
+  lengthOfStay: z.string().optional(),
+
+  priorInjuries: z.enum(["Yes", "No"]).optional(),
+  priorDoctorHospital: z.string().optional(),
+  priorHospitalAddressPhone: z.string().optional(),
+  priorTreatmentDetails: z.string().optional(),
+  priorTreatmentFrom: z.string().optional(),
+  priorTreatmentTo: z.string().optional(),
+  priorInsuranceClaims: z.string().optional(),
+  priorAttorneys: z.string().optional(),
+
+  priorDoctorHospital2: z.string().optional(),
+  priorHospitalAddressPhone2: z.string().optional(),
+  priorTreatmentDetails2: z.string().optional(),
+  priorTreatmentFrom2: z.string().optional(),
+  priorTreatmentTo2: z.string().optional(),
+  priorInsuranceClaims2: z.string().optional(),
+  priorAttorneys2: z.string().optional(),
+
+  priorDoctorHospital3: z.string().optional(),
+  priorHospitalAddressPhone3: z.string().optional(),
+  priorTreatmentDetails3: z.string().optional(),
+  priorTreatmentFrom3: z.string().optional(),
+  priorTreatmentTo3: z.string().optional(),
+  priorInsuranceClaims3: z.string().optional(),
+  priorAttorneys3: z.string().optional(),
+
+  currentTreatment: z.enum(["Yes", "No"]).optional(),
+
+  currentDoctorHospital: z.string().optional(),
+  currentHospitalAddressPhone: z.string().optional(),
+  currentTreatmentDetails: z.string().optional(),
+  currentTreatmentFrom: z.string().optional(),
+  currentTreatmentTo: z.string().optional(),
+
+  currentDoctorHospital2: z.string().optional(),
+  currentHospitalAddressPhone2: z.string().optional(),
+  currentTreatmentDetails2: z.string().optional(),
+  currentTreatmentFrom2: z.string().optional(),
+  currentTreatmentTo2: z.string().optional(),
+
+  currentDoctorHospital3: z.string().optional(),
+  currentHospitalAddressPhone3: z.string().optional(),
+  currentTreatmentDetails3: z.string().optional(),
+  currentTreatmentFrom3: z.string().optional(),
+  currentTreatmentTo3: z.string().optional(),
+
+  // Step 6 - Submit
+  hearAboutUs: z.string().optional(),
+  hearAboutUsDetail: z.string().optional(),
+});
+
+export type IntakeFormData = z.infer<typeof intakeFormSchema> & {
   userId?: string;
   referenceId?: string;
-  clientName: string;
-  gender?: string;
   phoneNumber?: string;
-  email?: string;
-  address?: string;
-  city?: string;
-  zip?: string;
   dateOfBirth?: string;
-  ssn?: string;
-  accidentDate?: string;
-  accidentTime?: string;
-  accidentLocation?: string;
-  accidentDescription?: string;
-  passenger?: string;
-  passengerName?: string;
-  passengerAge?: string;
-  relationshipToYou?: string;
-  injuryDescription?: string;
-  hospitalized?: string;
-  hospitalName?: string;
-  treatmentDetails?: string;
-  seatbeltUsed?: string;
-  workAtAccident?: string;
-  defendant1Name?: string;
-  defendant1Address?: string;
-  defendant1Carrier?: string;
-  defendant1CarrierPhone?: string;
-  defendant1Year?: string;
-  defendant1Make?: string;
-  defendant1Model?: string;
-  defendant1Damage?: string;
-  defendant2Name?: string;
-  defendant2Address?: string;
-  defendant2Carrier?: string;
-  defendant2CarrierPhone?: string;
-  defendant2Year?: string;
-  defendant2Make?: string;
-  defendant2Model?: string;
-  defendant2Damage?: string;
+  bodyPartsAffected?: string;
+  LeadId?: string;
   defendant3Name?: string;
   defendant3Address?: string;
   defendant3Carrier?: string;
@@ -135,69 +230,4 @@ export interface IntakeFormData {
   defendant3Make?: string;
   defendant3Model?: string;
   defendant3Damage?: string;
-  autoName?: string;
-  autoPhone?: string;
-  autoAddress?: string;
-  autoAgent?: string;
-  autoPolicy?: string;
-  autoClaim?: string;
-  autoAdditionalinfo?: string;
-  healthCarrier?: string;
-  healthPhone?: string;
-  healthAddress?: string;
-  healthAgent?: string;
-  healthAdjuster?: string;
-  healthPolicy?: string;
-  healthClaim?: string;
-  medicare?: string;
-  medicareNumber?: string;
-  medicaid?: string;
-  medicaidNumber?: string;
-  healthAdditionalinfo?: string;
-  ambulance?: string;
-  ambulanceCompany?: string;
-  admitted?: string;
-  lengthOfStay?: string;
-  priorInjuries?: string;
-  priorDoctorHospital?: string;
-  priorHospitalAddressPhone?: string;
-  priorTreatmentDetails?: string;
-  priorTreatmentFrom?: string;
-  priorTreatmentTo?: string;
-  priorInsuranceClaims?: string;
-  priorAttorneys?: string;
-  priorDoctorHospital2?: string;
-  priorHospitalAddressPhone2?: string;
-  priorTreatmentDetails2?: string;
-  priorTreatmentFrom2?: string;
-  priorTreatmentTo2?: string;
-  priorInsuranceClaims2?: string;
-  priorAttorneys2?: string;
-  priorDoctorHospital3?: string;
-  priorHospitalAddressPhone3?: string;
-  priorTreatmentDetails3?: string;
-  priorTreatmentFrom3?: string;
-  priorTreatmentTo3?: string;
-  priorInsuranceClaims3?: string;
-  priorAttorneys3?: string;
-  currentTreatment?: string;
-  currentDoctorHospital?: string;
-  currentHospitalAddressPhone?: string;
-  currentTreatmentDetails?: string;
-  currentTreatmentFrom?: string;
-  currentTreatmentTo?: string;
-  currentDoctorHospital2?: string;
-  currentHospitalAddressPhone2?: string;
-  currentTreatmentDetails2?: string;
-  currentTreatmentFrom2?: string;
-  currentTreatmentTo2?: string;
-  currentDoctorHospital3?: string;
-  currentHospitalAddressPhone3?: string;
-  currentTreatmentDetails3?: string;
-  currentTreatmentFrom3?: string;
-  currentTreatmentTo3?: string;
-  bodyPartsAffected?: string;
-  hearAboutUs?: string;
-  hearAboutUsDetail?: string;
-  LeadId?: string;
-}
+};

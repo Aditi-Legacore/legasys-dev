@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { hashReferenceId } from "@/lib/hashReferenceId";
 
 export async function GET(
   request: NextRequest,
@@ -11,9 +12,9 @@ export async function GET(
       return NextResponse.json({ error: "Invalid reference ID" }, { status: 400 });
     }
 
-    const intake = await prisma.intakeInfo.findFirst({
-      where: { referenceId },
-    });
+    // Fetch all intakes and find the one where hash matches
+    const intakes = await prisma.intakeInfo.findMany();
+    const intake = intakes.find(i => hashReferenceId(i.referenceId!) === referenceId);
 
     if (!intake) {
       return NextResponse.json({ error: "Intake not found" }, { status: 404 });
