@@ -12,6 +12,7 @@ import Image from 'next/image';
 import LoginLogoBg from '../../../public/assets/images/auth/logo.png';
 import InputField from './inputs/InputField';
 import TextareaField from './inputs/TextareaField';
+import DateInputField from './inputs/DateInputField';
 
 type LeadFormData = {
   fullName: string;
@@ -153,10 +154,10 @@ export default function IntakeForm({ }: { onClose: () => void }) {
                 />
               </div>
 
-              <InputField
+              <DateInputField
                 name="dateOfLoss"
                 label="Date of Loss *"
-                type="date"
+                // type="date"
               />
 
               <div>
