@@ -213,7 +213,12 @@ export default function FillFormPage() {
 
       if (response.ok) {
         alert('Form submitted successfully!');
-        router.push('/forms');
+        // If embedded in iframe, notify parent window
+        if (window.self !== window.top) {
+          window.parent.postMessage('formSubmitted', '*');
+        } else {
+          router.push('/forms');
+        }
       } else {
         throw new Error('Failed to submit form');
       }

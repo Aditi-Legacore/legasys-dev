@@ -6,7 +6,7 @@ import QuickIntakeForm from "./forms/QuickIntakeForm";
 import { Button } from "@/components/ui/button";
 
 export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
-  const [mode, setMode] = useState<"email" | "otp" | "new">("email");
+  const [mode, setMode] = useState<"email" | "otp" | "new" | "choice">("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
@@ -32,19 +32,8 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
       const checkData = await checkRes.json();
 
       if (checkData.exists) {
-        // Draft exists, send OTP
-        const otpRes = await fetch("/api/send-otp", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        });
-        const otpData = await otpRes.json();
-
-        if (otpRes.ok) {
-          setMode("otp");
-        } else {
-          setError(otpData.error || "Failed to send OTP");
-        }
+        // Draft exists, show choice
+        setMode("choice");
       } else {
         // No draft, go to new intake
         setMode("new");
@@ -54,6 +43,35 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleContinueWithDraft = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      // Send OTP
+      const otpRes = await fetch("/api/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const otpData = await otpRes.json();
+
+      if (otpRes.ok) {
+        setMode("otp");
+      } else {
+        setError(otpData.error || "Failed to send OTP");
+      }
+    } catch (err) {
+      setError("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateNew = () => {
+    setMode("new");
   };
 
   const handleOtpSubmit = async () => {
@@ -150,6 +168,41 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
             >
               {loading ? "Verifying..." : "Verify OTP"}
             </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setMode("choice")}
+              className="w-full"
+            >
+              Back
+            </Button>
+            {error && <p className="text-red-600 text-sm text-center">{error}</p>}
+          </div>
+        )}
+
+        {/* Choice */}
+        {mode === "choice" && (
+          <div className="space-y-4">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                We found a draft for <strong>{email}</strong>. What would you like to do?
+              </p>
+            </div>
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={handleContinueWithDraft}
+                disabled={loading}
+                className="w-full"
+              >
+                {loading ? "Sending OTP..." : "Continue with Draft"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleCreateNew}
+                className="w-full"
+              >
+                Create New Form
+              </Button>
+            </div>
             <Button
               variant="ghost"
               onClick={() => setMode("email")}
