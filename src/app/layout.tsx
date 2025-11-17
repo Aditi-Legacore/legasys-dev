@@ -1,12 +1,12 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
 import { Providers } from "../components/ThemeProvider";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../lib/auth";
 import { Inter } from "next/font/google";
+import AppLayout from "../components/AppLayout";
+
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
@@ -30,17 +30,9 @@ export default async function RootLayout({
         className={`${inter.className} antialiased`}
       >
         <Providers>
-          {session ? (
-            <div className="flex h-screen overflow-hidden">
-              <Sidebar />
-              <div className="flex flex-col flex-1 overflow-hidden">
-                <Navbar />
-                <main className="flex-1 overflow-y-auto overflow-x-hidden p-6">{children}</main>
-              </div>
-            </div>
-          ) : (
-            <div className="min-h-screen">{children}</div>
-          )}
+          <AppLayout session={session}>
+            {children}
+          </AppLayout>
         </Providers>
       </body>
     </html>
