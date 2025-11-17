@@ -9,7 +9,9 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    const isEmbedded = request.headers.get('referer') && !request.headers.get('referer')?.includes(request.headers.get('host') || '');
+
+    if (!session && !isEmbedded) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
