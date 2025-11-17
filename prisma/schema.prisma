@@ -281,3 +281,13 @@ model ActivityLog {
 
   intake          IntakeInfo  @relation("IntakeToActivityLogs", fields: [intakeId], references: [id], onDelete: Cascade)
 }
+
+model OTP {
+  id        String   @id @default(cuid())
+  email     String
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([email, otp])
+}

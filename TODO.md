@@ -1,10 +1,16 @@
-# TODO: Fix File Upload Error on Vercel Server
+# Intake Flow Modification Tasks
 
-## Steps to Complete
-- [x] Add @vercel/blob dependency to package.json
-- [x] Update POST method in src/app/api/intake/[id]/documents/route.ts to use Vercel Blob for file uploads
-- [x] Update DELETE method in src/app/api/intake/[id]/documents/route.ts to use Vercel Blob for file deletions
-- [x] Remove file system operations from src/app/api/documents/route.ts DELETE method (files are now in Vercel Blob)
-- [x] Run npm install to install the new dependency (completed)
-- [x] Set BLOB_READ_WRITE_TOKEN environment variable in Vercel dashboard (user action required)
-- [x] Deploy to Vercel and test file uploads (user action required)
+## Completed Tasks
+- [x] Analyze current intake modal and related components
+- [x] Understand check-draft API and email system
+- [x] Create comprehensive plan for OTP-based intake flow
+- [x] Add OTP model to Prisma schema
+- [x] Run Prisma migration for OTP model
+- [x] Update email.ts to add OTP email sending function
+- [x] Create /api/send-otp API endpoint
+- [x] Create /api/verify-otp API endpoint
+- [x] Modify NewIntakeModal.tsx to implement new email-based flow with OTP verification
+
+## Pending Tasks
+- [ ] Test the new intake flow (email input, draft check, OTP send/verify, form rendering)
+- [ ] Ensure OTP expiration (10 minutes) and cleanup
