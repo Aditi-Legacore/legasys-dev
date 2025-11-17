@@ -94,7 +94,12 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
       if (res.ok) {
         // Store draft data in localStorage
         localStorage.setItem("draftData", JSON.stringify(data.draft || {}));
-        router.push(`/intake-form?ref=${email}`);
+        // For embed, navigate to the embed form with ref
+        if (window.self !== window.top) {
+          window.location.href = `/embed/form?ref=${email}`;
+        } else {
+          router.push(`/intake-form?ref=${email}`);
+        }
       } else {
         setError(data.error || "Invalid OTP");
       }

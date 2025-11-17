@@ -103,7 +103,12 @@ export default function IntakeForm({ }: { onClose: () => void }) {
   };
 
   const handleNext = () => {
-    router.push(`/intake-form?ref=${referenceId}`);
+    // For embed, navigate to the embed form with ref
+    if (window.self !== window.top) {
+      window.location.href = `/embed/form?ref=${referenceId}`;
+    } else {
+      router.push(`/intake-form?ref=${referenceId}`);
+    }
   };
 
   return (

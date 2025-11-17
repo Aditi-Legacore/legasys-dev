@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
     }
 
-    // Query the database for a draft with the given email
+    // Query the database for a draft with the given email (no auth required for embed)
     const draft = await prisma.intakeInfo.findFirst({
       where: {
         email: email,

@@ -4,11 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
-  const serverSession = await getServerSession(authOptions);
-  if (!serverSession || !serverSession.user.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const { searchParams } = new URL(req.url);
   const referenceId = searchParams.get('referenceId');
 
@@ -17,18 +12,10 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const lead = await prisma.lead.findUnique({
-      where: { referenceId },
-    });
-
-    if (!lead) {
-      return NextResponse.json({ error: "Invalid reference ID" }, { status: 404 });
-    }
-
+    // For embed, allow fetching draft without auth if referenceId exists
     const intake = await prisma.intakeInfo.findFirst({
       where: {
         referenceId: referenceId,
-        userId: serverSession.user.id,
         isDraft: true
       },
       orderBy: {
@@ -48,11 +35,6 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const serverSession = await getServerSession(authOptions);
-  if (!serverSession || !serverSession.user.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const data = await req.json();
   const { referenceId, ...draftFields } = data;
 
@@ -61,14 +43,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const lead = await prisma.lead.findUnique({
-      where: { referenceId },
-    });
-
-    if (!lead) {
-      return NextResponse.json({ error: "Invalid reference ID" }, { status: 404 });
-    }
-
+    // For embed, allow draft saving without auth
     const existingIntake = await prisma.intakeInfo.findFirst({
       where: { referenceId: referenceId },
     });
@@ -126,7 +101,6 @@ export async function POST(req: NextRequest) {
         data: {
           ...transformedFields,
           isDraft: true,
-          user: { connect: { id: serverSession.user.id } },
         } as IntakeInfoUpdate,
       });
     } else {
@@ -134,7 +108,6 @@ export async function POST(req: NextRequest) {
         data: {
           ...transformedFields,
           isDraft: true,
-          user: { connect: { id: serverSession.user.id } },
         } as IntakeInfoCreate,
       });
     }

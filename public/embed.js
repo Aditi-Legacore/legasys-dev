@@ -108,7 +108,7 @@
   modal.innerHTML = `
     <div class="form-embed-modal-content">
       <button class="form-embed-close">&times;</button>
-      <iframe class="form-embed-iframe" src="${config.domain}/forms/${config.formId}/fill"></iframe>
+      <iframe class="form-embed-iframe" src="${config.domain}/embed/form?id=${config.formId}"></iframe>
     </div>
   `;
   document.body.appendChild(modal);
@@ -124,10 +124,10 @@
     }
   });
 
-  // Listen for messages from iframe (e.g., form submission success)
+  // Listen for messages from iframe (e.g., form submission success or close modal)
   window.addEventListener('message', (event) => {
     if (event.origin !== config.domain) return;
-    if (event.data === 'formSubmitted') {
+    if (event.data === 'formSubmitted' || event.data === 'closeModal') {
       modal.classList.remove('show');
       // Optional: Show a success message or redirect
     }

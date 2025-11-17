@@ -48,6 +48,21 @@ const steps = [
   "DOCUMENT UPLOAD",
 ];
 
+// Mapping for human-readable field names
+const fieldDisplayNames: Record<string, string> = {
+  clientName: "Client Name",
+  email: "Email",
+  gender: "Gender",
+  phone: "Phone",
+  accidentDate: "Accident Date",
+  accidentLocation: "Accident Location",
+  accidentDescription: "Accident Description",
+  defendant1Name: "Defendant Name",
+};
+
+// List of required fields based on the schema
+const requiredFields = ["clientName", "email", "gender", "phone", "accidentDate", "accidentLocation", "accidentDescription", "defendant1Name"];
+
 // 👇 Define the fields to validate at each step
 const stepFields: (keyof IntakeFormData)[][] = [
   ["clientName", "email", "gender", "phone"], // Step 1
@@ -142,17 +157,19 @@ const handleSaveDraft = async () => {
       const savedData = await res.json();
       console.log("savedData", savedData);
       
-      // Log activity for saving draft
-      await fetch('/api/activity-log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          refId: savedData.id,
-          activityType: 'save_draft',
-          shortDescription: 'Draft Saved',
-          longDescription: 'saved intake as draft',
-        }),
-      });
+      // Log activity for saving draft (only if user is logged in)
+      if (session?.user?.id) {
+        await fetch('/api/activity-log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            refId: savedData.id,
+            activityType: 'save_draft',
+            shortDescription: 'Draft Saved',
+            longDescription: 'saved intake as draft',
+          }),
+        });
+      }
     } catch (err) {
       console.error(err);
       toast.error("Error saving draft.");
@@ -162,7 +179,7 @@ const handleSaveDraft = async () => {
 
   const methods = useForm<IntakeFormData>({
     resolver: zodResolver(intakeFormSchema),
-    mode: "onBlur",
+    mode: "onSubmit",
   });
   const { data: session } = useSession();
 
@@ -378,8 +395,9 @@ const payload: Payload = {
       localStorage.setItem(`submittedIntakeId_${referenceId}`, savedData.id);
     }
 
-    // ✅ Log the activity
-    await fetch('/api/activity-log', {
+    // ✅ Log the activity (only if user is logged in)
+    if (session?.user?.id) {
+      await fetch('/api/activity-log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -389,6 +407,7 @@ const payload: Payload = {
           longDescription: intakeId ? 'successfully updated intake form' : 'successfully submitted intake form',
         }),
       });
+    }
 
     // ✅ Auto-navigate to step 7 (Document Upload)
     setStep(6);
@@ -411,13 +430,19 @@ const payload: Payload = {
     if (fieldsToValidate.length > 0) {
       const isValid = await methods.trigger(fieldsToValidate);
       if (!isValid) {
-        toast.error("Please fill in all required fields before proceeding.");
+        const errors = methods.formState.errors;
+        const missingFields = fieldsToValidate
+          .filter(field => errors[field])
+          .map(field => fieldDisplayNames[field] || field)
+          .join(", ");
+        const errorMessage = `Please fill in the following required fields: ${missingFields}`;
+        toast.error(errorMessage);
         return; // ❌ Stop if validation fails
       }
     }
 
     setStep((s) => s + 1);
-    
+
   };
 
 
@@ -462,6 +487,13 @@ const payload: Payload = {
               console.log("Calling methods.handleSubmit(onSubmit)");
               methods.handleSubmit(onSubmit, (errors) => {
                 console.log("❌ Validation failed:", errors);
+                const missingFields = Object.keys(errors)
+                  .filter(field => requiredFields.includes(field))
+                  .map(field => fieldDisplayNames[field] || field)
+                  .join(", ");
+                const errorMessage = `Please fill in the following required fields: ${missingFields}`;
+                console.error(errorMessage);
+                toast.error(errorMessage);
               })();
             }}
             className="bg-white dark:bg-gray-900 p-4 sm:p-6 lg:p-8 rounded-xl shadow-xl transition-all duration-300"
@@ -518,16 +550,15 @@ const payload: Payload = {
                 Back
               </button>
             )}
-            {/* {step === steps.length - 2 && (
+            {step === steps.length - 2 && (
               <button
-                type="button"
-                onClick={handleFinalSubmit}
+                type="submit"
                 disabled={isSubmitting}
                 className="ml-auto px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
               >
                 {isSubmitting ? "Submitting..." : "Submit"}
               </button>
-            )} */}
+            )}
             {step < steps.length - 2 && (
               <button
                 type="button"

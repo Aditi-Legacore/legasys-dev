@@ -12,10 +12,10 @@ interface AppLayoutProps {
 export default function AppLayout({ children, session }: AppLayoutProps) {
   const pathname = usePathname();
 
-  // For fill pages, render without navbar/sidebar for embedding
-  const isFillPage = pathname.includes('/fill');
+  // For fill and embed pages, render without navbar/sidebar for embedding
+  const isEmbedPage = pathname.includes('/fill') || pathname.includes('/embed');
 
-  if (session && !isFillPage) {
+  if (session && !isEmbedPage) {
     return (
       <div className="flex h-screen overflow-hidden">
         <Sidebar />

@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
     const referenceId = searchParams.get('referenceId');
 
     if (referenceId) {
-      // Fetch single lead by referenceId
+      // Fetch single lead by referenceId (no auth required for embed)
       const lead = await prisma.lead.findUnique({
         where: { referenceId },
         include: {
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json(lead, { status: 200 });
     } else {
-      // Fetch all leads
+      // Fetch all leads (requires auth for admin access)
       const leads = await prisma.lead.findMany({
         orderBy: { createdAt: "desc" },
         include: {

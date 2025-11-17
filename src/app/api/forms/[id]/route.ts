@@ -11,6 +11,7 @@ export async function GET(
     const session = await getServerSession(authOptions);
     const isEmbedded = request.headers.get('referer') && !request.headers.get('referer')?.includes(request.headers.get('host') || '');
 
+    // Allow access if user is authenticated OR if it's an embedded request
     if (!session && !isEmbedded) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -34,7 +35,7 @@ export async function GET(
     });
 
     if (!submission) {
-      return NextResponse.json({ error: 'Submission not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Form not found' }, { status: 404 });
     }
 
     return NextResponse.json(submission);
