@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendIntakeSubmissionEmail } from "@/lib/email";
 import { IntakeFormData } from "@/types/form";
@@ -10,13 +8,8 @@ import { Prisma } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const data: IntakeFormData = await request.json();
-    console.log("📥 POST /api/intake - Received data:", data);
+    console.log("📥 POST /api/embed/intake - Received data:", data);
 
     // Validate userId if provided
     if (data.userId) {
@@ -96,40 +89,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(intake, { status: 201 });
   } catch (err: unknown) {
-    console.error("❌ POST /api/intake error:", err);
+    console.error("❌ POST /api/embed/intake error:", err);
     if (err instanceof Error && 'code' in err && err.code === 'EROFS') {
       return NextResponse.json({ error: "File system is read-only. Please try again later." }, { status: 500 });
     }
     return NextResponse.json({ error: "Failed to save intake info", details: err instanceof Error ? err.message : "Unknown error" }, { status: 500 });
-  }
-}
-
-// for fetching all intakes and showing in Intaketable
-
-export async function GET() {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const allIntakes = await prisma.intakeInfo.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
-      include: {
-        Lead: {
-          select: {
-            caseType: true,
-          },
-        },
-      },
-    });
-    return NextResponse.json(allIntakes, { status: 200 });
-  } catch (err) {
-    console.error(err);
-    if (err instanceof Error && 'code' in err && err.code === 'EROFS') {
-      return NextResponse.json({ error: "File system is read-only. Please try again later." }, { status: 500 });
-    }
-    return NextResponse.json({ error: "Failed to fetch intake info" }, { status: 500 });
   }
 }

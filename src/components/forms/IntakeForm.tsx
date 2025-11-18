@@ -76,16 +76,20 @@ const stepFields: (keyof IntakeFormData)[][] = [
 
 interface IntakeFormWizardProps {
   onFormSubmit?: (data: IntakeFormData) => void;
+  isEmbedded?: boolean;
 }
 
 
-export default function IntakeFormWizard({ }: IntakeFormWizardProps) {
+export default function IntakeFormWizard({ isEmbedded = false }: IntakeFormWizardProps) {
   const searchParams = useSearchParams();
   const [referenceId, setReferenceId] = useState<string | null>(null);
   // const [draft, setDraft] = useState<any>(null);
   // const [leadData, setLeadData] = useState<any>(null);
   const [draft, setDraft] = useState<Record<string, unknown> | null>(null);
 const [leadData, setLeadData] = useState<Lead | null>(null);
+
+  // Use the prop if provided, otherwise check if we're in embedded context
+  const isEmbeddedCheck = isEmbedded || (typeof window !== 'undefined' && window.self !== window.top);
 
   const intakeId = searchParams.get("id");  // 👈 get ID from URL
   const [isLoadingExistingData, setIsLoadingExistingData] = useState(false);
@@ -110,8 +114,10 @@ const [leadData, setLeadData] = useState<Lead | null>(null);
   // Set step based on referenceId and submission status
   useEffect(() => {
     if (referenceId) {
+  // Use embed API if embedded, otherwise regular API
+      const apiBase = isEmbeddedCheck ? '/api/embed' : '/api/intake';
       // Check if intake is already submitted
-      fetch(`/api/intake/reference/${referenceId}`)
+      fetch(`${apiBase}/reference/${referenceId}`)
         .then((res) => {
           if (res.ok) {
             return res.json();
@@ -135,7 +141,7 @@ const [leadData, setLeadData] = useState<Lead | null>(null);
           setStep(savedStep ? parseInt(savedStep, 10) : 0);
         });
     }
-  }, [referenceId]);
+  }, [referenceId, isEmbeddedCheck]);
 
   // Persist step in localStorage
   useEffect(() => {
@@ -164,7 +170,10 @@ const handleSaveDraft = async () => {
 
       const currentFormData = methods.getValues();
 
-      const res = await fetch("/api/intake/draft", {
+      // Use embed API if embedded, otherwise regular API
+      const apiUrl = isEmbedded ? "/api/embed/draft" : "/api/intake/draft";
+
+      const res = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ referenceId, ...currentFormData }),
@@ -178,7 +187,7 @@ const handleSaveDraft = async () => {
        toast.success("Draft saved successfully!");
       const savedData = await res.json();
       console.log("savedData", savedData);
-      
+
       // Log activity for saving draft (only if user is logged in)
       if (session?.user?.id) {
         try {
@@ -213,8 +222,10 @@ const handleSaveDraft = async () => {
 
   useEffect(() => {
     if (!isSubmitted && referenceId) {
+      // Use embed API if embedded, otherwise regular API
+      const apiBase = isEmbedded ? '/api/embed' : '/api/intake';
       // First, check if there's a submitted intake
-      fetch(`/api/intake/reference/${referenceId}`)
+      fetch(`${apiBase}/reference/${referenceId}`)
         .then((res) => {
           if (res.ok) {
             return res.json();
@@ -229,7 +240,7 @@ const handleSaveDraft = async () => {
           }
 
           // No submitted intake, try to fetch draft
-          fetch(`/api/intake/draft?referenceId=${referenceId}`)
+          fetch(`${apiBase}/draft?referenceId=${referenceId}`)
             .then((res) => {
               if (res.ok) {
                 return res.json();
@@ -242,7 +253,7 @@ const handleSaveDraft = async () => {
                 setDraft(data.draft);
               } else {
                 // If no draft, fetch lead data
-                fetch(`/api/leads?referenceId=${referenceId}`)
+                fetch(`${apiBase}/leads?referenceId=${referenceId}`)
                   .then((res) => {
                     if (res.ok) {
                       return res.json();
@@ -268,7 +279,7 @@ const handleSaveDraft = async () => {
           // Silently ignore errors to avoid console noise
         });
     }
-  }, [referenceId, isSubmitted]);
+  }, [referenceId, isSubmitted, isEmbeddedCheck]);
 
   // Populate form with draft data when draft is loaded
   useEffect(() => {
@@ -395,7 +406,9 @@ useEffect(() => {
 
   try {
     const method = intakeId ? "PUT" : "POST";
-    const url = intakeId ? `/api/intake/${intakeId}` : `/api/intake`;
+    // Use embed API if embedded, otherwise regular API
+    const apiBase = isEmbedded ? '/api/embed/intake' : '/api/intake';
+    const url = intakeId ? `${apiBase}/${intakeId}` : apiBase;
 
     console.log(`📡 Sending ${method} request to ${url}`);
 
@@ -510,7 +523,7 @@ const payload: Payload = {
       case 3: return <ClientInsuranceStep />;
       case 4: return <MedicalTreatmentStep />;
       case 5: return <SubmitStep isSubmitting={isSubmitting} />;
-      case 6: return submittedIntakeId ? <IntakeDocuments submittedIntakeId={submittedIntakeId} /> : <div className="text-center">Loading document upload...</div>;
+      case 6: return submittedIntakeId ? <IntakeDocuments submittedIntakeId={submittedIntakeId} isEmbedded={isEmbeddedCheck} /> : <div className="text-center">Loading document upload...</div>;
       default: return null;
     }
   };

@@ -46,7 +46,7 @@ export default function EmbedFormPage() {
         {showModal ? (
           <NewIntakeModal onClose={handleClose} />
         ) : (
-          <IntakeFormWizard />
+          <IntakeFormWizard isEmbedded={true} />
         )}
       </div>
     </div>

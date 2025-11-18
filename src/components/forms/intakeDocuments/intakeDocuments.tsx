@@ -9,9 +9,10 @@ import { useSession } from "next-auth/react";
 interface IntakeDocumentsProps {
   submittedIntakeId: string;
   onUploadSuccess?: () => void;
+  isEmbedded?: boolean;
 }
 
-const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, onUploadSuccess }) => {
+const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, onUploadSuccess, isEmbedded = false }) => {
   const router = useRouter();
   const { data: session } = useSession();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -43,10 +44,15 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, on
     const formData = new FormData();
     selectedFiles.forEach((file) => formData.append("files", file));
 
+    if (isEmbedded) {
+      formData.append("intakeId", submittedIntakeId);
+    }
+
   try {
   setIsUploading(true);
 
-  const response = await fetch(`/api/intake/${submittedIntakeId}/documents`, {
+  const apiUrl = isEmbedded ? `/api/embed/documents` : `/api/intake/${submittedIntakeId}/documents`;
+  const response = await fetch(apiUrl, {
     method: "POST",
     body: formData,
   });
@@ -84,8 +90,10 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, on
       }),
     });
 
-    // Redirect to intake-list after successful upload
-    router.push("/intake-list");
+    // Redirect to intake-list after successful upload only if not embedded
+    if (!isEmbedded) {
+      router.push("/intake-list");
+    }
   }
 } catch (err) {
   console.error(err);
@@ -174,14 +182,16 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, on
       )}
 
       {/* Back link */}
-      <div className="mt-6 text-center">
-        <Link
-          href="/intake-list"
-          className="text-indigo-600 hover:text-indigo-800 font-medium transition"
-        >
-          ← Back to Intake List
-        </Link>
-      </div>
+      {!isEmbedded && (
+        <div className="mt-6 text-center">
+          <Link
+            href="/intake-list"
+            className="text-indigo-600 hover:text-indigo-800 font-medium transition"
+          >
+            ← Back to Intake List
+          </Link>
+        </div>
+      )}
       
     </div>
     
