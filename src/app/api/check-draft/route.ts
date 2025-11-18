@@ -6,9 +6,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email } = body;
 
-    // Validate email presence and format
     if (!email || typeof email !== "string") {
-      return NextResponse.json({ error: "Email is required and must be a string" }, { status: 400 });
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -16,24 +15,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
     }
 
-    // Query the database for a draft with the given email (no auth required for embed)
+    // 🔍 Find existing intake draft for this email
     const draft = await prisma.intakeInfo.findFirst({
       where: {
         email: email,
         isDraft: true,
       },
+      select: {
+        id: true,
+        email: true,
+        isDraft: true,
+        referenceId: true,  // <-- IMPORTANT
+        createdAt: true,
+        updatedAt: true,
+        // return additional fields only if needed
+      },
     });
 
     if (draft) {
+      // ✔ Return referenceId if found
       return NextResponse.json({
         exists: true,
-        draft: draft,
-      });
-    } else {
-      return NextResponse.json({
-        exists: false,
+        referenceId: draft.referenceId,
+        draft,
       });
     }
+
+    // ❌ No draft found — do NOT create anything
+    return NextResponse.json({
+      exists: false,
+      referenceId: null,
+    });
+
   } catch (error) {
     console.error("Error checking draft:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

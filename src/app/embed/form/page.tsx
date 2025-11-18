@@ -7,7 +7,7 @@ import NewIntakeModal from '@/components/NewIntakeModal';
 
 export default function EmbedFormPage() {
   const searchParams = useSearchParams();
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(true);
   const [isIframe, setIsIframe] = useState(false);
 
   // Determine iframe + initial modal state only once
@@ -15,7 +15,9 @@ export default function EmbedFormPage() {
     const ref = searchParams.get('ref');
 
     // show modal only if ref is NOT present
-    setShowModal(!ref);
+    if (ref) {
+      setShowModal(false);
+    }
 
     // check iframe safely
     if (typeof window !== 'undefined') {

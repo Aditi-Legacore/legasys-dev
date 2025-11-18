@@ -32,15 +32,15 @@ export async function POST(request: NextRequest) {
 
     let intake;
     if (data.referenceId) {
-      const existingIntake = await prisma.intakeInfo.findFirst({
-        where: { referenceId: data.referenceId },
+      const existingDraft = await prisma.intakeInfo.findFirst({
+        where: { referenceId: data.referenceId, isDraft: true },
       });
 
-      console.log("existingIntake", existingIntake);
+      console.log("existingDraft", existingDraft);
 
-      if (existingIntake) {
+      if (existingDraft) {
         intake = await prisma.intakeInfo.update({
-          where: { id: existingIntake.id },
+          where: { id: existingDraft.id },
           data: {
             ...buildIntakeData(data as unknown as Record<string, unknown>),
             isDraft: false, // Mark as submitted

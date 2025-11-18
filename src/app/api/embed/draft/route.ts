@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   try {
     // For embed, allow draft saving without auth
     const existingIntake = await prisma.intakeInfo.findFirst({
-      where: { referenceId: referenceId },
+      where: { referenceId: referenceId, isDraft: true },
     });
 
     // Define allowed fields based on Prisma schema
