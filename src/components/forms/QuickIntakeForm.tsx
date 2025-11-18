@@ -38,7 +38,7 @@ const referralSources = [
   { value: 'other', label: 'Other' },
 ];
 
-export default function IntakeForm({ }: { onClose: () => void }) {
+export default function IntakeForm({ onClose }: { onClose: () => void }) {
   const [referenceId, setReferenceId] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
@@ -102,7 +102,16 @@ export default function IntakeForm({ }: { onClose: () => void }) {
   };
 
   const handleNext = () => {
-    router.push(`/intake-form?ref=${referenceId}`);
+    // For embed, navigate to the embed form with ref and close modal
+    if (window.self !== window.top) {
+      window.location.href = `/embed/form?ref=${referenceId}`;
+    } else {
+      router.push(`/intake-form?ref=${referenceId}`);
+    }
+    // Close the modal after navigation
+    if (onClose) {
+      onClose();
+    }
   };
 
   return (
