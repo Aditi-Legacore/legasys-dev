@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendIntakeSubmissionEmail } from "@/lib/email";
 import { IntakeFormData } from "@/types/form";
 import { buildIntakeData } from "@/lib/intakeData/buildIntakeData";
+import { Prisma } from "@prisma/client";
 
 
 export async function POST(request: NextRequest) {
@@ -40,16 +43,25 @@ export async function POST(request: NextRequest) {
       if (existingIntake) {
         intake = await prisma.intakeInfo.update({
           where: { id: existingIntake.id },
-          data: buildIntakeData(data),
+          data: {
+            ...buildIntakeData(data as unknown as Record<string, unknown>),
+            isDraft: false, // Mark as submitted
+          } as Prisma.IntakeInfoUpdateInput,
         });
       } else {
         intake = await prisma.intakeInfo.create({
-          data: buildIntakeData(data),
+          data: {
+            ...buildIntakeData(data as unknown as Record<string, unknown>),
+            isDraft: false, // Mark as submitted
+          } as Prisma.IntakeInfoCreateInput,
         });
       }
     } else {
       intake = await prisma.intakeInfo.create({
-        data: buildIntakeData(data),
+        data: {
+          ...buildIntakeData(data as unknown as Record<string, unknown>),
+          isDraft: false, // Mark as submitted
+        } as Prisma.IntakeInfoCreateInput,
       });
     }
 
@@ -91,9 +103,13 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const allIntakes = await prisma.intakeInfo.findMany({
-      // where: { userId: session.user.id },
+      where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
       include: {
         Lead: {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner"; // or any toast lib you use
+import { useSession } from "next-auth/react";
 
 interface IntakeDocumentsProps {
   submittedIntakeId: string;
@@ -12,6 +13,7 @@ interface IntakeDocumentsProps {
 
 const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, onUploadSuccess }) => {
   const router = useRouter();
+  const { data: session } = useSession();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -69,8 +71,8 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, on
   setSelectedFiles([]);
   onUploadSuccess?.();
 
-  // Log activity only if some were uploaded
-  if (response.ok || response.status === 207) {
+  // Log activity only if some were uploaded and user is logged in
+  if ((response.ok || response.status === 207) && session?.user?.id) {
     await fetch("/api/activity-log", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

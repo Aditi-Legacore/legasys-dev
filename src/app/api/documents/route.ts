@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse, } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { del } from "@vercel/blob"; 
+import { del } from "@vercel/blob";
 
 // for fetching uploaded documents in table
 
@@ -32,7 +34,13 @@ import { del } from "@vercel/blob";
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const intakes = await prisma.intakeInfo.findMany({
+      where: { userId: session.user.id },
       include: {
         Document: true, // ✅ Use uppercase — matches schema
         Lead: {
@@ -72,6 +80,11 @@ export async function GET() {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
@@ -87,6 +100,10 @@ export async function DELETE(request: NextRequest) {
 
     if (!intake) {
       return NextResponse.json({ error: "Intake not found" }, { status: 404 });
+    }
+
+    if (intake.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // 🗑️ If there are no documents
@@ -116,7 +133,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error("Error deleting intake documents:", error);
 
-    if (error instanceof Error && "code" in error && (error as any).code === "EROFS") {
+    if (error instanceof Error && 'code' in error && (error as { code: string }).code === "EROFS") {
       return NextResponse.json(
         { error: "File system is read-only. Please try again later." },
         { status: 500 }
@@ -130,6 +147,11 @@ export async function DELETE(request: NextRequest) {
 // Working on this ....
 export async function PUT(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
@@ -142,6 +164,16 @@ export async function PUT(request: Request) {
 
     if (!fileName) {
       return NextResponse.json({ error: "fileName is required" }, { status: 400 });
+    }
+
+    // Verify the document belongs to the user
+    const document = await prisma.document.findUnique({
+      where: { id },
+      include: { intake: true },
+    });
+
+    if (!document || document.intake.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const updatedDoc = await prisma.document.update({

@@ -6,7 +6,7 @@ import Sidebar from './Sidebar';
 
 interface AppLayoutProps {
   children: React.ReactNode;
-  session: any;
+  session: unknown;
 }
 
 export default function AppLayout({ children, session }: AppLayoutProps) {

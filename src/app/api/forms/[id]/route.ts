@@ -38,6 +38,11 @@ export async function GET(
       return NextResponse.json({ error: 'Form not found' }, { status: 404 });
     }
 
+    // If authenticated, verify ownership
+    if (session && submission.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     return NextResponse.json(submission);
   } catch (error) {
     console.error('Error fetching form submission:', error);
@@ -57,6 +62,16 @@ export async function PUT(
 
     const { id } = await params;
     const { status, data } = await request.json();
+
+    // Verify ownership before updating
+    const existingSubmission = await prisma.formSubmission.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+
+    if (!existingSubmission || existingSubmission.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     const submission = await prisma.formSubmission.update({
       where: { id },
@@ -96,6 +111,16 @@ export async function DELETE(
     }
 
     const { id } = await params;
+
+    // Verify ownership before deleting
+    const existingSubmission = await prisma.formSubmission.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+
+    if (!existingSubmission || existingSubmission.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     await prisma.formSubmission.delete({
       where: { id },

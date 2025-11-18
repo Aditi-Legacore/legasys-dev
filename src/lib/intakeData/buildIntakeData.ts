@@ -1,13 +1,21 @@
 // src/lib/intake/buildIntakeData.ts
 
 // Helper to convert empty strings to null
-export const toNullable = (value: string | undefined): string | null =>
-  value === "" || value === undefined ? null : value;
+export const toNullable = (value: unknown): string | null =>
+  typeof value === "string" && value.trim() !== "" ? value : null;
+
+// Helper to safely create Date from unknown value
+const toDate = (value: unknown): Date | null => {
+  if (typeof value === "string" && value.trim() !== "") {
+    return new Date(value);
+  }
+  return null;
+};
 
 // Main function to prepare intake data
-export const buildIntakeData = (data: any) => ({
-  ...(data.userId && { user: { connect: { id: data.userId } } }),
-  ...(data.referenceId && { referenceId: data.referenceId }),
+export const buildIntakeData = (data: Record<string, unknown>) => ({
+  ...(data.userId ? { user: { connect: { id: data.userId as string } } } : {}),
+  ...(data.referenceId ? { referenceId: data.referenceId as string } : {}),
 
   clientName: data.clientName,
   gender: toNullable(data.gender),
@@ -16,15 +24,11 @@ export const buildIntakeData = (data: any) => ({
   address: toNullable(data.address),
   city: toNullable(data.city),
   zip: toNullable(data.zip),
-  dateOfBirth: toNullable(data.dateOfBirth)
-    ? new Date(data.dateOfBirth)
-    : null,
+  dateOfBirth: toDate(data.dateOfBirth),
   ssn: toNullable(data.ssn),
 
   // Accident
-  accidentDate: toNullable(data.accidentDate)
-    ? new Date(data.accidentDate)
-    : null,
+  accidentDate: toDate(data.accidentDate),
   accidentTime: toNullable(data.accidentTime),
   accidentLocation: toNullable(data.accidentLocation),
   accidentDescription: toNullable(data.accidentDescription),
@@ -95,12 +99,8 @@ export const buildIntakeData = (data: any) => ({
   priorDoctorHospital: toNullable(data.priorDoctorHospital),
   priorHospitalAddressPhone: toNullable(data.priorHospitalAddressPhone),
   priorTreatmentDetails: toNullable(data.priorTreatmentDetails),
-  priorTreatmentFrom: toNullable(data.priorTreatmentFrom)
-    ? new Date(data.priorTreatmentFrom)
-    : null,
-  priorTreatmentTo: toNullable(data.priorTreatmentTo)
-    ? new Date(data.priorTreatmentTo)
-    : null,
+  priorTreatmentFrom: toDate(data.priorTreatmentFrom),
+  priorTreatmentTo: toDate(data.priorTreatmentTo),
   priorInsuranceClaims: toNullable(data.priorInsuranceClaims),
   priorAttorneys: toNullable(data.priorAttorneys),
 
@@ -108,12 +108,8 @@ export const buildIntakeData = (data: any) => ({
   priorDoctorHospital2: toNullable(data.priorDoctorHospital2),
   priorHospitalAddressPhone2: toNullable(data.priorHospitalAddressPhone2),
   priorTreatmentDetails2: toNullable(data.priorTreatmentDetails2),
-  priorTreatmentFrom2: toNullable(data.priorTreatmentFrom2)
-    ? new Date(data.priorTreatmentFrom2)
-    : null,
-  priorTreatmentTo2: toNullable(data.priorTreatmentTo2)
-    ? new Date(data.priorTreatmentTo2)
-    : null,
+  priorTreatmentFrom2: toDate(data.priorTreatmentFrom2),
+  priorTreatmentTo2: toDate(data.priorTreatmentTo2),
   priorInsuranceClaims2: toNullable(data.priorInsuranceClaims2),
   priorAttorneys2: toNullable(data.priorAttorneys2),
 
@@ -121,12 +117,8 @@ export const buildIntakeData = (data: any) => ({
   priorDoctorHospital3: toNullable(data.priorDoctorHospital3),
   priorHospitalAddressPhone3: toNullable(data.priorHospitalAddressPhone3),
   priorTreatmentDetails3: toNullable(data.priorTreatmentDetails3),
-  priorTreatmentFrom3: toNullable(data.priorTreatmentFrom3)
-    ? new Date(data.priorTreatmentFrom3)
-    : null,
-  priorTreatmentTo3: toNullable(data.priorTreatmentTo3)
-    ? new Date(data.priorTreatmentTo3)
-    : null,
+  priorTreatmentFrom3: toDate(data.priorTreatmentFrom3),
+  priorTreatmentTo3: toDate(data.priorTreatmentTo3),
   priorInsuranceClaims3: toNullable(data.priorInsuranceClaims3),
   priorAttorneys3: toNullable(data.priorAttorneys3),
 
@@ -135,34 +127,22 @@ export const buildIntakeData = (data: any) => ({
   currentDoctorHospital: toNullable(data.currentDoctorHospital),
   currentHospitalAddressPhone: toNullable(data.currentHospitalAddressPhone),
   currentTreatmentDetails: toNullable(data.currentTreatmentDetails),
-  currentTreatmentFrom: toNullable(data.currentTreatmentFrom)
-    ? new Date(data.currentTreatmentFrom)
-    : null,
-  currentTreatmentTo: toNullable(data.currentTreatmentTo)
-    ? new Date(data.currentTreatmentTo)
-    : null,
+  currentTreatmentFrom: toDate(data.currentTreatmentFrom),
+  currentTreatmentTo: toDate(data.currentTreatmentTo),
 
   // Set 2
   currentDoctorHospital2: toNullable(data.currentDoctorHospital2),
   currentHospitalAddressPhone2: toNullable(data.currentHospitalAddressPhone2),
   currentTreatmentDetails2: toNullable(data.currentTreatmentDetails2),
-  currentTreatmentFrom2: toNullable(data.currentTreatmentFrom2)
-    ? new Date(data.currentTreatmentFrom2)
-    : null,
-  currentTreatmentTo2: toNullable(data.currentTreatmentTo2)
-    ? new Date(data.currentTreatmentTo2)
-    : null,
+  currentTreatmentFrom2: toDate(data.currentTreatmentFrom2),
+  currentTreatmentTo2: toDate(data.currentTreatmentTo2),
 
   // Set 3
   currentDoctorHospital3: toNullable(data.currentDoctorHospital3),
   currentHospitalAddressPhone3: toNullable(data.currentHospitalAddressPhone3),
   currentTreatmentDetails3: toNullable(data.currentTreatmentDetails3),
-  currentTreatmentFrom3: toNullable(data.currentTreatmentFrom3)
-    ? new Date(data.currentTreatmentFrom3)
-    : null,
-  currentTreatmentTo3: toNullable(data.currentTreatmentTo3)
-    ? new Date(data.currentTreatmentTo3)
-    : null,
+  currentTreatmentFrom3: toDate(data.currentTreatmentFrom3),
+  currentTreatmentTo3: toDate(data.currentTreatmentTo3),
 
   bodyPartsAffected: toNullable(data.bodyPartsAffected),
 
@@ -172,5 +152,5 @@ export const buildIntakeData = (data: any) => ({
 
   isDraft: false,
 
-  ...(data.LeadId && { Lead: { connect: { id: data.LeadId } } }),
+  ...(data.LeadId ? { Lead: { connect: { id: data.LeadId as string } } } : {}),
 });

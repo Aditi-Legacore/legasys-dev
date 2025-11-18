@@ -38,7 +38,7 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
         // No draft, go to new intake
         setMode("new");
       }
-    } catch (err) {
+    } catch {
       setError("Something went wrong");
     } finally {
       setLoading(false);
@@ -63,7 +63,7 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
       } else {
         setError(otpData.error || "Failed to send OTP");
       }
-    } catch (err) {
+    } catch {
       setError("Something went wrong");
     } finally {
       setLoading(false);
@@ -103,7 +103,7 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
       } else {
         setError(data.error || "Invalid OTP");
       }
-    } catch (err) {
+    } catch {
       setError("Something went wrong");
     } finally {
       setLoading(false);
@@ -224,7 +224,7 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
           <div className="space-y-4">
             <div className="text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                No existing draft found for <strong>{email}</strong>. Let's create a new intake.
+                No existing draft found for <strong>{email}</strong>. Let&apos;s create a new intake.
               </p>
             </div>
             <QuickIntakeForm onClose={onClose} />

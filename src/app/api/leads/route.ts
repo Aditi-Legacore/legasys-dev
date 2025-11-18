@@ -46,13 +46,13 @@ export async function POST(request: NextRequest) {
     console.log("✅ Lead created:", lead);
     return NextResponse.json({ ...lead, referenceId }, { status: 201 });
   } catch (err: unknown) {
-  console.error("❌ POST /api/leads error:", err);
-  const errorMessage = err instanceof Error ? err.message : "Unknown error";
-  return NextResponse.json(
-    { error: "Failed to create lead", details: errorMessage },
-    { status: 500 }
-  );
-}
+    console.error("❌ POST /api/leads error:", err);
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json(
+      { error: "Failed to create lead", details: errorMessage },
+      { status: 500 }
+    );
+  }
 }
 
 // export async function GET() {
@@ -73,9 +73,13 @@ export async function GET(request: NextRequest) {
     const referenceId = searchParams.get('referenceId');
 
     if (referenceId) {
-      // Fetch single lead by referenceId (no auth required for embed)
-      const lead = await prisma.lead.findUnique({
-        where: { referenceId },
+      // Fetch single lead by referenceId or email (no auth required for embed)
+      const whereClause = referenceId.includes('@')
+        ? { email: referenceId }
+        : { referenceId };
+
+      const lead = await prisma.lead.findFirst({
+        where: whereClause,
         include: {
           intakeInfo: {
             select: { id: true },

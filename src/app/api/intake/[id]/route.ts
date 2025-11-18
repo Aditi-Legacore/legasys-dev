@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { IntakeFormData } from "@/types/form";
 import { buildIntakeData } from "@/lib/intakeData/buildIntakeData";
@@ -8,6 +10,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
     if (!id) {
       return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
@@ -19,6 +26,10 @@ export async function GET(
 
     if (!intake) {
       return NextResponse.json({ error: "Intake not found" }, { status: 404 });
+    }
+
+    if (intake.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     return NextResponse.json(intake, { status: 200 });
@@ -34,6 +45,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
 
     if (!id) {
@@ -46,6 +62,10 @@ export async function DELETE(
 
     if (!existing) {
       return NextResponse.json({ error: "Intake not found" }, { status: 404 });
+    }
+
+    if (existing.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     await prisma.intakeInfo.delete({
@@ -69,6 +89,11 @@ export async function DELETE(
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
     const data: IntakeFormData = await req.json();
 
@@ -93,15 +118,19 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     // Use SAME logic as POST → prevents missing fields becoming null
-    const updateData = buildIntakeData(data);
+    const updateData = buildIntakeData(data as unknown as Record<string, unknown>);
 
     // Always set isDraft to false on update
     updateData.isDraft = false;
 
     const updated = await prisma.intakeInfo.update({
       where: { id },
-      data: updateData,
+      data: updateData as Parameters<typeof prisma.intakeInfo.update>[0]['data'],
     });
+
+    if (updated.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     return NextResponse.json(updated, { status: 200 });
   } catch (error: unknown) {

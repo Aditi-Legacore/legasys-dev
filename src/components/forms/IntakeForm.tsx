@@ -107,11 +107,33 @@ const [leadData, setLeadData] = useState<Lead | null>(null);
     }
   }, [searchParams]);
 
-  // Set step based on referenceId
+  // Set step based on referenceId and submission status
   useEffect(() => {
     if (referenceId) {
-      const savedStep = localStorage.getItem(`intakeFormStep_${referenceId}`);
-      setStep(savedStep ? parseInt(savedStep, 10) : 0);
+      // Check if intake is already submitted
+      fetch(`/api/intake/reference/${referenceId}`)
+        .then((res) => {
+          if (res.ok) {
+            return res.json();
+          } else {
+            return null;
+          }
+        })
+        .then((intake) => {
+          if (intake && !intake.isDraft) {
+            // Intake is submitted, go to document upload step
+            setStep(6);
+          } else {
+            // Not submitted, go to saved step or 0
+            const savedStep = localStorage.getItem(`intakeFormStep_${referenceId}`);
+            setStep(savedStep ? parseInt(savedStep, 10) : 0);
+          }
+        })
+        .catch(() => {
+          // On error, default to saved step or 0
+          const savedStep = localStorage.getItem(`intakeFormStep_${referenceId}`);
+          setStep(savedStep ? parseInt(savedStep, 10) : 0);
+        });
     }
   }, [referenceId]);
 
@@ -159,16 +181,20 @@ const handleSaveDraft = async () => {
       
       // Log activity for saving draft (only if user is logged in)
       if (session?.user?.id) {
-        await fetch('/api/activity-log', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            refId: savedData.id,
-            activityType: 'save_draft',
-            shortDescription: 'Draft Saved',
-            longDescription: 'saved intake as draft',
-          }),
-        });
+        try {
+          await fetch('/api/activity-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              refId: savedData.id,
+              activityType: 'save_draft',
+              shortDescription: 'Draft Saved',
+              longDescription: 'saved intake as draft',
+            }),
+          });
+        } catch (error) {
+          console.error('Failed to log draft save activity:', error);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -187,38 +213,56 @@ const handleSaveDraft = async () => {
 
   useEffect(() => {
     if (!isSubmitted && referenceId) {
-      // First, try to fetch draft
-      fetch(`/api/intake/draft?referenceId=${referenceId}`)
+      // First, check if there's a submitted intake
+      fetch(`/api/intake/reference/${referenceId}`)
         .then((res) => {
           if (res.ok) {
             return res.json();
           } else {
-            // Silently handle 404 or other errors without logging
             return null;
           }
         })
-        .then((data) => {
-          if (data && data.draft) {
-            setDraft(data.draft);
-          } else {
-            // If no draft, fetch lead data
-            fetch(`/api/leads?referenceId=${referenceId}`)
-              .then((res) => {
-                if (res.ok) {
-                  return res.json();
-                } else {
-                  return null;
-                }
-              })
-              .then((leadData) => {
-                if (leadData) {
-                  setLeadData(leadData);
-                }
-              })
-              .catch(() => {
-                // Silently ignore errors
-              });
+        .then((intake) => {
+          if (intake && !intake.isDraft) {
+            // There's a submitted intake, no need to load draft or lead data
+            return;
           }
+
+          // No submitted intake, try to fetch draft
+          fetch(`/api/intake/draft?referenceId=${referenceId}`)
+            .then((res) => {
+              if (res.ok) {
+                return res.json();
+              } else {
+                return null;
+              }
+            })
+            .then((data) => {
+              if (data && data.draft) {
+                setDraft(data.draft);
+              } else {
+                // If no draft, fetch lead data
+                fetch(`/api/leads?referenceId=${referenceId}`)
+                  .then((res) => {
+                    if (res.ok) {
+                      return res.json();
+                    } else {
+                      return null;
+                    }
+                  })
+                  .then((leadData) => {
+                    if (leadData) {
+                      setLeadData(leadData);
+                    }
+                  })
+                  .catch(() => {
+                    // Silently ignore errors
+                  });
+              }
+            })
+            .catch(() => {
+              // Silently ignore errors to avoid console noise
+            });
         })
         .catch(() => {
           // Silently ignore errors to avoid console noise
@@ -293,7 +337,7 @@ useEffect(() => {
   } else {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
-  if (intakeId) {
+  if (intakeId && typeof window !== 'undefined' && window.self === window.top) {
     const fetchIntake = async () => {
       try {
         setIsLoadingExistingData(true);
@@ -397,16 +441,25 @@ const payload: Payload = {
 
     // ✅ Log the activity (only if user is logged in)
     if (session?.user?.id) {
-      await fetch('/api/activity-log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          refId: savedData.id,
-          activityType: intakeId ? 'intake_update' : 'intake_submission',
-          shortDescription: intakeId ? 'Intake Updated' : 'Intake Submitted',
-          longDescription: intakeId ? 'successfully updated intake form' : 'successfully submitted intake form',
-        }),
-      });
+      try {
+        await fetch('/api/activity-log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            refId: savedData.id,
+            activityType: intakeId ? 'intake_update' : 'intake_submission',
+            shortDescription: intakeId ? 'Intake Updated' : 'Intake Submitted',
+            longDescription: intakeId ? 'successfully updated intake form' : 'successfully submitted intake form',
+          }),
+        });
+      } catch (error) {
+        console.error('Failed to log intake activity:', error);
+      }
+    }
+
+    // ✅ Notify parent window if in iframe
+    if (typeof window !== 'undefined' && window.self !== window.top) {
+      window.parent.postMessage('formSubmitted', '*');
     }
 
     // ✅ Auto-navigate to step 7 (Document Upload)

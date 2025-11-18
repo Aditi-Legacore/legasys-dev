@@ -20,7 +20,23 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
+
+    // Verify the intake belongs to the user
+    const intake = await prisma.intakeInfo.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+
+    if (!intake || intake.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const notes: NoteWithCreatedBy[] = await prisma.note.findMany({
       where: { intakeId: id },
       include: {
@@ -63,6 +79,16 @@ export async function POST(
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
     }
 
+    // Verify the intake belongs to the user
+    const intake = await prisma.intakeInfo.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+
+    if (!intake || intake.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const note = await prisma.note.create({
       data: {
         intakeId: id,
@@ -91,6 +117,16 @@ export async function DELETE(
 
     if (!noteId) {
       return NextResponse.json({ error: "Note ID is required" }, { status: 400 });
+    }
+
+    // Verify the note belongs to the user
+    const note = await prisma.note.findUnique({
+      where: { id: noteId },
+      include: { intake: true },
+    });
+
+    if (!note || note.intake.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     await prisma.note.delete({

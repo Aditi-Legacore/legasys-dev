@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 // for uploading documents to db and uploads/documents folder
 
@@ -9,6 +11,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Removed auth check for public uploads
+
     const { id } = await params;
     console.log("Upload request for intake ID:", id);
 
@@ -177,7 +181,22 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
+
+    // Verify the intake belongs to the user
+    const intake = await prisma.intakeInfo.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+
+    if (!intake || intake.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     const documents = await prisma.document.findMany({
       where: { intakeId: id },
@@ -212,6 +231,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
     const { documentId } = await request.json();
 
@@ -226,6 +250,16 @@ export async function DELETE(
 
     if (!document) {
       return NextResponse.json({ error: "Document not found" }, { status: 404 });
+    }
+
+    // Verify the intake belongs to the user
+    const intake = await prisma.intakeInfo.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+
+    if (!intake || intake.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // ✅ Delete file from Vercel Blob storage
