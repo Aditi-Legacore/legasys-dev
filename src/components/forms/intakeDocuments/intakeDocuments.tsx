@@ -77,9 +77,9 @@ const IntakeDocuments: React.FC<IntakeDocumentsProps> = ({ submittedIntakeId, on
   setSelectedFiles([]);
   onUploadSuccess?.();
 
-  // Log activity only if some were uploaded and user is logged in
-  if ((response.ok || response.status === 207) && session?.user?.id) {
-    await fetch("/api/activity-log", {
+  // Log activity only if some were uploaded
+  if (response.ok || response.status === 207) {
+    await fetch(isEmbedded ? "/api/embed/activity-log" : "/api/activity-log", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

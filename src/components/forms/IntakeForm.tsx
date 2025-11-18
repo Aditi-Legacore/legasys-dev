@@ -19,6 +19,7 @@ import { useSearchParams } from "next/navigation";
 import type { DefaultUser } from "next-auth";
 import { toast } from "sonner";
 import IntakeDocuments from "./intakeDocuments/intakeDocuments";
+import SuccessPage from "./SuccessPage";
 import { Lead } from "@/types/leads";
 
 declare module "next-auth" {
@@ -46,6 +47,7 @@ const steps = [
   "MEDICAL TREATMENT",
   "Submit",
   "DOCUMENT UPLOAD",
+  "SUCCESS",
 ];
 
 // Mapping for human-readable field names
@@ -72,6 +74,7 @@ const stepFields: (keyof IntakeFormData)[][] = [
   [], // Step 5 (Medical Treatment - no required fields)
   [], // Step 6 (Submit)
   [], // Step 7 (Document Upload - no required fields)
+  [], // Step 8 (Success - no required fields)
 ];
 
 interface IntakeFormWizardProps {
@@ -218,22 +221,21 @@ const handleSaveDraft = async () => {
       const savedData = await res.json();
       console.log("savedData", savedData);
 
-      // Log activity for saving draft (only if user is logged in)
-      if (session?.user?.id) {
-        try {
-          await fetch('/api/activity-log', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              refId: savedData.id,
-              activityType: 'save_draft',
-              shortDescription: 'Draft Saved',
-              longDescription: 'saved intake as draft',
-            }),
-          });
-        } catch (error) {
-          console.error('Failed to log draft save activity:', error);
-        }
+      // Log activity for saving draft
+      try {
+        const activityApiUrl = isEmbeddedCheck ? '/api/embed/activity-log' : '/api/activity-log';
+        await fetch(activityApiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            refId: savedData.id,
+            activityType: 'save_draft',
+            shortDescription: 'Draft Saved',
+            longDescription: 'saved intake as draft',
+          }),
+        });
+      } catch (error) {
+        console.error('Failed to log draft save activity:', error);
       }
     } catch (err) {
       console.error(err);
@@ -475,22 +477,21 @@ const payload: Payload = {
       localStorage.setItem(`submittedIntakeId_${referenceId}`, savedData.id);
     }
 
-    // ✅ Log the activity (only if user is logged in)
-    if (session?.user?.id) {
-      try {
-        await fetch('/api/activity-log', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            refId: savedData.id,
-            activityType: intakeId ? 'intake_update' : 'intake_submission',
-            shortDescription: intakeId ? 'Intake Updated' : 'Intake Submitted',
-            longDescription: intakeId ? 'successfully updated intake form' : 'successfully submitted intake form',
-          }),
-        });
-      } catch (error) {
-        console.error('Failed to log intake activity:', error);
-      }
+    // ✅ Log the activity
+    try {
+      const activityApiUrl = isEmbeddedCheck ? '/api/embed/activity-log' : '/api/activity-log';
+      await fetch(activityApiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          refId: savedData.id,
+          activityType: intakeId ? 'intake_update' : 'intake_submission',
+          shortDescription: intakeId ? 'Intake Updated' : 'Intake Submitted',
+          longDescription: intakeId ? 'successfully updated intake form' : 'successfully submitted intake form',
+        }),
+      });
+    } catch (error) {
+      console.error('Failed to log intake activity:', error);
     }
 
     // ✅ Notify parent window if in iframe
@@ -498,8 +499,8 @@ const payload: Payload = {
       window.parent.postMessage('formSubmitted', '*');
     }
 
-    // ✅ Auto-navigate to step 7 (Document Upload)
-    setStep(6);
+    // ✅ Auto-navigate to step 8 (Success)
+    setStep(7);
 
     // Optionally redirect if needed later
     // router.push("/intake-list");
@@ -547,6 +548,11 @@ const payload: Payload = {
       case 4: return <MedicalTreatmentStep />;
       case 5: return <SubmitStep isSubmitting={isSubmitting} />;
       case 6: return submittedIntakeId ? <IntakeDocuments submittedIntakeId={submittedIntakeId} isEmbedded={isEmbeddedCheck} /> : <div className="text-center">Loading document upload...</div>;
+      case 7: return <SuccessPage
+        title="Form Submitted Successfully!"
+        message="Thank you for submitting your intake form. Your information has been received and will be reviewed shortly."
+        isEmbedded={isEmbeddedCheck}
+      />;
       default: return null;
     }
   };

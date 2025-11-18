@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import PDFPreviewModal from '@/components/intake-preview/PDFPreviewModal';
+import { email } from 'zod';
 
 interface DocumentRecord {
   id: string;
@@ -64,6 +65,10 @@ export default function IntakePreviewPage() {
         if (res.status === 404) {
           // If not found by ID, try to fetch by referenceId (for leads table links)
           res = await fetch(`/api/intake/reference/${id}`);
+        }
+        if (res.status === 404) {
+          // If not found, try embed API for embedded intakes
+          res = await fetch(`/api/intake/reference/${email(id)}`);
         }
         if (res.status === 404) {
           setIntake(null);

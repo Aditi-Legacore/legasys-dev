@@ -15,23 +15,21 @@ export async function logActivity({
 }) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      console.warn("⚠️ No user session found — skipping activity log");
-      return;
+    let createdBy = "embedded"; // Default for embedded forms
+    let userName = "Embedded User";
+
+    if (session?.user?.id) {
+      // Fetch user details if session exists
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { firstName: true, lastName: true, uniqueUserId: true },
+      });
+
+      if (user?.uniqueUserId) {
+        createdBy = user.uniqueUserId;
+        userName = `${user.firstName || ""} ${user.lastName || ""}`.trim();
+      }
     }
-
-    // Fetch user details
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { firstName: true, lastName: true, uniqueUserId: true },
-    });
-
-    if (!user?.uniqueUserId) {
-      console.warn("⚠️ Missing user or uniqueUserId — skipping activity log");
-      return;
-    }
-
-    const userName = `${user.firstName || ""} ${user.lastName || ""}`.trim();
 
     // 🔍 Find IntakeInfo by ID (refId is the intake ID)
     const intake = await prisma.intakeInfo.findUnique({
@@ -45,7 +43,7 @@ export async function logActivity({
     }
 
     // 📝 Construct full long description
-    const fullLongDescription = `${userName} (${user.uniqueUserId}) - Intake ${intake.referenceId || refId}: ${longDescription}`;
+    const fullLongDescription = `${userName} (${createdBy}) - Intake ${intake.referenceId || refId}: ${longDescription}`;
 
     // ✅ Create activity log with intakeId
     await prisma.activityLog.create({
@@ -54,7 +52,7 @@ export async function logActivity({
         activityType,
         shortDescription,
         longDescription: fullLongDescription,
-        createdBy: user.uniqueUserId,
+        createdBy,
       },
     });
 
