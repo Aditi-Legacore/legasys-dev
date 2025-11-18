@@ -102,6 +102,14 @@ const [leadData, setLeadData] = useState<Lead | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedIntakeId, setSubmittedIntakeId] = useState<string | null>(null);
 
+  const methods = useForm<IntakeFormData>({
+    resolver: zodResolver(intakeFormSchema),
+    mode: "onSubmit",
+  });
+  const { data: session } = useSession();
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
   // Set referenceId and submittedIntakeId on mount
   useEffect(() => {
     const refFromUrl = searchParams.get("ref");
@@ -213,17 +221,8 @@ const handleSaveDraft = async () => {
     }
   };
 
-
-  const methods = useForm<IntakeFormData>({
-    resolver: zodResolver(intakeFormSchema),
-    mode: "onSubmit",
-  });
-  const { data: session } = useSession();
-
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
   useEffect(() => {
-    if (!isSubmitted && referenceId) {
+    if (!isSubmitted && referenceId && !intakeId) {
       // Use embed API if embedded, otherwise regular API
       const apiBase = isEmbedded ? '/api/embed' : '/api/intake';
       // First, check if there's a submitted intake
@@ -281,7 +280,7 @@ const handleSaveDraft = async () => {
           // Silently ignore errors to avoid console noise
         });
     }
-  }, [referenceId, isSubmitted, isEmbeddedCheck]);
+  }, [referenceId, isSubmitted, isEmbeddedCheck, intakeId]);
 
   // Populate form with draft data when draft is loaded
   useEffect(() => {
@@ -339,49 +338,48 @@ const handleSaveDraft = async () => {
   }, [leadData, draft, methods]);
 
   
-useEffect(() => {
-  // Only set from session if no referenceId (not from lead) and no intakeId (not editing existing)
-  if (session?.user && !referenceId && !intakeId) {
-    methods.setValue("clientName", session.user.name || "");
-    methods.setValue("email", session.user.email || "");
-  }
-  if (containerRef.current) {
-    containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-  } else {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-  if (intakeId && typeof window !== 'undefined' && window.self === window.top) {
-    const fetchIntake = async () => {
-      try {
-        setIsLoadingExistingData(true);
-        const res = await fetch(`/api/intake/${intakeId}`);
-        if (!res.ok) throw new Error("Failed to fetch intake data");
-        const data = await res.json();
+  // Set session values when session is available and no referenceId or intakeId
+  useEffect(() => {
+    if (session?.user && !referenceId && !intakeId) {
+      methods.setValue("clientName", session.user.name || "");
+      methods.setValue("email", session.user.email || "");
+    }
+  }, [session, referenceId, intakeId, methods]);
 
-        // Map database fields back to form fields
-        const mappedData = {
-          ...data,
-          phone: data.phoneNumber || '',
-          dob: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
-          phoneNumber: data.phoneNumber || '',
-          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
-        };
+  // Fetch existing intake data when editing (intakeId present)
+  useEffect(() => {
+    if (intakeId && typeof window !== 'undefined' && window.self === window.top) {
+      const fetchIntake = async () => {
+        try {
+          setIsLoadingExistingData(true);
+          const res = await fetch(`/api/intake/${intakeId}`);
+          if (!res.ok) throw new Error("Failed to fetch intake data");
+          const data = await res.json();
 
-        (Object.keys(mappedData) as (keyof typeof mappedData)[]).forEach((key) => {
-          const value = mappedData[key];
-          if (value !== null && value !== undefined) {
-            methods.setValue(key as keyof IntakeFormData, value);
-          }
-        });
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setIsLoadingExistingData(false);
-      }
-    };
-    fetchIntake();
-  }
-}, [session, intakeId, methods, referenceId]);
+          // Map database fields back to form fields
+          const mappedData = {
+            ...data,
+            phone: data.phoneNumber || '',
+            dob: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
+            phoneNumber: data.phoneNumber || '',
+            dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
+          };
+
+          (Object.keys(mappedData) as (keyof typeof mappedData)[]).forEach((key) => {
+            const value = mappedData[key];
+            if (value !== null && value !== undefined) {
+              methods.setValue(key as keyof IntakeFormData, value);
+            }
+          });
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setIsLoadingExistingData(false);
+        }
+      };
+      fetchIntake();
+    }
+  }, [intakeId, methods]);
 
   
 
