@@ -32,9 +32,9 @@ export async function GET(
     }
 
     // For non-embed, check ownership
-    if (!isEmbed && intake.userId !== session?.user?.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // if (!isEmbed && intake.userId !== session?.user?.id) {
+    //   return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    // }
 
     return NextResponse.json(intake, { status: 200 });
   } catch (err) {

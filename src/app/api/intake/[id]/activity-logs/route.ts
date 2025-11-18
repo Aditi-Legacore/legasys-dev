@@ -21,9 +21,9 @@ export async function GET(
       select: { userId: true },
     });
 
-    if (!intake || intake.userId !== session.user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // if (!intake || intake.userId !== session.user.id) {
+    //   return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    // }
 
     // Fetch activity logs for the intake
     const activityLogs = await prisma.activityLog.findMany({
@@ -78,9 +78,9 @@ export async function POST(
       select: { userId: true },
     });
 
-    if (!intake || intake.userId !== session.user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // if (!intake || intake.userId !== session.user.id) {
+    //   return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    // }
 
     // Fetch user details
     const user = await prisma.user.findUnique({

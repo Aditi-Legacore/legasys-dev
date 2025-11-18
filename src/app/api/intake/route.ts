@@ -114,7 +114,7 @@ export async function GET() {
     }
 
     const allIntakes = await prisma.intakeInfo.findMany({
-      where: { userId: session.user.id },
+      // where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
       include: {
         Lead: {

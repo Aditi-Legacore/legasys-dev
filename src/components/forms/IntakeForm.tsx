@@ -150,16 +150,46 @@ const [leadData, setLeadData] = useState<Lead | null>(null);
     }
   }, [step, referenceId]);
 
-// Prefill draft if exists
+  const methods = useForm<IntakeFormData>({
+    resolver: zodResolver(intakeFormSchema),
+    mode: "onSubmit",
+  });
+  const { data: session } = useSession();
+
+  // Prefill draft if exists
   useEffect(() => {
     const draftData = localStorage.getItem("draftData");
     if (draftData) {
       const parsedDraft = JSON.parse(draftData);
-      Object.keys(parsedDraft).forEach((key) => {
-        methods.setValue(key as keyof IntakeFormData, parsedDraft[key]);
+
+      // Safely parse values that may be unknown coming from the draft object.
+      const parseDateString = (d: unknown) => {
+        if (!d) return '';
+        if (typeof d === 'string' || typeof d === 'number' || d instanceof Date) {
+          const date = new Date(d);
+          if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
+        }
+        return '';
+      };
+
+      const getString = (v: unknown) => (typeof v === 'string' ? v : '');
+
+      const mappedData = {
+        ...parsedDraft,
+        phone: getString((parsedDraft as Record<string, unknown>).phoneNumber) || getString((parsedDraft as Record<string, unknown>).phone),
+        dob: parseDateString((parsedDraft as Record<string, unknown>).dateOfBirth ?? (parsedDraft as Record<string, unknown>).dob),
+        phoneNumber: getString((parsedDraft as Record<string, unknown>).phoneNumber),
+        dateOfBirth: parseDateString((parsedDraft as Record<string, unknown>).dateOfBirth ?? (parsedDraft as Record<string, unknown>).dob),
+      };
+
+      (Object.keys(mappedData) as Array<keyof typeof mappedData>).forEach((key) => {
+        const value = mappedData[key];
+        if (value !== null && value !== undefined) {
+          methods.setValue(key as keyof IntakeFormData, value);
+        }
       });
     }
-  }, []);
+  }, [methods]);
 
 const handleSaveDraft = async () => {
     try {
@@ -210,13 +240,6 @@ const handleSaveDraft = async () => {
       toast.error("Error saving draft.");
     }
   };
-
-
-  const methods = useForm<IntakeFormData>({
-    resolver: zodResolver(intakeFormSchema),
-    mode: "onSubmit",
-  });
-  const { data: session } = useSession();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
