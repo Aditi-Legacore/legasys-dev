@@ -1,32 +1,50 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import IntakeFormWizard from '@/components/forms/IntakeForm';
 import NewIntakeModal from '@/components/NewIntakeModal';
 
 export default function EmbedFormPage() {
   const searchParams = useSearchParams();
-  const ref = searchParams.get('ref');
-  const [showModal, setShowModal] = useState(!ref);
+  const [showModal, setShowModal] = useState(false);
+  const [isIframe, setIsIframe] = useState(false);
+
+  // Determine iframe + initial modal state only once
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+
+    // show modal only if ref is NOT present
+    setShowModal(!ref);
+
+    // check iframe safely
+    if (typeof window !== 'undefined') {
+      setIsIframe(window.self !== window.top);
+    }
+  }, [searchParams]);
 
   const handleClose = () => {
     setShowModal(false);
-    // If embedded in iframe, notify parent window
-    if (window.self !== window.top) {
+
+    // notify parent only if inside iframe
+    if (isIframe) {
       window.parent.postMessage('closeModal', '*');
     }
   };
 
   const handleModalSuccess = () => {
     setShowModal(false);
+
+    if (isIframe) {
+      window.parent.postMessage('formStarted', '*');
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {showModal ? (
-          <NewIntakeModal onClose={handleClose} />
+          <NewIntakeModal {...({ onClose: handleClose, onSuccess: handleModalSuccess } as any)} />
         ) : (
           <IntakeFormWizard />
         )}
