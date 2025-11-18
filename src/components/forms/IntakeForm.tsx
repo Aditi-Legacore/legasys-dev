@@ -19,6 +19,7 @@ import { useSearchParams } from "next/navigation";
 import type { DefaultUser } from "next-auth";
 import { toast } from "sonner";
 import IntakeDocuments from "./intakeDocuments/intakeDocuments";
+import SuccessPage from "./SuccessPage";
 import { Lead } from "@/types/leads";
 
 declare module "next-auth" {
@@ -46,6 +47,7 @@ const steps = [
   "MEDICAL TREATMENT",
   "Submit",
   "DOCUMENT UPLOAD",
+  "SUCCESS",
 ];
 
 // Mapping for human-readable field names
@@ -72,6 +74,7 @@ const stepFields: (keyof IntakeFormData)[][] = [
   [], // Step 5 (Medical Treatment - no required fields)
   [], // Step 6 (Submit)
   [], // Step 7 (Document Upload - no required fields)
+  [], // Step 8 (Success - no required fields)
 ];
 
 interface IntakeFormWizardProps {
@@ -473,8 +476,8 @@ const payload: Payload = {
       window.parent.postMessage('formSubmitted', '*');
     }
 
-    // ✅ Auto-navigate to step 7 (Document Upload)
-    setStep(6);
+    // ✅ Auto-navigate to step 8 (Success)
+    setStep(7);
 
     // Optionally redirect if needed later
     // router.push("/intake-list");
@@ -522,6 +525,11 @@ const payload: Payload = {
       case 4: return <MedicalTreatmentStep />;
       case 5: return <SubmitStep isSubmitting={isSubmitting} />;
       case 6: return submittedIntakeId ? <IntakeDocuments submittedIntakeId={submittedIntakeId} isEmbedded={isEmbeddedCheck} /> : <div className="text-center">Loading document upload...</div>;
+      case 7: return <SuccessPage
+        title="Form Submitted Successfully!"
+        message="Thank you for submitting your intake form. Your information has been received and will be reviewed shortly."
+        isEmbedded={isEmbeddedCheck}
+      />;
       default: return null;
     }
   };
