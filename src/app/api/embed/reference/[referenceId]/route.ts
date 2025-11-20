@@ -13,7 +13,7 @@ export async function GET(
 
     // For embed (when referenceId is an email), allow access without auth
     const isEmbed = referenceId.includes('@');
-    let session = null;
+    // const session = null;
     if (!isEmbed) {
       // For non-embed, we could add auth check here if needed, but since this is embed API, we'll keep it open
     }

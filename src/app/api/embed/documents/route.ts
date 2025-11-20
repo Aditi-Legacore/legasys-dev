@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { put, del } from "@vercel/blob";
+import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 
 // for uploading documents to db and uploads/documents folder

@@ -16,10 +16,10 @@ export async function GET(
     const intakeId = (await params).id;
 
     // Verify the intake belongs to the user
-    const intake = await prisma.intakeInfo.findUnique({
-      where: { id: intakeId },
-      select: { userId: true },
-    });
+    // const intake = await prisma.intakeInfo.findUnique({
+    //   where: { id: intakeId },
+    //   select: { userId: true },
+    // });
 
     // if (!intake || intake.userId !== session.user.id) {
     //   return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
