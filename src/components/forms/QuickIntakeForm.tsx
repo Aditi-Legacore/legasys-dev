@@ -39,7 +39,7 @@ const referralSources = [
   { value: 'other', label: 'Other' },
 ];
 
-export default function IntakeForm({ }: { onClose: () => void }) {
+export default function IntakeForm({ onClose }: { onClose: () => void }) {
   const [referenceId, setReferenceId] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
@@ -103,7 +103,11 @@ export default function IntakeForm({ }: { onClose: () => void }) {
   };
 
   const handleNext = () => {
-    // For embed, navigate to the embed form with ref
+    // Close the modal first
+    if (onClose) {
+      onClose();
+    }
+    // Then navigate
     if (window.self !== window.top) {
       window.location.href = `/embed/form?ref=${referenceId}`;
     } else {

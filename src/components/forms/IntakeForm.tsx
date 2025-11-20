@@ -347,6 +347,10 @@ const handleSaveDraft = async () => {
         accidentDescription: leadData.description || '',
         referralSource: leadData.referralSource || '',
         dob: leadData.dateOfBirth ? new Date(leadData.dateOfBirth).toISOString().split('T')[0] : '',
+        // Clear address fields since QuickIntakeForm doesn't provide them
+        address: '',
+        city: '',
+        zip: '',
       };
 
       (Object.keys(mappedData) as (keyof typeof mappedData)[]).forEach((key) => {
