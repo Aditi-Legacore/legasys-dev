@@ -247,65 +247,62 @@ const handleSaveDraft = async () => {
 
   useEffect(() => {
     if (!isSubmitted && referenceId) {
-      // Use embed API if embedded, otherwise regular API
-      const apiBase = isEmbedded ? '/api/embed' : '/api/intake';
-      // First, check if there's a submitted intake
-      fetch(`${apiBase}/reference/${referenceId}`)
-        .then((res) => {
-          if (res.ok) {
-            return res.json();
+      // If embedded → use existing full logic
+      if (isEmbedded) {
+        const apiBase = "/api/embed";
+  
+        // First check submitted intake
+        fetch(`${apiBase}/reference/${referenceId}`)
+          .then((res) => (res.ok ? res.json() : null))
+          .then((intake) => {
+            if (intake && !intake.isDraft) {
+              return; // already submitted → stop here
+            }
+  
+            // No submitted intake → check for draft
+            fetch(`${apiBase}/draft?referenceId=${referenceId}`)
+              .then((res) => (res.ok ? res.json() : null))
+              .then((data) => {
+                if (data?.draft) {
+                  setDraft(data.draft);
+                } else {
+                  // No draft → load lead data
+                  fetch(`${apiBase}/leads?referenceId=${referenceId}`)
+                    .then((res) => (res.ok ? res.json() : null))
+                    .then((leadData) => {
+                      if (leadData) setLeadData(leadData);
+                    })
+                    .catch(() => {});
+                }
+              })
+              .catch(() => {});
+          })
+          .catch(() => {});
+  
+        return; // STOP — do not continue to non-embed logic
+      }
+  
+      // NOT EMBEDDED → simplified logic (NO reference check)
+      fetch(`/api/intake/draft?referenceId=${referenceId}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.draft) {
+            setDraft(data.draft);
           } else {
-            return null;
+            // No draft → fetch lead
+            fetch(`/api/leads?referenceId=${referenceId}`)
+              .then((res) => (res.ok ? res.json() : null))
+              .then((leadData) => {
+                if (leadData) setLeadData(leadData);
+              })
+              .catch(() => {});
           }
         })
-        .then((intake) => {
-          if (intake && !intake.isDraft) {
-            // There's a submitted intake, no need to load draft or lead data
-            return;
-          }
-
-          // No submitted intake, try to fetch draft
-          fetch(`${apiBase}/draft?referenceId=${referenceId}`)
-            .then((res) => {
-              if (res.ok) {
-                return res.json();
-              } else {
-                return null;
-              }
-            })
-            .then((data) => {
-              if (data && data.draft) {
-                setDraft(data.draft);
-              } else {
-                // If no draft, fetch lead data
-                fetch(`${apiBase}/leads?referenceId=${referenceId}`)
-                  .then((res) => {
-                    if (res.ok) {
-                      return res.json();
-                    } else {
-                      return null;
-                    }
-                  })
-                  .then((leadData) => {
-                    if (leadData) {
-                      setLeadData(leadData);
-                    }
-                  })
-                  .catch(() => {
-                    // Silently ignore errors
-                  });
-              }
-            })
-            .catch(() => {
-              // Silently ignore errors to avoid console noise
-            });
-        })
-        .catch(() => {
-          // Silently ignore errors to avoid console noise
-        });
+        .catch(() => {});
     }
-  }, [referenceId, isSubmitted, isEmbeddedCheck]);
-
+  }, [referenceId, isSubmitted, isEmbedded]);
+  
+  
   // Populate form with draft data when draft is loaded
   useEffect(() => {
     if (draft) {
@@ -425,8 +422,8 @@ useEffect(() => {
   // new code for update field added to fetch data from database
 
   const onSubmit = async (data: IntakeFormData) => {
-  console.log("🚀 Form submission attempted with data:", data);
-  console.log("Session user ID:", session?.user?.id);
+  // console.log("🚀 Form submission attempted with data:", data);
+  // console.log("Session user ID:", session?.user?.id);
   setIsSubmitting(true);
 
   try {
@@ -435,7 +432,7 @@ useEffect(() => {
     const apiBase = isEmbedded ? '/api/embed/intake' : '/api/intake';
     const url = intakeId ? `${apiBase}/${intakeId}` : apiBase;
 
-    console.log(`📡 Sending ${method} request to ${url}`);
+    // console.log(`📡 Sending ${method} request to ${url}`);
 
   
 
@@ -456,7 +453,7 @@ const payload: Payload = {
       body: JSON.stringify(payload),
     });
 
-    console.log("Response status:", response.status);
+    // console.log("Response status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -465,7 +462,7 @@ const payload: Payload = {
     }
 
     const savedData = await response.json();
-    console.log("✅ Intake form saved:", savedData);
+    // console.log("✅ Intake form saved:", savedData);
 
     // ✅ Show success message
     toast.success(intakeId ? "✅ Intake updated successfully!" : "✅ Intake created successfully!");
@@ -577,17 +574,17 @@ const payload: Payload = {
         <div className="max-w-4xl mx-auto border border-gray-300 dark:border-gray-600 rounded-xl">
           <form
             onSubmit={(e) => {
-              console.log("Form onSubmit triggered");
+              // console.log("Form onSubmit triggered");
               e.preventDefault();
-              console.log("Calling methods.handleSubmit(onSubmit)");
+              // console.log("Calling methods.handleSubmit(onSubmit)");
               methods.handleSubmit(onSubmit, (errors) => {
-                console.log("❌ Validation failed:", errors);
+                // console.log("❌ Validation failed:", errors);
                 const missingFields = Object.keys(errors)
                   .filter(field => requiredFields.includes(field))
                   .map(field => fieldDisplayNames[field] || field)
                   .join(", ");
                 const errorMessage = `Please fill in the following required fields: ${missingFields}`;
-                console.error(errorMessage);
+                // console.error(errorMessage);
                 toast.error(errorMessage);
               })();
             }}
