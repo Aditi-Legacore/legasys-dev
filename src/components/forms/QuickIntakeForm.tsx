@@ -39,7 +39,7 @@ const referralSources = [
   { value: 'other', label: 'Other' },
 ];
 
-export default function IntakeForm({ }: { onClose: () => void }) {
+export default function IntakeForm({ onClose }: { onClose: () => void }) {
   const [referenceId, setReferenceId] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
@@ -103,6 +103,11 @@ export default function IntakeForm({ }: { onClose: () => void }) {
   };
 
   const handleNext = () => {
+    // Close the modal first
+    if (onClose) {
+      onClose();
+    }
+    // Then navigate
     router.push(`/intake-form?ref=${referenceId}`);
   };
 
