@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import QuickIntakeForm from "./forms/QuickIntakeForm";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,14 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isEmbedded, setIsEmbedded] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsEmbedded(window.self !== window.top);
+    }
+  }, []);
 
   const handleEmailSubmit = async () => {
     if (!email) {
@@ -115,10 +122,14 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
       <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-2xl p-6 shadow-2xl border border-gray-200 dark:border-gray-700">
         {/* Header */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Intake</h2>
-          <Button variant="ghost" size="icon" onClick={onClose} className="text-gray-400 hover:text-red-600 text-lg">✕</Button>
-        </div>
+<div className="flex justify-between items-center mb-4">
+  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Intake</h2>
+  {!isEmbedded && (
+    <Button variant="ghost" size="icon" onClick={onClose} className="text-gray-400 hover:text-red-600 text-lg">
+      ✕
+    </Button>
+  )}
+</div>
 
         {/* Email Input */}
         {mode === "email" && (
