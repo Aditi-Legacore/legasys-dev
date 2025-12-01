@@ -60,4 +60,9 @@ export const menuItems: MenuItem[] = [
     path: "/documents",
     icon: FolderOpen,
   },
+  {
+    label: "Demand Notes",
+    path: "/demand-notes",
+    icon: FolderOpen,
+  },
 ];

@@ -1,20 +1,27 @@
-# TODO: Separate APIs for Embedded Form and Restore Auth
+# Demand Notes [id] Page Update
 
-## Step 1: Restore Auth to Existing APIs
-- [x] Add session check to `/api/intake/route.ts` POST method
-- [x] Restore auth check to `/api/intake/[id]/documents/route.ts` POST method
+## Task: Update demand notes [id] page to use reusable components like toast and keep it similar to intake preview page
 
-## Step 2: Create New Embed APIs (No Auth)
-- [x] Create `/api/embed/intake/route.ts` (POST) - copy from intake/route.ts without auth
-- [x] Create `/api/embed/draft/route.ts` (GET/POST) - copy from intake/draft/route.ts without auth
-- [x] Create `/api/embed/documents/route.ts` (POST) - copy from intake/[id]/documents/route.ts without auth
-- [x] Create `/api/embed/check-draft/route.ts` (POST) - copy from check-draft/route.ts
-- [x] Create `/api/embed/reference/[referenceId]/route.ts` (GET) - copy from intake/reference/[referenceId]/route.ts without auth
-- [x] Create `/api/embed/leads/route.ts` (GET) - copy from leads/route.ts without auth
+### Completed Tasks:
+- [x] Import toast from 'sonner' for notifications
+- [x] Import and use the reusable StatusBadge component
+- [x] Restructure the page layout to match intake preview page:
+  - Added header section with back, download, and share buttons
+  - Added avatar with project initials
+  - Added project information display
+  - Updated main content layout with proper spacing and containers
+- [x] Remove inline StatusBadge component and use the imported one
+- [x] Add toast notifications for download and share actions
+- [x] Update mock data status to match StatusBadge component types
 
-## Step 3: Update Embedded Form
-- [ ] Modify `IntakeForm.tsx` to detect embedded context and call embed APIs instead of regular ones
+### Pending Tasks:
+- [ ] Test the page functionality
+- [ ] Verify toast notifications work correctly
+- [ ] Ensure responsive design matches intake preview page
+- [ ] Add any missing functionality from intake preview page if needed
 
-## Step 4: Testing
-- [ ] Test embedded form functionality
-- [ ] Verify regular form still works with auth
+### Notes:
+- Used 'initiated' status for mock data to match StatusBadge component
+- Added proper JSX structure with fragment and closing tags
+- Maintained existing tab functionality (Details, Files, Workflow)
+- Added back navigation, download, and share functionality with toast feedback
