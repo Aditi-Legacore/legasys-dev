@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Search, Filter, FileText, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,170 +19,137 @@ import { useRouter } from "next/navigation";
 
 interface DemandNote {
   id: string;
-  clientName: string;
-  demandDate: string;
+  client: { name: string } | null;
+  dueDate: string | null;
   status: DemandNoteStatus;
-  lastUpdated: string;
+  updatedAt: string;
 }
-
-const mockDemandNotes: DemandNote[] = [
-  {
-    id: "DN-001",
-    clientName: "John Doe",
-    demandDate: "2025-11-20",
-    status: "generated",
-    lastUpdated: "2025-11-25 14:30",
-  },
-  {
-    id: "DN-002",
-    clientName: "Jane Smith",
-    demandDate: "2025-11-22",
-    status: "verified",
-    lastUpdated: "2025-11-26 09:15",
-  },
-  {
-    id: "DN-003",
-    clientName: "Robert Johnson",
-    demandDate: "2025-11-24",
-    status: "doc-uploaded",
-    lastUpdated: "2025-11-26 16:45",
-  },
-];
 
 export default function DemandNotes() {
   const router = useRouter();
+  const [demandNotes, setDemandNotes] = useState<DemandNote[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
-  const filteredNotes = mockDemandNotes.filter((note) => {
-    const matchesSearch = note.clientName
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || note.status === statusFilter;
+  useEffect(() => {
+    async function load() {
+      const res = await fetch("/api/demand-notes");
+      const data = await res.json();
+      if (Array.isArray(data)) setDemandNotes(data);
+    }
+    load();
+  }, []);
+
+  // FILTERING
+  const filteredNotes = demandNotes.filter((note) => {
+    const clientName = note.client?.name ?? "";
+    const matchesSearch = clientName.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || note.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  // Define columns for CommonTable
+  // TABLE DATA → convert DemandNote → Record<string, unknown>
+  const tableData: Record<string, unknown>[] = filteredNotes.map((n) => ({
+    id: n.id,
+    clientName: n.client?.name ?? "Unknown",
+    dueDate: n.dueDate,
+    status: n.status,
+    updatedAt: n.updatedAt,
+    _original: n, // keep reference for actions
+  }));
+
+  // COLUMNS
   const columns: Column<Record<string, unknown>>[] = [
     {
-      key: 'clientName',
-      label: 'Client Name',
-      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium',
+      key: "clientName",
+      label: "Client Name",
       sortable: true,
     },
     {
-      key: 'demandDate',
-      label: 'Demand Date',
-      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      key: "dueDate",
+      label: "Demand Date",
       sortable: true,
-      render: (value): React.ReactNode => new Date(value as string).toLocaleDateString('en-US')
+      render: (value) =>
+        value ? new Date(value as string).toLocaleDateString() : "—",
     },
     {
-      key: 'status',
-      label: 'Status',
-      className: 'px-4 py-4',
+      key: "status",
+      label: "Status",
       sortable: true,
-      render: (value): React.ReactNode => (
-        <StatusBadge status={value as DemandNoteStatus} />
-      )
+      render: (value) => <StatusBadge status={value as DemandNoteStatus} />,
     },
     {
-      key: 'lastUpdated',
-      label: 'Last Updated',
-      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      key: "updatedAt",
+      label: "Last Updated",
       sortable: true,
-    }
+      render: (value) =>
+        new Date(value as string).toLocaleString(),
+    },
   ];
 
-  // Define actions for CommonTable
+  // ACTIONS
   const actions: Action<Record<string, unknown>>[] = [
     {
-      label: 'View Details',
+      label: "View",
       icon: Eye,
-      onClick: (row) => router.push(`/demand-notes/${(row as unknown as DemandNote).id}`),
-      className: 'text-blue-600 dark:text-blue-400'
-    }
+      onClick: (row) => {
+        const original = row._original as DemandNote;
+        router.push(`/demand-notes/${original.id}`);
+      },
+    },
   ];
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Demand Notes</h1>
-            <p className="text-muted-foreground mt-1">
-              Manage and track demand notes for your cases
-            </p>
-          </div>
-          <Button asChild className="bg-primary hover:bg-primary/90">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Demand Notes</h1>
+          <Button asChild>
             <Link href="/demand-notes/new">
-              <Plus className="h-4 w-4 mr-2" />
-              New Demand Note
+              <Plus className="h-4 w-4 mr-2" /> New Demand Note
             </Link>
           </Button>
         </div>
 
         {/* Filters */}
         <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by client name..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="All Statuses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="initiated">Initiated</SelectItem>
-                  <SelectItem value="doc-uploading">Uploading</SelectItem>
-                  <SelectItem value="doc-uploaded">Uploaded</SelectItem>
-                  <SelectItem value="verified">Verified</SelectItem>
-                  <SelectItem value="generated">Generated</SelectItem>
-                </SelectContent>
-              </Select>
+          <CardContent className="p-4 flex gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" />
+              <Input
+                placeholder="Search by client name..."
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
+
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[200px]">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="initiated">Initiated</SelectItem>
+                <SelectItem value="doc-uploading">Uploading</SelectItem>
+                <SelectItem value="doc-uploaded">Uploaded</SelectItem>
+                <SelectItem value="verified">Verified</SelectItem>
+                <SelectItem value="generated">Generated</SelectItem>
+              </SelectContent>
+            </Select>
           </CardContent>
         </Card>
 
         {/* Table */}
-        {filteredNotes.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                No demand notes yet
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Get started by creating your first demand note
-              </p>
-              <Button asChild>
-                <Link href="/demand-notes/new">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create your first demand note
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <CommonTable
-            columns={columns}
-            data={filteredNotes as unknown as Record<string, unknown>[]}
-            actions={actions}
-            emptyMessage="No demand notes found."
-          />
-        )}
+        <CommonTable
+          columns={columns}
+          data={tableData}
+          actions={actions}
+          emptyMessage="No demand notes found"
+        />
       </div>
     </main>
   );

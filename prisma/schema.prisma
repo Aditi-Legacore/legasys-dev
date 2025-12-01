@@ -315,7 +315,7 @@ model DemandNote {
   updatedAt      DateTime     @updatedAt
 
   // relations  
-  client         DefendantClient       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client         DefedantClient       @relation(fields: [clientId], references: [id], onDelete: Cascade)
   createdBy      User         @relation(fields: [createdById], references: [id])
 
   files          DemandFile[]
@@ -326,7 +326,7 @@ model DemandNote {
   tags           DemandNoteTag[]
 }
 
-model DefendantClient {
+model DefedantClient {
   id         String       @id @default(cuid())
   name       String
   email      String?
@@ -348,6 +348,7 @@ model DemandFile {
   id           String      @id @default(cuid())
   demandNoteId String
   uploadedById String
+  fileCategory String?
   fileName     String
   fileUrl      String
   fileType     String?
