@@ -120,7 +120,7 @@ export default function NewIntakeModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-2xl p-6 shadow-2xl border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-2xl p-10 shadow-2xl border border-gray-200 dark:border-gray-700">
         {/* Header */}
 <div className="flex justify-between items-center mb-4">
   <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Intake</h2>
