@@ -25,6 +25,10 @@ model User {
   sessions      Session[]
   formSubmissions FormSubmission[]
   notes         Note[]
+  demandNotes DemandNote[]
+  uploadedFiles DemandFile[]
+  internalNotes DemandInternalNote[]
+  statusHistories DemandStatusHistory[]
 }
 
 model Account {
@@ -428,6 +432,6 @@ model DemandNoteTag {
   demandNoteId String
   tagId        String
 
-  demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], references: [id], onDelete: Cascade)
+  demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
   tag          DemandTag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
 }
