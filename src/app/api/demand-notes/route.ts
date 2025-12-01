@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(demandNote, { status: 201 });
   } catch (err: any) {
-    console.error("❌ POST /api/demand-notes error:", err);
+    // console.error("❌ POST /api/demand-notes error:", err);
     return NextResponse.json(
       { error: "Failed to create demand note", details: err.message },
       { status: 500 }
