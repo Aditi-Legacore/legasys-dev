@@ -1,11 +1,15 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+
+
 
 model User {
   id            String       @id @default(cuid())
@@ -26,6 +30,10 @@ model User {
   sessions      Session[]
   formSubmissions FormSubmission[]
   notes         Note[]
+  demandNotes DemandNote[]
+  uploadedFiles DemandFile[]
+  internalNotes DemandInternalNote[]
+  statusHistories DemandStatusHistory[]
 }
 
 model Account {
@@ -290,4 +298,145 @@ model OTP {
   createdAt DateTime @default(now())
 
   @@unique([email, otp])
+}
+
+model DemandNote {
+  id             String       @id @default(cuid())
+  clientId       String
+  createdById    String
+  title          String
+  description    String?
+  referenceNumber String?     @unique
+  totalAmount    Float
+  dueDate        DateTime?
+  status         String       @default("draft") // draft | sent | overdue | paid
+  priority       String?      // low | medium | high
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // relations  
+  client         DefendantClient       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  createdBy      User         @relation(fields: [createdById], references: [id])
+
+  files          DemandFile[]
+  internalNotes  DemandInternalNote[]
+  timeline       DemandTimeline[]
+  statusHistory  DemandStatusHistory[]
+  reminders      DemandReminder[]
+  tags           DemandNoteTag[]
+}
+
+model DefendantClient {
+  id         String       @id @default(cuid())
+  name       String
+  email      String?
+  phone      String?
+  address    String?
+  gstNumber  String?
+  panNumber  String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  demandNotes DemandNote[]
+}
+
+// -----------------------------
+// Files
+// -----------------------------
+
+model DemandFile {
+  id           String      @id @default(cuid())
+  demandNoteId String
+  uploadedById String
+  fileName     String
+  fileUrl      String
+  fileType     String?
+  size         Int?
+  createdAt    DateTime    @default(now())
+
+  demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
+  uploadedBy   User        @relation(fields: [uploadedById], references: [id])
+}
+
+// -----------------------------
+// Internal Notes
+// -----------------------------
+
+model DemandInternalNote {
+  id           String      @id @default(cuid())
+  demandNoteId String
+  createdById  String
+  content      String
+  createdAt    DateTime    @default(now())
+
+  demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
+  createdBy    User        @relation(fields: [createdById], references: [id])
+}
+
+// -----------------------------
+// Timeline
+// -----------------------------
+
+model DemandTimeline {
+  id           String      @id @default(cuid())
+  demandNoteId String
+  type         String      // created | email-sent | status-updated | file-uploaded | note-added
+  message      String
+  metadata     Json?
+  createdAt    DateTime    @default(now())
+
+  demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
+}
+
+// -----------------------------
+// Status History
+// -----------------------------
+
+model DemandStatusHistory {
+  id           String      @id @default(cuid())
+  demandNoteId String
+  changedById  String
+  oldStatus    String?
+  newStatus    String
+  createdAt    DateTime    @default(now())
+
+  demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
+  changedBy    User        @relation(fields: [changedById], references: [id])
+}
+
+// -----------------------------
+// Reminders
+// -----------------------------
+
+model DemandReminder {
+  id           String      @id @default(cuid())
+  demandNoteId String
+  remindAt     DateTime
+  sent         Boolean     @default(false)
+  type         String      // email | sms | whatsapp
+  createdAt    DateTime    @default(now())
+
+  demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
+}
+
+// -----------------------------
+// Tags + Pivot
+// -----------------------------
+
+model DemandTag {
+  id        String        @id @default(cuid())
+  name      String        @unique
+  color     String?
+  createdAt DateTime      @default(now())
+
+  notes     DemandNoteTag[]
+}
+
+model DemandNoteTag {
+  id           String      @id @default(cuid())
+  demandNoteId String
+  tagId        String
+
+  demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
+  tag          DemandTag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
 }

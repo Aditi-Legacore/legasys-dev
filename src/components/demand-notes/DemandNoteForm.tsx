@@ -39,16 +39,59 @@ export default function DemandNoteForm({ id }: { id?: string }) {
     .toString(36)
     .substring(2, 8)}`;
 
-  const handleGenerate = async () => {
-    setIsGenerating(true);
-
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    setStatus("generated");
-    setIsGenerating(false);
-
-    toast.success("Demand note generated successfully.");
-  };
+    const handleGenerate = async () => {
+      try {
+        setIsGenerating(true);
+    
+        // 🔥 Add fileUrl before sending to backend
+        const traffic = trafficFiles.map((f) => ({
+          ...f,
+          fileUrl: "/uploads/" + f.name,
+        }));
+    
+        const medical = medicalFiles.map((f) => ({
+          ...f,
+          fileUrl: "/uploads/" + f.name,
+        }));
+    
+        const bills = billFiles.map((f) => ({
+          ...f,
+          fileUrl: "/uploads/" + f.name,
+        }));
+    
+        const response = await fetch("/api/demand-notes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientName,
+            demandDate,
+            internalNotes,
+            status: "generated",
+            files: {
+              traffic,
+              medical,
+              bills,
+            },
+          }),
+        });
+    
+        const data = await response.json();
+    
+        if (!response.ok) {
+          toast.error("Failed to create demand note.");
+          return;
+        }
+    
+        toast.success("Demand note generated & saved!");
+        router.push(`/demand-notes/${data.demandNote.id}`);
+      } catch (err) {
+        toast.error("Something went wrong.");
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+    
+    
 
   const handleSaveDraft = () => {
     toast.success("Draft saved successfully!");
@@ -95,7 +138,7 @@ export default function DemandNoteForm({ id }: { id?: string }) {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="clientName">Client Name</Label>
+                  <Label htmlFor="clientName">Defendant Name</Label>
                   <Input
                     id="clientName"
                     value={clientName}
