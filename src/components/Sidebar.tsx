@@ -74,7 +74,7 @@ const Sidebar: React.FC = () => {
         </div>
 
         {/* Menu Section */}
-        <nav className="flex-1">
+        <nav className="flex-1 overflow-y-auto">
           <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
