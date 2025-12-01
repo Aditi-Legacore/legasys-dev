@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Search, Filter, FileText, Eye } from "lucide-react";
+import { Plus, Search, Filter, FileText, Eye, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,46 +16,60 @@ import { Card, CardContent } from "@/components/ui/card";
 import { StatusBadge, DemandNoteStatus } from "@/components/demand-notes/StatusBadge";
 import CommonTable, { Column, Action } from "@/components/ui/CommonTable";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface DemandNote {
   id: string;
-  clientName: string;
-  demandDate: string;
+  client: { name: string };
+  dueDate: string;
   status: DemandNoteStatus;
-  lastUpdated: string;
+  updatedAt: string;
 }
-
-const mockDemandNotes: DemandNote[] = [
-  {
-    id: "DN-001",
-    clientName: "John Doe",
-    demandDate: "2025-11-20",
-    status: "generated",
-    lastUpdated: "2025-11-25 14:30",
-  },
-  {
-    id: "DN-002",
-    clientName: "Jane Smith",
-    demandDate: "2025-11-22",
-    status: "verified",
-    lastUpdated: "2025-11-26 09:15",
-  },
-  {
-    id: "DN-003",
-    clientName: "Robert Johnson",
-    demandDate: "2025-11-24",
-    status: "doc-uploaded",
-    lastUpdated: "2025-11-26 16:45",
-  },
-];
 
 export default function DemandNotes() {
   const router = useRouter();
+  const { data: session, status: sessionStatus } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [demandNotes, setDemandNotes] = useState<DemandNote[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredNotes = mockDemandNotes.filter((note) => {
-    const matchesSearch = note.clientName
+  useEffect(() => {
+    if (sessionStatus === 'loading') return;
+
+    if (!session) {
+      setError('Please log in to view demand notes');
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchDemandNotes = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await fetch('/api/demand-notes');
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Authentication required. Please log in again.');
+          }
+          throw new Error('Failed to fetch demand notes');
+        }
+        const data = await response.json();
+        setDemandNotes(data);
+      } catch (err) {
+        console.error('Error fetching demand notes:', err);
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDemandNotes();
+  }, [session, sessionStatus]);
+
+  const filteredNotes = demandNotes.filter((note) => {
+    const matchesSearch = note.client.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     const matchesStatus =
@@ -66,13 +80,14 @@ export default function DemandNotes() {
   // Define columns for CommonTable
   const columns: Column<Record<string, unknown>>[] = [
     {
-      key: 'clientName',
+      key: 'client.name',
       label: 'Client Name',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium',
       sortable: true,
+      render: (value, row): React.ReactNode => (row as unknown as DemandNote).client.name
     },
     {
-      key: 'demandDate',
+      key: 'dueDate',
       label: 'Demand Date',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
       sortable: true,
@@ -88,10 +103,17 @@ export default function DemandNotes() {
       )
     },
     {
-      key: 'lastUpdated',
+      key: 'updatedAt',
       label: 'Last Updated',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
       sortable: true,
+      render: (value): React.ReactNode => new Date(value as string).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
     }
   ];
 
@@ -156,8 +178,38 @@ export default function DemandNotes() {
           </CardContent>
         </Card>
 
+        {/* Loading State */}
+        {isLoading && (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Loader2 className="h-12 w-12 animate-spin text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Loading demand notes...
+              </h3>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Error State */}
+        {error && !isLoading && (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <FileText className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Error loading demand notes
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                {error}
+              </p>
+              <Button onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Table */}
-        {filteredNotes.length === 0 ? (
+        {!isLoading && !error && filteredNotes.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
               <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

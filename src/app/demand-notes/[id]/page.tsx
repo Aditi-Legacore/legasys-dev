@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import {
@@ -13,6 +13,7 @@ import {
   Clock,
   Eye,
   Share2,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,12 +33,59 @@ interface UploadedFile {
   size: number;
 }
 
-interface DemandNoteViewProps {
-  id?: string;
+interface DemandNote {
+  id: string;
+  title: string;
+  description: string | null;
+  status: DemandNoteStatus;
+  totalAmount: number;
+  dueDate: string;
+  createdAt: string;
+  updatedAt: string;
+  client: {
+    id: string;
+    name: string;
+  };
+  createdBy: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  internalNotes: Array<{
+    id: string;
+    content: string;
+    createdAt: string;
+    createdBy: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
+  }>;
+  timeline: Array<{
+    id: string;
+    type: string;
+    message: string;
+    createdAt: string;
+    metadata?: any;
+  }>;
 }
 
-export default function DemandNoteView({ id }: DemandNoteViewProps) {
+interface DemandNoteViewProps {
+  params: { id: string };
+}
+
+export default function DemandNoteView({ params }: DemandNoteViewProps) {
   const router = useRouter();
+  const { id } = params;
+
+  // Loading and data states
+  const [isLoading, setIsLoading] = useState(true);
+  const [demandNote, setDemandNote] = useState<DemandNote | null>(null);
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [notes, setNotes] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<any[]>([]);
 
   // Modal / preview state
   const [previewFile, setPreviewFile] = useState<{ name: string; url: string } | null>(
@@ -47,82 +95,132 @@ export default function DemandNoteView({ id }: DemandNoteViewProps) {
   // Exporting state
   const [isExporting, setIsExporting] = useState(false);
 
-  // Internal notes (editable in-place? currently read-only like your original)
-  const [internalNotes] = useState(
-    "Client requires expedited processing. All medical reports have been verified by Dr. Smith."
-  );
+  // Fetch demand note data
+  useEffect(() => {
+    const fetchDemandNote = async () => {
+      try {
+        const response = await fetch(`/api/demand-notes/${id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch demand note');
+        }
+        const data = await response.json();
+        setDemandNote(data);
+      } catch (error) {
+        console.error('Error fetching demand note:', error);
+        toast.error('Failed to load demand note');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // mock activity timeline (you can replace by API)
-  const activityEvents = [
-    {
-      id: "1",
-      type: "created" as const,
-      description: "Demand note created",
-      timestamp: "2025-11-20 10:30",
-      user: "Admin User",
-    },
-    {
-      id: "2",
-      type: "uploaded" as const,
-      description: "Traffic reports uploaded (2 files)",
-      timestamp: "2025-11-20 11:15",
-      user: "Admin User",
-    },
-    {
-      id: "3",
-      type: "uploaded" as const,
-      description: "Medical reports uploaded (2 files)",
-      timestamp: "2025-11-20 14:20",
-      user: "Admin User",
-    },
-    {
-      id: "4",
-      type: "uploaded" as const,
-      description: "Medical bills uploaded (2 files)",
-      timestamp: "2025-11-20 15:10",
-      user: "Admin User",
-    },
-    {
-      id: "5",
-      type: "verified" as const,
-      description: "All documents verified",
-      timestamp: "2025-11-21 09:00",
-      user: "Dr. Smith",
-    },
-    {
-      id: "6",
-      type: "generated" as const,
-      description: "Demand note generated successfully",
-      timestamp: "2025-11-26 16:45",
-      user: "System",
-    },
-  ];
+    const fetchTimeline = async () => {
+      try {
+        const response = await fetch(`/api/demand-notes/${id}/timeline`);
+        if (response.ok) {
+          const data = await response.json();
+          setTimeline(data);
+        }
+      } catch (error) {
+        console.error('Error fetching timeline:', error);
+      }
+    };
 
-  // mock demand note data (replace by API fetch)
-  const demandNote = {
-    id: id || "DN-001",
-    clientName: "John Doe",
-    demandDate: "2025-11-20",
-    status: "generated" as DemandNoteStatus,
-    directoryName: "dn_2025_11_20_abc123",
-    createdBy: "Admin User",
-    createdAt: "2025-11-20 10:30",
-    lastUpdated: "2025-11-26 16:45",
-    internalNotes:
-      "Client requires expedited processing. All medical reports have been verified by Dr. Smith.",
-    trafficFiles: [
-      { id: "1", name: "police_report.pdf", size: 1024000 },
-      { id: "2", name: "accident_scene_photos.pdf", size: 2048000 },
-    ] as UploadedFile[],
-    medicalFiles: [
-      { id: "3", name: "initial_diagnosis.pdf", size: 512000 },
-      { id: "4", name: "xray_results.pdf", size: 3072000 },
-    ] as UploadedFile[],
-    billFiles: [
-      { id: "5", name: "hospital_invoice.pdf", size: 256000 },
-      { id: "6", name: "pharmacy_bills.pdf", size: 128000 },
-    ] as UploadedFile[],
-  };
+    const fetchNotes = async () => {
+      try {
+        const response = await fetch(`/api/demand-notes/${id}/notes`);
+        if (response.ok) {
+          const data = await response.json();
+          setNotes(data);
+        }
+      } catch (error) {
+        console.error('Error fetching notes:', error);
+      }
+    };
+
+    const fetchDocuments = async () => {
+      try {
+        const response = await fetch(`/api/documents?demandNoteId=${id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setDocuments(data);
+        }
+      } catch (error) {
+        console.error('Error fetching documents:', error);
+      }
+    };
+
+    if (id) {
+      fetchDemandNote();
+      fetchTimeline();
+      fetchNotes();
+      fetchDocuments();
+    }
+  }, [id]);
+
+  // Convert timeline to activity events format
+  const activityEvents = timeline.map((event) => ({
+    id: event.id,
+    type: event.type as any,
+    description: event.message,
+    timestamp: format(new Date(event.createdAt), 'yyyy-MM-dd HH:mm'),
+    user: 'System', // You can enhance this to show actual user
+  }));
+
+  // Categorize documents based on file names or types
+  const trafficFiles: UploadedFile[] = documents.filter(doc =>
+    doc.fileName.toLowerCase().includes('traffic') ||
+    doc.fileName.toLowerCase().includes('accident') ||
+    doc.fileName.toLowerCase().includes('police')
+  ).map(doc => ({
+    id: doc.id,
+    name: doc.fileName,
+    size: doc.fileSize || 0
+  }));
+
+  const medicalFiles: UploadedFile[] = documents.filter(doc =>
+    doc.fileName.toLowerCase().includes('medical') ||
+    doc.fileName.toLowerCase().includes('hospital') ||
+    doc.fileName.toLowerCase().includes('doctor') ||
+    doc.fileName.toLowerCase().includes('report')
+  ).map(doc => ({
+    id: doc.id,
+    name: doc.fileName,
+    size: doc.fileSize || 0
+  }));
+
+  const billFiles: UploadedFile[] = documents.filter(doc =>
+    doc.fileName.toLowerCase().includes('bill') ||
+    doc.fileName.toLowerCase().includes('invoice') ||
+    doc.fileName.toLowerCase().includes('receipt')
+  ).map(doc => ({
+    id: doc.id,
+    name: doc.fileName,
+    size: doc.fileSize || 0
+  }));
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Loading demand note...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!demandNote) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Demand note not found</h2>
+          <Button onClick={() => router.push('/demand-notes')}>
+            Back to Demand Notes
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const contentRef = useRef<HTMLDivElement | null>(null);
 
@@ -312,11 +410,11 @@ export default function DemandNoteView({ id }: DemandNoteViewProps) {
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="font-bold">{getInitials(demandNote.clientName)}</span>
+                    <span className="font-bold">{getInitials(demandNote.client.name)}</span>
                   </div>
                   <div>
                     <h1 className="text-2xl font-bold text-foreground">
-                      {demandNote.clientName}
+                      {demandNote.client.name}
                     </h1>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                       <Badge variant="outline" className="font-mono text-xs">
@@ -324,11 +422,11 @@ export default function DemandNoteView({ id }: DemandNoteViewProps) {
                       </Badge>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3.5 w-3.5" />
-                        <span>{format(new Date(demandNote.demandDate), 'MM/dd/yyyy')}</span>
+                        <span>{format(new Date(demandNote.dueDate), 'MM/dd/yyyy')}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="h-3.5 w-3.5" />
-                        <span>Updated {demandNote.lastUpdated}</span>
+                        <span>Updated {format(new Date(demandNote.updatedAt), 'MM/dd/yyyy HH:mm')}</span>
                       </div>
                     </div>
                   </div>
@@ -369,12 +467,12 @@ export default function DemandNoteView({ id }: DemandNoteViewProps) {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Client Name</p>
-                    <p className="text-sm font-medium">{demandNote.clientName}</p>
+                    <p className="text-sm font-medium">{demandNote.client.name}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Demand Date</p>
                     <p className="text-sm font-medium">
-                      {format(new Date(demandNote.demandDate), 'MM/dd/yyyy')}
+                      {format(new Date(demandNote.dueDate), 'MM/dd/yyyy')}
                     </p>
                   </div>
                   <div>
@@ -382,10 +480,8 @@ export default function DemandNoteView({ id }: DemandNoteViewProps) {
                     <p className="text-sm font-medium font-mono">{demandNote.id}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Directory Name</p>
-                    <p className="text-sm font-medium font-mono">
-                      {demandNote.directoryName}
-                    </p>
+                    <p className="text-sm text-muted-foreground mb-1">Title</p>
+                    <p className="text-sm font-medium">{demandNote.title}</p>
                   </div>
                 </div>
               </CardContent>
@@ -394,9 +490,9 @@ export default function DemandNoteView({ id }: DemandNoteViewProps) {
             {/* Documents */}
             <div className="space-y-4">
               <h2 className="text-lg font-semibold">Uploaded Documents</h2>
-              {renderFileList(demandNote.trafficFiles, "Traffic Reports")}
-              {renderFileList(demandNote.medicalFiles, "Medical Reports")}
-              {renderFileList(demandNote.billFiles, "Medical Bills")}
+              {renderFileList(trafficFiles, "Traffic Reports")}
+              {renderFileList(medicalFiles, "Medical Reports")}
+              {renderFileList(billFiles, "Medical Bills")}
             </div>
 
             {/* Generated Summary */}
@@ -410,7 +506,7 @@ export default function DemandNoteView({ id }: DemandNoteViewProps) {
                     <div>
                       <p className="text-muted-foreground mb-1.5 font-sans">Traffic Reports:</p>
                       <ul className="list-disc list-inside text-foreground space-y-1">
-                        {demandNote.trafficFiles.map((file) => (
+                        {trafficFiles.map((file) => (
                           <li key={file.id}>{file.name}</li>
                         ))}
                       </ul>
@@ -419,7 +515,7 @@ export default function DemandNoteView({ id }: DemandNoteViewProps) {
                     <div>
                       <p className="text-muted-foreground mb-1.5 font-sans">Medical Reports:</p>
                       <ul className="list-disc list-inside text-foreground space-y-1">
-                        {demandNote.medicalFiles.map((file) => (
+                        {medicalFiles.map((file) => (
                           <li key={file.id}>{file.name}</li>
                         ))}
                       </ul>
@@ -428,7 +524,7 @@ export default function DemandNoteView({ id }: DemandNoteViewProps) {
                     <div>
                       <p className="text-muted-foreground mb-1.5 font-sans">Medical Bills:</p>
                       <ul className="list-disc list-inside text-foreground space-y-1">
-                        {demandNote.billFiles.map((file) => (
+                        {billFiles.map((file) => (
                           <li key={file.id}>{file.name}</li>
                         ))}
                       </ul>
@@ -461,7 +557,7 @@ export default function DemandNoteView({ id }: DemandNoteViewProps) {
                   <p className="text-sm text-muted-foreground mb-1">Created By</p>
                   <div className="flex items-center gap-2">
                     <User className="h-3.5 w-3.5 text-muted-foreground" />
-                    <p className="text-sm font-medium">{demandNote.createdBy}</p>
+                    <p className="text-sm font-medium">{demandNote.createdBy.firstName} {demandNote.createdBy.lastName}</p>
                   </div>
                 </div>
 
@@ -469,7 +565,7 @@ export default function DemandNoteView({ id }: DemandNoteViewProps) {
                   <p className="text-sm text-muted-foreground mb-1">Created At</p>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                    <p className="text-sm">{demandNote.createdAt}</p>
+                    <p className="text-sm">{format(new Date(demandNote.createdAt), 'MM/dd/yyyy HH:mm')}</p>
                   </div>
                 </div>
 
@@ -477,22 +573,34 @@ export default function DemandNoteView({ id }: DemandNoteViewProps) {
                   <p className="text-sm text-muted-foreground mb-1">Last Updated</p>
                   <div className="flex items-center gap-2">
                     <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                    <p className="text-sm">{demandNote.lastUpdated}</p>
+                    <p className="text-sm">{format(new Date(demandNote.updatedAt), 'MM/dd/yyyy HH:mm')}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Internal Notes */}
-            {demandNote.internalNotes && (
+            {demandNote.internalNotes && demandNote.internalNotes.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Internal Notes</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {demandNote.internalNotes}
-                  </p>
+                  <div className="space-y-3">
+                    {demandNote.internalNotes.map((note) => (
+                      <div key={note.id} className="border-l-2 border-muted pl-3">
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                          {note.content}
+                        </p>
+                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                          <User className="h-3 w-3" />
+                          <span>{note.createdBy.firstName} {note.createdBy.lastName}</span>
+                          <span>•</span>
+                          <span>{format(new Date(note.createdAt), 'MM/dd/yyyy HH:mm')}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             )}
