@@ -22,10 +22,7 @@ import { StatusBadge, DemandNoteStatus } from "@/components/demand-notes/StatusB
 import { Badge } from "@/components/ui/badge";
 import { ActivityTimeline } from "@/components/demand-notes/ActivityTimeline";
 import { DocumentPreviewModal } from "@/components/demand-notes/DocumentPreviewModal";
-import { Avatar } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 
 interface UploadedFile {
   id: string;
@@ -34,7 +31,6 @@ interface UploadedFile {
 }
 
 interface DemandNote {
-  files: any;
   id: string;
   title: string;
   description: string | null;
@@ -243,64 +239,97 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
 
   // Exports the element with id 'demand-note-content' into a PDF.
   const handleExportPDF = async () => {
+    // Ensure this only runs on the client side
+    if (typeof window === 'undefined') {
+      toast.error("PDF export is not available on server-side rendering.");
+      return;
+    }
+
     setIsExporting(true);
     try {
-      const element = document.getElementById("demand-note-content") || contentRef.current;
-      if (!element) throw new Error("Content element not found");
+      const { jsPDF } = await import('jspdf');
 
-      // Take canvas (high DPI)
-      const canvas = await html2canvas(element as HTMLElement, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        windowWidth: document.documentElement.scrollWidth,
-        windowHeight: document.documentElement.scrollHeight,
+      // Create PDF directly with structured content
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'in',
+        format: 'letter',
       });
 
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
+      let yPosition = 1;
+      const lineHeight = 0.25;
+      const pageHeight = 10.5;
+      const margin = 0.5;
+      const maxWidth = 7.5;
 
-      const pdfWidth = 210; // mm A4
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      // If content fits one page
-      if (pdfHeight <= 297) {
-        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      } else {
-        // Multi-page handling: split by page height
-        let remainingHeight = canvas.height;
-        const pageCanvas = document.createElement("canvas");
-        const pageCtx = pageCanvas.getContext("2d")!;
-        const pxPerMm = canvas.height / (pdfHeight); // approximate scaling
-        const pageHeightPx = Math.floor((297 * canvas.width) / pdfWidth);
-
-        let offsetY = 0;
-        while (remainingHeight > 0) {
-          pageCanvas.width = canvas.width;
-          pageCanvas.height = Math.min(pageHeightPx, remainingHeight);
-
-          pageCtx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
-          pageCtx.drawImage(
-            canvas,
-            0,
-            offsetY,
-            pageCanvas.width,
-            pageCanvas.height,
-            0,
-            0,
-            pageCanvas.width,
-            pageCanvas.height
-          );
-
-          const pageData = pageCanvas.toDataURL("image/png");
-          const h = (pageCanvas.height * pdfWidth) / pageCanvas.width;
-
-          if (offsetY > 0) pdf.addPage();
-          pdf.addImage(pageData, "PNG", 0, 0, pdfWidth, h);
-
-          remainingHeight -= pageCanvas.height;
-          offsetY += pageCanvas.height;
+      // Helper function to add text and handle page breaks
+      const addText = (text: string, fontSize = 12, fontWeight: 'normal' | 'bold' = 'normal') => {
+        if (fontWeight === 'bold') {
+          pdf.setFont('helvetica', 'bold');
+        } else {
+          pdf.setFont('helvetica', 'normal');
         }
+        pdf.setFontSize(fontSize);
+
+        const lines = pdf.splitTextToSize(text, maxWidth);
+        lines.forEach((line: string) => {
+          if (yPosition > pageHeight) {
+            pdf.addPage();
+            yPosition = 1;
+          }
+          pdf.text(line, margin, yPosition);
+          yPosition += lineHeight;
+        });
+      };
+
+      // Add title
+      addText(`Demand Note - ${demandNote.title}`, 16, 'bold');
+      yPosition += 0.2;
+
+      // Basic Information
+      addText('Basic Information', 14, 'bold');
+      yPosition += 0.1;
+
+      addText(`Client Name: ${demandNote.client.name}`);
+      addText(`Demand Date: ${format(new Date(demandNote.dueDate), 'MM/dd/yyyy')}`);
+      addText(`Demand Note ID: ${demandNote.id}`);
+      addText(`Status: ${demandNote.status}`);
+      addText(`Created By: ${demandNote.createdBy.firstName} ${demandNote.createdBy.lastName}`);
+      addText(`Created At: ${format(new Date(demandNote.createdAt), 'MM/dd/yyyy HH:mm')}`);
+      addText(`Last Updated: ${format(new Date(demandNote.updatedAt), 'MM/dd/yyyy HH:mm')}`);
+      yPosition += 0.2;
+
+      // Files section
+      if (demandNote.files && demandNote.files.length > 0) {
+        addText('Attached Files', 14, 'bold');
+        yPosition += 0.1;
+
+        demandNote.files.forEach((file) => {
+          addText(`• ${file.fileName} (${formatFileSize(file.size || 0)})`);
+        });
+        yPosition += 0.2;
+      }
+
+      // Internal Notes
+      if (demandNote.internalNotes && demandNote.internalNotes.length > 0) {
+        addText('Internal Notes', 14, 'bold');
+        yPosition += 0.1;
+
+        demandNote.internalNotes.forEach((note) => {
+          addText(`Note by ${note.createdBy.firstName} ${note.createdBy.lastName} (${format(new Date(note.createdAt), 'MM/dd/yyyy HH:mm')}):`);
+          addText(note.content);
+          yPosition += 0.1;
+        });
+      }
+
+      // Timeline
+      if (timeline && timeline.length > 0) {
+        addText('Activity Timeline', 14, 'bold');
+        yPosition += 0.1;
+
+        timeline.forEach((event) => {
+          addText(`${format(new Date(event.createdAt), 'MM/dd/yyyy HH:mm')}: ${event.message}`);
+        });
       }
 
       pdf.save(`demand_note_${demandNote.id}.pdf`);
