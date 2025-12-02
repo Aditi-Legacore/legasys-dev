@@ -3,6 +3,56 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+// export async function GET(
+//   request: NextRequest,
+//   { params }: { params: { id: string } }
+// ) {
+//   try {
+//     const session = await getServerSession(authOptions);
+//     if (!session?.user?.id) {
+//       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+//     }
+
+//     const demandNoteId = params.id;
+
+//     const demandNote = await prisma.demandNote.findFirst({
+//       where: {
+//         id: demandNoteId,
+//         createdById: session.user.id,
+//       },
+//       include: {
+//         client: true,
+//         createdBy: {
+//           select: { id: true, firstName: true, lastName: true, email: true },
+//         },
+//         internalNotes: {
+//           include: {
+//             createdBy: {
+//               select: { id: true, firstName: true, lastName: true, email: true },
+//             },
+//           },
+//           orderBy: { createdAt: 'desc' },
+//         },
+//         timeline: {
+//           orderBy: { createdAt: 'desc' },
+//         },
+//       },
+//     });
+
+//     if (!demandNote) {
+//       return NextResponse.json({ error: 'Demand note not found' }, { status: 404 });
+//     }
+
+//     return NextResponse.json(demandNote, { status: 200 });
+//   } catch (err: unknown) {
+//     console.error("❌ GET /api/demand-notes/[id] error:", err);
+//     const errorMessage = err instanceof Error ? err.message : "Unknown error";
+//     return NextResponse.json(
+//       { error: "Failed to fetch demand note", details: errorMessage },
+//       { status: 500 }
+//     );
+//   }
+// }
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -10,16 +60,11 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const demandNoteId = params.id;
-
-    const demandNote = await prisma.demandNote.findFirst({
-      where: {
-        id: demandNoteId,
-        createdById: session.user.id,
-      },
+    const demandNote = await prisma.demandNote.findUnique({
+      where: { id: params.id },
       include: {
         client: true,
         createdBy: {
@@ -31,28 +76,32 @@ export async function GET(
               select: { id: true, firstName: true, lastName: true, email: true },
             },
           },
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: "desc" },
         },
         timeline: {
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: "desc" },
         },
+        files: true,
       },
     });
 
     if (!demandNote) {
-      return NextResponse.json({ error: 'Demand note not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: "Demand note not found" },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json(demandNote, { status: 200 });
-  } catch (err: unknown) {
+    return NextResponse.json(demandNote);
+  } catch (err) {
     console.error("❌ GET /api/demand-notes/[id] error:", err);
-    const errorMessage = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to fetch demand note", details: errorMessage },
+      { error: "Failed to fetch demand note" },
       { status: 500 }
     );
   }
 }
+
 
 export async function PUT(
   request: NextRequest,

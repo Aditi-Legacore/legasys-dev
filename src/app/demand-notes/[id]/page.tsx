@@ -34,6 +34,7 @@ interface UploadedFile {
 }
 
 interface DemandNote {
+  files: any;
   id: string;
   title: string;
   description: string | null;
@@ -73,7 +74,7 @@ interface DemandNote {
 }
 
 interface DemandNoteViewProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default function DemandNoteView({ params }: DemandNoteViewProps) {
@@ -83,11 +84,12 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
 
   // Loading and data states
   const [isLoading, setIsLoading] = useState(true);
+  const [demand, setDemand] = useState<any>(null);
   const [demandNote, setDemandNote] = useState<DemandNote | null>(null);
   const [timeline, setTimeline] = useState<any[]>([]);
   const [notes, setNotes] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
-
+  const [selectedFile, setSelectedFile] = useState<any>(null);
   // Modal / preview state
   const [previewFile, setPreviewFile] = useState<{ name: string; url: string } | null>(
     null
@@ -100,19 +102,17 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
   useEffect(() => {
     const fetchDemandNote = async () => {
       try {
-        const response = await fetch(`/api/demand-notes/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch demand note');
-        }
-        const data = await response.json();
+        const res = await fetch(`/api/demand-notes/${id}`);
+        const data = await res.json();
         setDemandNote(data);
-      } catch (error) {
-        console.error('Error fetching demand note:', error);
-        toast.error('Failed to load demand note');
+      } catch (err) {
+        console.error("Error fetching demand note:", err);
       } finally {
         setIsLoading(false);
       }
     };
+
+    
 
     const fetchTimeline = async () => {
       try {
@@ -228,6 +228,12 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
       </div>
     );
   }
+
+  const groupedFiles = {
+    traffic: demandNote.files?.filter((f: any) => f.fileCategory === "traffic") || [],
+    medical: demandNote.files?.filter((f: any) => f.fileCategory === "medical") || [],
+    bills: demandNote.files?.filter((f: any) => f.fileCategory === "bills") || [],
+  };
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return bytes + " B";
@@ -493,11 +499,59 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
             </Card>
 
             {/* Documents */}
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Uploaded Documents</h2>
-              {renderFileList(trafficFiles, "Traffic Reports")}
-              {renderFileList(medicalFiles, "Medical Reports")}
-              {renderFileList(billFiles, "Medical Bills")}
+            <div className="space-y-6">
+              {Object.entries(groupedFiles).map(([group, files]) => (
+                <Card key={group}>
+                  <CardHeader>
+                    <CardTitle className="capitalize">{group} Reports</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {files.length === 0 ? (
+                      <p className="text-sm text-gray-500">No files uploaded.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {files.map((file: any) => (
+                          <div
+                            key={file.id}
+                            className="p-3 border rounded-lg flex items-center justify-between"
+                          >
+                            <div className="flex items-center gap-3">
+                              <FileText className="h-5 w-5 text-blue-600" />
+                              <div>
+                                <p>{file.fileName}</p>
+                                <p className="text-xs text-gray-500">
+                                  {(file.size / 1024).toFixed(1)} KB
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setSelectedFile(file)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+
+                              <a
+                                href={file.fileUrl}
+                                download
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Button variant="ghost" size="icon">
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
             </div>
 
             {/* Generated Summary */}

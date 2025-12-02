@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Filter, FileText, Eye } from "lucide-react";
+import { Plus, Search, Filter, FileText, Eye, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,14 +28,21 @@ interface DemandNote {
 export default function DemandNotes() {
   const router = useRouter();
   const [demandNotes, setDemandNotes] = useState<DemandNote[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     async function load() {
-      const res = await fetch("/api/demand-notes");
-      const data = await res.json();
-      if (Array.isArray(data)) setDemandNotes(data);
+      try {
+        const res = await fetch("/api/demand-notes");
+        const data = await res.json();
+        if (Array.isArray(data)) setDemandNotes(data);
+      } catch (error) {
+        console.error("Error loading demand notes:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
     load();
   }, []);
@@ -144,12 +151,23 @@ export default function DemandNotes() {
         </Card>
 
         {/* Table */}
-        <CommonTable
-          columns={columns}
-          data={tableData}
-          actions={actions}
-          emptyMessage="No demand notes found"
-        />
+        {isLoading ? (
+          <Card>
+            <CardContent className="p-8">
+              <div className="flex items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                <span>Loading demand notes...</span>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <CommonTable
+            columns={columns}
+            data={tableData}
+            actions={actions}
+            emptyMessage="No demand notes found"
+          />
+        )}
       </div>
     </main>
   );
