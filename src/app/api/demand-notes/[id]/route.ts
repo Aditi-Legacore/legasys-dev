@@ -36,6 +36,14 @@ export async function GET(
         timeline: {
           orderBy: { createdAt: 'desc' },
         },
+        files: {
+          include: {
+            uploadedBy: {
+              select: { id: true, firstName: true, lastName: true },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+        },
       },
     });
 

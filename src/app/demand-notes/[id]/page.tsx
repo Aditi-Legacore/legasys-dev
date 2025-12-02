@@ -70,10 +70,23 @@ interface DemandNote {
     createdAt: string;
     metadata?: any;
   }>;
+  files: Array<{
+    id: string;
+    fileName: string;
+    fileUrl: string;
+    fileType?: string;
+    fileCategory?: string;
+    size?: number;
+    uploadedBy: {
+      id: string;
+      firstName: string;
+      lastName: string;
+    };
+  }>;
 }
 
 interface DemandNoteViewProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default function DemandNoteView({ params }: DemandNoteViewProps) {
@@ -86,7 +99,6 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
   const [demandNote, setDemandNote] = useState<DemandNote | null>(null);
   const [timeline, setTimeline] = useState<any[]>([]);
   const [notes, setNotes] = useState<any[]>([]);
-  const [documents, setDocuments] = useState<any[]>([]);
 
   // Modal / preview state
   const [previewFile, setPreviewFile] = useState<{ name: string; url: string } | null>(
@@ -138,23 +150,10 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
       }
     };
 
-    const fetchDocuments = async () => {
-      try {
-        const response = await fetch(`/api/documents?demandNoteId=${id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setDocuments(data);
-        }
-      } catch (error) {
-        console.error('Error fetching documents:', error);
-      }
-    };
-
     if (id) {
       fetchDemandNote();
       fetchTimeline();
       fetchNotes();
-      fetchDocuments();
     }
   }, [id]);
 
@@ -168,41 +167,41 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
   }));
 
   // Categorize documents based on file names or types
-  const trafficFiles: UploadedFile[] = documents.filter(doc =>
-    doc.fileName && (
-      doc.fileName.toLowerCase().includes('traffic') ||
-      doc.fileName.toLowerCase().includes('accident') ||
-      doc.fileName.toLowerCase().includes('police')
+  const trafficFiles: UploadedFile[] = (demandNote?.files || []).filter(file =>
+    file.fileName && (
+      file.fileName.toLowerCase().includes('traffic') ||
+      file.fileName.toLowerCase().includes('accident') ||
+      file.fileName.toLowerCase().includes('police')
     )
-  ).map(doc => ({
-    id: doc.id,
-    name: doc.fileName || '',
-    size: doc.fileSize || 0
+  ).map(file => ({
+    id: file.id,
+    name: file.fileName || '',
+    size: file.size || 0
   }));
 
-  const medicalFiles: UploadedFile[] = documents.filter(doc =>
-    doc.fileName && (
-      doc.fileName.toLowerCase().includes('medical') ||
-      doc.fileName.toLowerCase().includes('hospital') ||
-      doc.fileName.toLowerCase().includes('doctor') ||
-      doc.fileName.toLowerCase().includes('report')
+  const medicalFiles: UploadedFile[] = (demandNote?.files || []).filter(file =>
+    file.fileName && (
+      file.fileName.toLowerCase().includes('medical') ||
+      file.fileName.toLowerCase().includes('hospital') ||
+      file.fileName.toLowerCase().includes('doctor') ||
+      file.fileName.toLowerCase().includes('report')
     )
-  ).map(doc => ({
-    id: doc.id,
-    name: doc.fileName || '',
-    size: doc.fileSize || 0
+  ).map(file => ({
+    id: file.id,
+    name: file.fileName || '',
+    size: file.size || 0
   }));
 
-  const billFiles: UploadedFile[] = documents.filter(doc =>
-    doc.fileName && (
-      doc.fileName.toLowerCase().includes('bill') ||
-      doc.fileName.toLowerCase().includes('invoice') ||
-      doc.fileName.toLowerCase().includes('receipt')
+  const billFiles: UploadedFile[] = (demandNote?.files || []).filter(file =>
+    file.fileName && (
+      file.fileName.toLowerCase().includes('bill') ||
+      file.fileName.toLowerCase().includes('invoice') ||
+      file.fileName.toLowerCase().includes('receipt')
     )
-  ).map(doc => ({
-    id: doc.id,
-    name: doc.fileName || '',
-    size: doc.fileSize || 0
+  ).map(file => ({
+    id: file.id,
+    name: file.fileName || '',
+    size: file.size || 0
   }));
 
   if (isLoading) {
@@ -307,16 +306,25 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
     }
   };
 
-  const handlePreviewFile = (fileName: string) => {
-    // Replace with your real file URL logic
-    const fileUrl = `https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf`;
-    setPreviewFile({ name: fileName, url: fileUrl });
+  const handlePreviewFile = (file: UploadedFile) => {
+    const fileData = demandNote?.files.find(f => f.id === file.id);
+    if (fileData) {
+      setPreviewFile({ name: fileData.fileName, url: fileData.fileUrl });
+    }
   };
 
   const handleDownloadFile = (file: UploadedFile) => {
-    // Replace with real download logic. For demo, open preview and user can download.
-    handlePreviewFile(file.name);
-    toast.success("Opened preview — use the preview modal to download.");
+    const fileData = demandNote?.files.find(f => f.id === file.id);
+    if (fileData) {
+      // Create a temporary link to download the file
+      const link = document.createElement('a');
+      link.href = fileData.fileUrl;
+      link.download = fileData.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("File download started.");
+    }
   };
 
   const handleBack = () => {
@@ -374,7 +382,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0"
-                    onClick={() => handlePreviewFile(file.name)}
+                    onClick={() => handlePreviewFile(file)}
                     title="Preview document"
                   >
                     <Eye className="h-3 w-3" />
