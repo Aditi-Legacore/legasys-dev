@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import {
@@ -78,7 +78,8 @@ interface DemandNoteViewProps {
 
 export default function DemandNoteView({ params }: DemandNoteViewProps) {
   const router = useRouter();
-  const { id } = params;
+  const { id } = use(params);
+  const contentRef = useRef<HTMLDivElement | null>(null);
 
   // Loading and data states
   const [isLoading, setIsLoading] = useState(true);
@@ -168,33 +169,39 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
 
   // Categorize documents based on file names or types
   const trafficFiles: UploadedFile[] = documents.filter(doc =>
-    doc.fileName.toLowerCase().includes('traffic') ||
-    doc.fileName.toLowerCase().includes('accident') ||
-    doc.fileName.toLowerCase().includes('police')
+    doc.fileName && (
+      doc.fileName.toLowerCase().includes('traffic') ||
+      doc.fileName.toLowerCase().includes('accident') ||
+      doc.fileName.toLowerCase().includes('police')
+    )
   ).map(doc => ({
     id: doc.id,
-    name: doc.fileName,
+    name: doc.fileName || '',
     size: doc.fileSize || 0
   }));
 
   const medicalFiles: UploadedFile[] = documents.filter(doc =>
-    doc.fileName.toLowerCase().includes('medical') ||
-    doc.fileName.toLowerCase().includes('hospital') ||
-    doc.fileName.toLowerCase().includes('doctor') ||
-    doc.fileName.toLowerCase().includes('report')
+    doc.fileName && (
+      doc.fileName.toLowerCase().includes('medical') ||
+      doc.fileName.toLowerCase().includes('hospital') ||
+      doc.fileName.toLowerCase().includes('doctor') ||
+      doc.fileName.toLowerCase().includes('report')
+    )
   ).map(doc => ({
     id: doc.id,
-    name: doc.fileName,
+    name: doc.fileName || '',
     size: doc.fileSize || 0
   }));
 
   const billFiles: UploadedFile[] = documents.filter(doc =>
-    doc.fileName.toLowerCase().includes('bill') ||
-    doc.fileName.toLowerCase().includes('invoice') ||
-    doc.fileName.toLowerCase().includes('receipt')
+    doc.fileName && (
+      doc.fileName.toLowerCase().includes('bill') ||
+      doc.fileName.toLowerCase().includes('invoice') ||
+      doc.fileName.toLowerCase().includes('receipt')
+    )
   ).map(doc => ({
     id: doc.id,
-    name: doc.fileName,
+    name: doc.fileName || '',
     size: doc.fileSize || 0
   }));
 
@@ -221,8 +228,6 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
       </div>
     );
   }
-
-  const contentRef = useRef<HTMLDivElement | null>(null);
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return bytes + " B";
