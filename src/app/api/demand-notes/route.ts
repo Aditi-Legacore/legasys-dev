@@ -114,12 +114,22 @@ export async function POST(request: NextRequest) {
 }
 
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const offset = (page - 1) * limit;
+
+    // Get total count for pagination
+    const totalCount = await prisma.demandNote.count({
+      where: { createdById: session.user.id },
+    });
 
     const notes = await prisma.demandNote.findMany({
       where: { createdById: session.user.id },
@@ -128,9 +138,19 @@ export async function GET() {
         files: true,
       },
       orderBy: { updatedAt: "desc" },
+      skip: offset,
+      take: limit,
     });
 
-    return NextResponse.json(notes);
+    return NextResponse.json({
+      data: notes,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    });
   } catch (err) {
     console.error("❌ GET /api/demand-notes error:", err);
     return NextResponse.json(

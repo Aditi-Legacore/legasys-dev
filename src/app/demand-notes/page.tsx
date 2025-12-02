@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Plus, Search, Filter, FileText, Eye, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { StatusBadge, DemandNoteStatus } from "@/components/demand-notes/StatusBadge";
 import CommonTable, { Column, Action } from "@/components/ui/CommonTable";
+import Pagination from "@/components/ui/pagination";
 import { useRouter } from "next/navigation";
 
 interface DemandNote {
@@ -31,13 +32,20 @@ export default function DemandNotes() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/demand-notes");
+        const res = await fetch("/api/demand-notes?page=1&limit=1000"); // Load all for client-side filtering
         const data = await res.json();
-        if (Array.isArray(data)) setDemandNotes(data);
+        if (data.data && Array.isArray(data.data)) {
+          setDemandNotes(data.data);
+        } else if (Array.isArray(data)) {
+          // Fallback for old API format
+          setDemandNotes(data);
+        }
       } catch (error) {
         console.error("Error loading demand notes:", error);
       } finally {
@@ -47,16 +55,30 @@ export default function DemandNotes() {
     load();
   }, []);
 
-  // FILTERING
-  const filteredNotes = demandNotes.filter((note) => {
-    const clientName = note.client?.name ?? "";
-    const matchesSearch = clientName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || note.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  // FILTERING (client-side filtering for search and status)
+  const filteredNotes = useMemo(() => {
+    return demandNotes.filter((note) => {
+      const clientName = note.client?.name ?? "";
+      const matchesSearch = clientName.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === "all" || note.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [demandNotes, searchQuery, statusFilter]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
+  // Paginated data
+  const paginatedNotes = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredNotes.slice(startIndex, endIndex);
+  }, [filteredNotes, currentPage, itemsPerPage]);
 
   // TABLE DATA → convert DemandNote → Record<string, unknown>
-  const tableData: Record<string, unknown>[] = filteredNotes.map((n) => ({
+  const tableData: Record<string, unknown>[] = paginatedNotes.map((n) => ({
     id: n.id,
     clientName: n.client?.name ?? "Unknown",
     dueDate: n.dueDate,
@@ -64,6 +86,10 @@ export default function DemandNotes() {
     updatedAt: n.updatedAt,
     _original: n, // keep reference for actions
   }));
+
+  console.log("Filtered notes:", filteredNotes.length);
+  console.log("Paginated notes:", paginatedNotes.length);
+  console.log("Table data:", tableData);
 
   // COLUMNS
   const columns: Column<Record<string, unknown>>[] = [
@@ -168,6 +194,24 @@ export default function DemandNotes() {
             emptyMessage="No demand notes found"
           />
         )}
+
+        {/* Pagination */}
+        {(() => {
+          console.log("Pagination debug:", {
+            totalItems: filteredNotes.length,
+            itemsPerPage,
+            currentPage,
+            totalPages: Math.ceil(filteredNotes.length / itemsPerPage)
+          });
+          return filteredNotes.length > itemsPerPage ? (
+            <Pagination
+              totalItems={filteredNotes.length}
+              itemsPerPage={itemsPerPage}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+            />
+          ) : null;
+        })()}
       </div>
     </main>
   );
