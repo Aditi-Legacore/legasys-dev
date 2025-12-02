@@ -5,8 +5,12 @@ import { cn } from "@/lib/utils";
 
 interface UploadedFile {
   id: string;
-  name: string;
+  fileName: string;
   size: number;
+  fileCategory: string;
+  fileUrl: string;
+  uploadedAt: string | null;
+  file: File | null;
 }
 
 interface FileUploadGroupProps {
@@ -43,10 +47,15 @@ export function FileUploadGroup({
   };
 
   const addFiles = (newFiles: File[]) => {
+    const fileCategory = folderPath.slice(1); // remove leading /
     const uploadedFiles: UploadedFile[] = newFiles.map((file) => ({
       id: Math.random().toString(36).substring(2, 11),
-      name: file.name,
+      fileName: file.name,
       size: file.size,
+      fileCategory,
+      fileUrl: "",
+      uploadedAt: null,
+      file,
     }));
     onFilesChange([...files, ...uploadedFiles]);
   };
@@ -116,7 +125,7 @@ export function FileUploadGroup({
                 <File className="h-4 w-4 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">
-                    {file.name}
+                    {file.fileName}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {formatFileSize(file.size)}

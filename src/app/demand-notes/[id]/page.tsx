@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import {
   ArrowLeft,
   Download,
@@ -12,8 +12,9 @@ import {
   User,
   Clock,
   Eye,
-  Share2,
   Loader2,
+  Upload,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,19 +23,29 @@ import { StatusBadge, DemandNoteStatus } from "@/components/demand-notes/StatusB
 import { Badge } from "@/components/ui/badge";
 import { ActivityTimeline } from "@/components/demand-notes/ActivityTimeline";
 import { DocumentPreviewModal } from "@/components/demand-notes/DocumentPreviewModal";
-import { Avatar } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-interface UploadedFile {
+interface FileType {
   id: string;
-  name: string;
+  fileName: string;
   size: number;
+  fileCategory: string;
+  fileUrl: string;
+  uploadedAt: string | null; // Changed to nullable
 }
 
 interface DemandNote {
-  files: any;
   id: string;
   title: string;
   description: string | null;
@@ -53,6 +64,7 @@ interface DemandNote {
     lastName: string;
     email: string;
   };
+  files: FileType[];
   internalNotes: Array<{
     id: string;
     content: string;
@@ -82,157 +94,97 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
   const { id } = use(params);
   const contentRef = useRef<HTMLDivElement | null>(null);
 
-  // Loading and data states
   const [isLoading, setIsLoading] = useState(true);
-  const [demand, setDemand] = useState<any>(null);
   const [demandNote, setDemandNote] = useState<DemandNote | null>(null);
   const [timeline, setTimeline] = useState<any[]>([]);
   const [notes, setNotes] = useState<any[]>([]);
-  const [documents, setDocuments] = useState<any[]>([]);
-  const [selectedFile, setSelectedFile] = useState<any>(null);
-  // Modal / preview state
-  const [previewFile, setPreviewFile] = useState<{ name: string; url: string } | null>(
-    null
-  );
-
-  // Exporting state
+  const [previewFile, setPreviewFile] = useState<{ name: string; url: string } | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("traffic");
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+
+  // Safe date formatting function
+  const formatDate = (dateString: string | null | undefined, formatStr: string = 'MM/dd/yyyy') => {
+    if (!dateString) return "Unknown date";
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return "Invalid date";
+      }
+      return format(date, formatStr);
+    } catch (error) {
+      console.error("Date formatting error:", error, dateString);
+      return "Invalid date";
+    }
+  };
 
   // Fetch demand note data
   useEffect(() => {
-    const fetchDemandNote = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch(`/api/demand-notes/${id}`);
-        const data = await res.json();
-        setDemandNote(data);
-      } catch (err) {
-        console.error("Error fetching demand note:", err);
+        setIsLoading(true);
+        
+        const [demandResponse, timelineResponse, notesResponse] = await Promise.all([
+          fetch(`/api/demand-notes/${id}`),
+          fetch(`/api/demand-notes/${id}/timeline`),
+          fetch(`/api/demand-notes/${id}/notes`),
+        ]);
+
+        if (!demandResponse.ok) {
+          throw new Error('Failed to fetch demand note');
+        }
+
+        const demandData = await demandResponse.json();
+        
+        // Ensure files array exists and has proper uploadedAt dates
+        const processedData = {
+          ...demandData,
+          files: (demandData.files || []).map((file: FileType) => ({
+            ...file,
+            uploadedAt: file.uploadedAt || file.createdAt || new Date().toISOString(),
+          }))
+        };
+        
+        setDemandNote(processedData);
+
+        if (timelineResponse.ok) {
+          const timelineData = await timelineResponse.json();
+          setTimeline(timelineData);
+        }
+
+        if (notesResponse.ok) {
+          const notesData = await notesResponse.json();
+          setNotes(notesData);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load demand note');
       } finally {
         setIsLoading(false);
       }
     };
 
-    
-
-    const fetchTimeline = async () => {
-      try {
-        const response = await fetch(`/api/demand-notes/${id}/timeline`);
-        if (response.ok) {
-          const data = await response.json();
-          setTimeline(data);
-        }
-      } catch (error) {
-        console.error('Error fetching timeline:', error);
-      }
-    };
-
-    const fetchNotes = async () => {
-      try {
-        const response = await fetch(`/api/demand-notes/${id}/notes`);
-        if (response.ok) {
-          const data = await response.json();
-          setNotes(data);
-        }
-      } catch (error) {
-        console.error('Error fetching notes:', error);
-      }
-    };
-
-    const fetchDocuments = async () => {
-      try {
-        const response = await fetch(`/api/documents?demandNoteId=${id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setDocuments(data);
-        }
-      } catch (error) {
-        console.error('Error fetching documents:', error);
-      }
-    };
-
     if (id) {
-      fetchDemandNote();
-      fetchTimeline();
-      fetchNotes();
-      fetchDocuments();
+      fetchData();
     }
   }, [id]);
 
-  // Convert timeline to activity events format
+  // Convert timeline to activity events format with safe date formatting
   const activityEvents = timeline.map((event) => ({
     id: event.id,
     type: event.type as any,
     description: event.message,
-    timestamp: format(new Date(event.createdAt), 'yyyy-MM-dd HH:mm'),
-    user: 'System', // You can enhance this to show actual user
+    timestamp: formatDate(event.createdAt, 'yyyy-MM-dd HH:mm'),
+    user: 'System',
   }));
 
-  // Categorize documents based on file names or types
-  const trafficFiles: UploadedFile[] = documents.filter(doc =>
-    doc.fileName && (
-      doc.fileName.toLowerCase().includes('traffic') ||
-      doc.fileName.toLowerCase().includes('accident') ||
-      doc.fileName.toLowerCase().includes('police')
-    )
-  ).map(doc => ({
-    id: doc.id,
-    name: doc.fileName || '',
-    size: doc.fileSize || 0
-  }));
-
-  const medicalFiles: UploadedFile[] = documents.filter(doc =>
-    doc.fileName && (
-      doc.fileName.toLowerCase().includes('medical') ||
-      doc.fileName.toLowerCase().includes('hospital') ||
-      doc.fileName.toLowerCase().includes('doctor') ||
-      doc.fileName.toLowerCase().includes('report')
-    )
-  ).map(doc => ({
-    id: doc.id,
-    name: doc.fileName || '',
-    size: doc.fileSize || 0
-  }));
-
-  const billFiles: UploadedFile[] = documents.filter(doc =>
-    doc.fileName && (
-      doc.fileName.toLowerCase().includes('bill') ||
-      doc.fileName.toLowerCase().includes('invoice') ||
-      doc.fileName.toLowerCase().includes('receipt')
-    )
-  ).map(doc => ({
-    id: doc.id,
-    name: doc.fileName || '',
-    size: doc.fileSize || 0
-  }));
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Loading demand note...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!demandNote) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">Demand note not found</h2>
-          <Button onClick={() => router.push('/demand-notes')}>
-            Back to Demand Notes
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
+  // Group files by category
   const groupedFiles = {
-    traffic: demandNote.files?.filter((f: any) => f.fileCategory === "traffic") || [],
-    medical: demandNote.files?.filter((f: any) => f.fileCategory === "medical") || [],
-    bills: demandNote.files?.filter((f: any) => f.fileCategory === "bills") || [],
+    traffic: demandNote?.files?.filter((f: FileType) => f.fileCategory === "traffic") || [],
+    medical: demandNote?.files?.filter((f: FileType) => f.fileCategory === "medical") || [],
+    bills: demandNote?.files?.filter((f: FileType) => f.fileCategory === "bills") || [],
   };
 
   const formatFileSize = (bytes: number) => {
@@ -241,40 +193,128 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
-  // Exports the element with id 'demand-note-content' into a PDF.
+  // Handle file upload
+  const handleFileUpload = async () => {
+    if (!uploadFile || !demandNote) {
+      toast.error("Please select a file to upload");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", uploadFile);
+      formData.append("demandNoteId", demandNote.id);
+      formData.append("fileCategory", selectedCategory);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const result = await response.json();
+      
+      // Update the demand note with new file
+      setDemandNote(prev => prev ? {
+        ...prev,
+        files: [...prev.files, result.file]
+      } : null);
+
+      // Refresh timeline
+      const timelineResponse = await fetch(`/api/demand-notes/${id}/timeline`);
+      if (timelineResponse.ok) {
+        const timelineData = await timelineResponse.json();
+        setTimeline(timelineData);
+      }
+
+      setUploadFile(null);
+      toast.success("File uploaded successfully");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload file");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Handle file delete
+  const handleDeleteFile = async (fileId: string) => {
+    if (!confirm("Are you sure you want to delete this file?")) return;
+
+    try {
+      const response = await fetch(`/api/upload?fileId=${fileId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Delete failed");
+      }
+
+      // Remove file from state
+      setDemandNote(prev => prev ? {
+        ...prev,
+        files: prev.files.filter(f => f.id !== fileId)
+      } : null);
+
+      // Refresh timeline
+      const timelineResponse = await fetch(`/api/demand-notes/${id}/timeline`);
+      if (timelineResponse.ok) {
+        const timelineData = await timelineResponse.json();
+        setTimeline(timelineData);
+      }
+
+      toast.success("File deleted successfully");
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Failed to delete file");
+    }
+  };
+
+  // Handle file download
+  const handleDownloadFile = (fileUrl: string, fileName: string) => {
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Handle file preview
+  const handlePreviewFile = (fileUrl: string, fileName: string) => {
+    setPreviewFile({ name: fileName, url: fileUrl });
+  };
+
   const handleExportPDF = async () => {
     setIsExporting(true);
     try {
       const element = document.getElementById("demand-note-content") || contentRef.current;
       if (!element) throw new Error("Content element not found");
 
-      // Take canvas (high DPI)
       const canvas = await html2canvas(element as HTMLElement, {
         scale: 2,
         useCORS: true,
         logging: false,
-        windowWidth: document.documentElement.scrollWidth,
-        windowHeight: document.documentElement.scrollHeight,
       });
 
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
-
-      const pdfWidth = 210; // mm A4
+      const pdfWidth = 210;
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-      // If content fits one page
       if (pdfHeight <= 297) {
         pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
       } else {
-        // Multi-page handling: split by page height
         let remainingHeight = canvas.height;
         const pageCanvas = document.createElement("canvas");
         const pageCtx = pageCanvas.getContext("2d")!;
-        const pxPerMm = canvas.height / (pdfHeight); // approximate scaling
         const pageHeightPx = Math.floor((297 * canvas.width) / pdfWidth);
-
         let offsetY = 0;
+
         while (remainingHeight > 0) {
           pageCanvas.width = canvas.width;
           pageCanvas.height = Math.min(pageHeightPx, remainingHeight);
@@ -303,7 +343,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
         }
       }
 
-      pdf.save(`demand_note_${demandNote.id}.pdf`);
+      pdf.save(`demand_note_${demandNote?.id}.pdf`);
       toast.success("Demand note exported as PDF.");
     } catch (err) {
       console.error(err);
@@ -313,33 +353,12 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
     }
   };
 
-  const handlePreviewFile = (fileName: string) => {
-    // Replace with your real file URL logic
-    const fileUrl = `https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf`;
-    setPreviewFile({ name: fileName, url: fileUrl });
-  };
-
-  const handleDownloadFile = (file: UploadedFile) => {
-    // Replace with real download logic. For demo, open preview and user can download.
-    handlePreviewFile(file.name);
-    toast.success("Opened preview — use the preview modal to download.");
-  };
-
   const handleBack = () => {
     router.back();
   };
 
   const handleEdit = () => {
-    router.push(`/demand-notes/${demandNote.id}/edit`);
-  };
-
-  const handleShare = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copied to clipboard.");
-    } catch {
-      toast.error("Could not copy link.");
-    }
+    router.push(`/demand-notes/${demandNote?.id}/edit`);
   };
 
   const getInitials = (name: string) =>
@@ -349,59 +368,29 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
       .join("")
       .toUpperCase();
 
-  // render file list helper
-  const renderFileList = (files: UploadedFile[], title: string) => (
-    <Card key={title}>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-semibold flex items-center gap-2">
-          <FileText className="h-4 w-4 text-muted-foreground" />
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {files.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No files uploaded</p>
-        ) : (
-          <div className="space-y-2">
-            {files.map((file) => (
-              <div
-                key={file.id}
-                className="flex items-center justify-between p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="text-sm truncate">{file.name}</span>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs text-muted-foreground">
-                    {formatFileSize(file.size)}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={() => handlePreviewFile(file.name)}
-                    title="Preview document"
-                  >
-                    <Eye className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={() => handleDownloadFile(file)}
-                    title="Download document"
-                  >
-                    <Download className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Loading demand note...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!demandNote) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Demand note not found</h2>
+          <Button onClick={() => router.push('/demand-notes')}>
+            Back to Demand Notes
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -433,11 +422,11 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                       </Badge>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3.5 w-3.5" />
-                        <span>{format(new Date(demandNote.dueDate), 'MM/dd/yyyy')}</span>
+                        <span>{formatDate(demandNote.dueDate, 'MM/dd/yyyy')}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="h-3.5 w-3.5" />
-                        <span>Updated {format(new Date(demandNote.updatedAt), 'MM/dd/yyyy HH:mm')}</span>
+                        <span>Updated {formatDate(demandNote.updatedAt, 'MM/dd/yyyy HH:mm')}</span>
                       </div>
                     </div>
                   </div>
@@ -483,7 +472,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Demand Date</p>
                     <p className="text-sm font-medium">
-                      {format(new Date(demandNote.dueDate), 'MM/dd/yyyy')}
+                      {formatDate(demandNote.dueDate, 'MM/dd/yyyy')}
                     </p>
                   </div>
                   <div>
@@ -498,29 +487,80 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
               </CardContent>
             </Card>
 
+            {/* File Upload Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload New Document</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="fileCategory">Category</Label>
+                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="traffic">Traffic Reports</SelectItem>
+                          <SelectItem value="medical">Medical Reports</SelectItem>
+                          <SelectItem value="bills">Medical Bills</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="file">File</Label>
+                      <Input
+                        id="file"
+                        type="file"
+                        onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                      />
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={handleFileUpload} 
+                    disabled={!uploadFile || isUploading}
+                    className="w-full"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    {isUploading ? "Uploading..." : "Upload Document"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Documents */}
             <div className="space-y-6">
               {Object.entries(groupedFiles).map(([group, files]) => (
                 <Card key={group}>
                   <CardHeader>
-                    <CardTitle className="capitalize">{group} Reports</CardTitle>
+                    <CardTitle className="capitalize">
+                      {group === "traffic" && "Traffic Reports"}
+                      {group === "medical" && "Medical Reports"}
+                      {group === "bills" && "Medical Bills"}
+                      <Badge variant="secondary" className="ml-2">
+                        {(files as FileType[]).length} files
+                      </Badge>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {files.length === 0 ? (
+                    {(files as FileType[]).length === 0 ? (
                       <p className="text-sm text-gray-500">No files uploaded.</p>
                     ) : (
                       <div className="space-y-3">
-                        {files.map((file: any) => (
+                        {(files as FileType[]).map((file) => (
                           <div
                             key={file.id}
-                            className="p-3 border rounded-lg flex items-center justify-between"
+                            className="p-3 border rounded-lg flex items-center justify-between hover:bg-gray-50"
                           >
                             <div className="flex items-center gap-3">
                               <FileText className="h-5 w-5 text-blue-600" />
                               <div>
-                                <p>{file.fileName}</p>
+                                <p className="font-medium">{file.fileName}</p>
                                 <p className="text-xs text-gray-500">
-                                  {(file.size / 1024).toFixed(1)} KB
+                                  {formatFileSize(file.size)} • 
+                                  Uploaded {formatDate(file.uploadedAt, 'MM/dd/yyyy')}
                                 </p>
                               </div>
                             </div>
@@ -529,21 +569,25 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => setSelectedFile(file)}
+                                onClick={() => handlePreviewFile(file.fileUrl, file.fileName)}
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
-
-                              <a
-                                href={file.fileUrl}
-                                download
-                                target="_blank"
-                                rel="noopener noreferrer"
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDownloadFile(file.fileUrl, file.fileName)}
                               >
-                                <Button variant="ghost" size="icon">
-                                  <Download className="h-4 w-4" />
-                                </Button>
-                              </a>
+                                <Download className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteFile(file.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
                         ))}
@@ -562,32 +606,23 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3 font-mono text-xs">
-                    <div>
-                      <p className="text-muted-foreground mb-1.5 font-sans">Traffic Reports:</p>
-                      <ul className="list-disc list-inside text-foreground space-y-1">
-                        {trafficFiles.map((file) => (
-                          <li key={file.id}>{file.name}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <Separator />
-                    <div>
-                      <p className="text-muted-foreground mb-1.5 font-sans">Medical Reports:</p>
-                      <ul className="list-disc list-inside text-foreground space-y-1">
-                        {medicalFiles.map((file) => (
-                          <li key={file.id}>{file.name}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <Separator />
-                    <div>
-                      <p className="text-muted-foreground mb-1.5 font-sans">Medical Bills:</p>
-                      <ul className="list-disc list-inside text-foreground space-y-1">
-                        {billFiles.map((file) => (
-                          <li key={file.id}>{file.name}</li>
-                        ))}
-                      </ul>
-                    </div>
+                    {Object.entries(groupedFiles).map(([group, files]) => (
+                      <div key={group}>
+                        <p className="text-muted-foreground mb-1.5 font-sans capitalize">
+                          {group} Reports:
+                        </p>
+                        <ul className="list-disc list-inside text-foreground space-y-1">
+                          {(files as FileType[]).length === 0 ? (
+                            <li className="text-muted-foreground">No files</li>
+                          ) : (
+                            (files as FileType[]).map((file) => (
+                              <li key={file.id}>{file.fileName}</li>
+                            ))
+                          )}
+                        </ul>
+                        <Separator className="my-2" />
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -624,7 +659,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                   <p className="text-sm text-muted-foreground mb-1">Created At</p>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                    <p className="text-sm">{format(new Date(demandNote.createdAt), 'MM/dd/yyyy HH:mm')}</p>
+                    <p className="text-sm">{formatDate(demandNote.createdAt, 'MM/dd/yyyy HH:mm')}</p>
                   </div>
                 </div>
 
@@ -632,7 +667,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                   <p className="text-sm text-muted-foreground mb-1">Last Updated</p>
                   <div className="flex items-center gap-2">
                     <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                    <p className="text-sm">{format(new Date(demandNote.updatedAt), 'MM/dd/yyyy HH:mm')}</p>
+                    <p className="text-sm">{formatDate(demandNote.updatedAt, 'MM/dd/yyyy HH:mm')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -655,7 +690,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                           <User className="h-3 w-3" />
                           <span>{note.createdBy.firstName} {note.createdBy.lastName}</span>
                           <span>•</span>
-                          <span>{format(new Date(note.createdAt), 'MM/dd/yyyy HH:mm')}</span>
+                          <span>{formatDate(note.createdAt, 'MM/dd/yyyy HH:mm')}</span>
                         </div>
                       </div>
                     ))}

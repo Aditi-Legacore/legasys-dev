@@ -13,8 +13,12 @@ import { toast } from "sonner";
 
 interface UploadedFile {
   id: string;
-  name: string;
+  fileName: string;
   size: number;
+  fileCategory: string;
+  fileUrl: string;
+  uploadedAt: string | null;
+  file: File | null;
 }
 
 export default function DemandNoteForm({ id }: { id?: string }) {
@@ -42,23 +46,7 @@ export default function DemandNoteForm({ id }: { id?: string }) {
     const handleGenerate = async () => {
       try {
         setIsGenerating(true);
-    
-        // 🔥 Add fileUrl before sending to backend
-        const traffic = trafficFiles.map((f) => ({
-          ...f,
-          fileUrl: "/uploads/" + f.name,
-        }));
-    
-        const medical = medicalFiles.map((f) => ({
-          ...f,
-          fileUrl: "/uploads/" + f.name,
-        }));
-    
-        const bills = billFiles.map((f) => ({
-          ...f,
-          fileUrl: "/uploads/" + f.name,
-        }));
-    
+
         const response = await fetch("/api/demand-notes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -67,31 +55,74 @@ export default function DemandNoteForm({ id }: { id?: string }) {
             demandDate,
             internalNotes,
             status: "generated",
-            files: {
-              traffic,
-              medical,
-              bills,
-            },
           }),
         });
-    
+
         const data = await response.json();
-    
+
         if (!response.ok) {
           toast.error("Failed to create demand note.");
           return;
         }
-    
+
+        const demandNoteId = data.id;
+
+        if (!demandNoteId) {
+          console.error("Demand note ID is missing from response:", data);
+          toast.error("Failed to get demand note ID. Cannot upload files.");
+          return;
+        }
+
+        // Upload files individually
+        const allFiles = [...trafficFiles, ...medicalFiles, ...billFiles];
+        for (const fileInfo of allFiles) {
+          if (fileInfo.file) {
+            console.log("Uploading file:", fileInfo.fileName, "to demandNoteId:", demandNoteId, "category:", fileInfo.fileCategory);
+            try {
+              const formData = new FormData();
+              formData.append("file", fileInfo.file);
+              formData.append("demandNoteId", demandNoteId);
+              formData.append("fileCategory", fileInfo.fileCategory);
+
+              const uploadResponse = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+              });
+
+              if (!uploadResponse.ok) {
+                console.log("Upload response status:", uploadResponse.status, uploadResponse.statusText);
+                let errorData;
+                try {
+                  errorData = await uploadResponse.json();
+                  console.log("Parsed error data:", errorData);
+                } catch {
+                  errorData = { error: `HTTP ${uploadResponse.status}: ${uploadResponse.statusText}` };
+                }
+                console.error("Upload failed for file:", fileInfo.fileName, errorData);
+                toast.error(`Failed to upload ${fileInfo.fileName}: ${errorData.error || "Unknown error"}`);
+              } else {
+                console.log("Uploaded file:", fileInfo.fileName);
+              }
+            } catch (uploadError) {
+              console.error("Upload error for file:", fileInfo.fileName, uploadError);
+              toast.error(`Failed to upload ${fileInfo.fileName}: ${uploadError instanceof Error ? uploadError.message : "Unknown error"}`);
+            }
+          }
+        }
+
         toast.success("Demand note generated & saved!");
-        router.push(`/demand-notes/${data.demandNote.id}`);
+        setStatus("generated");
+        // if (demandNoteId) {
+        //   router.push(`/demand-notes/${demandNoteId}`);
+        // }
+        router.push("/demand-notes");
       } catch (err) {
-        toast.error("Something went wrong.");
+        console.error(err);
+        toast.error("An error occurred while generating the demand note.");
       } finally {
         setIsGenerating(false);
       }
     };
-    
-    
 
   const handleSaveDraft = () => {
     toast.success("Draft saved successfully!");
@@ -226,7 +257,7 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                     <p className="text-muted-foreground mb-1">Traffic Reports:</p>
                     <ul className="list-disc list-inside text-foreground space-y-1">
                       {trafficFiles.map((file) => (
-                        <li key={file.id}>{file.name}</li>
+                        <li key={file.id}>{file.fileName}</li>
                       ))}
                     </ul>
                   </div>
@@ -235,7 +266,7 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                     <p className="text-muted-foreground mb-1">Medical Reports:</p>
                     <ul className="list-disc list-inside text-foreground space-y-1">
                       {medicalFiles.map((file) => (
-                        <li key={file.id}>{file.name}</li>
+                        <li key={file.id}>{file.fileName}</li>
                       ))}
                     </ul>
                   </div>
@@ -244,7 +275,7 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                     <p className="text-muted-foreground mb-1">Medical Bills:</p>
                     <ul className="list-disc list-inside text-foreground space-y-1">
                       {billFiles.map((file) => (
-                        <li key={file.id}>{file.name}</li>
+                        <li key={file.id}>{file.fileName}</li>
                       ))}
                     </ul>
                   </div>
