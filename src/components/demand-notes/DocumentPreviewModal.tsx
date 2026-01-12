@@ -27,7 +27,7 @@ export function DocumentPreviewModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
+      <DialogContent className="max-w-7xl max-h-[95vh]">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-lg font-semibold">
@@ -58,11 +58,11 @@ export function DocumentPreviewModal({
           {fileUrl ? (
             <iframe
               src={fileUrl}
-              className="w-full h-[70vh] border rounded-md"
+              className="w-full h-[85vh] border rounded-md"
               title={`Preview of ${fileName}`}
             />
           ) : (
-            <div className="w-full h-[70vh] border rounded-md flex items-center justify-center bg-muted">
+            <div className="w-full h-[85vh] border rounded-md flex items-center justify-center bg-muted">
               <p className="text-muted-foreground">No preview available</p>
             </div>
           )}

@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { writeFile } from "fs/promises";
 import path from "path";
-import { v4 as uuidv4 } from "uuid";
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,12 +48,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate unique filename
-    const fileExtension = path.extname(file.name);
-    const uniqueFilename = `${uuidv4()}${fileExtension}`;
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    const filePath = path.join(uploadDir, uniqueFilename);
-    const fileUrl = `/uploads/${uniqueFilename}`;
+    // new code to handle file upload 12/01/2026
+
+    const categoryFolderMap: Record<string, string> = {
+      medical: "medical reports",
+      traffic: "traffic reports",
+      bills: "medical bills",
+    };
+    
+    const sanitizeFilename = (name: string) => {
+      return name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    };
+    
+    // Resolve folder based on category
+const categoryFolder = categoryFolderMap[fileCategory];
+
+// Build safe filename: demandId_originalFilename
+const safeOriginalName = sanitizeFilename(file.name);
+const finalFilename = `${demandNoteId}_${safeOriginalName}`;
+
+// Directory: public/uploads/<category folder>
+const uploadDir = path.join(
+  process.cwd(),
+  "public",
+  "uploads",
+  categoryFolder
+);
+
+// Full file path
+const filePath = path.join(uploadDir, finalFilename);
+
+// Public URL
+const fileUrl = `/uploads/${categoryFolder}/${finalFilename}`;
+
+
 
     // Convert file to buffer
     const bytes = await file.arrayBuffer();

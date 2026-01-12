@@ -110,7 +110,7 @@ export default function DemandNoteForm({ id }: { id?: string }) {
           }
         }
 
-        toast.success("Demand note generated & saved!");
+        toast.success("Demand note generated & saved!!!!");
         setStatus("generated");
         // if (demandNoteId) {
         //   router.push(`/demand-notes/${demandNoteId}`);

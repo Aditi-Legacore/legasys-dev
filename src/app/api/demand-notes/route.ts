@@ -79,6 +79,8 @@ export async function POST(request: NextRequest) {
       const fileList = files[category] || [];
 
       for (const file of fileList) {
+        console.log(file);
+        
         await prisma.demandFile.create({
           data: {
             demandNoteId: demandNote.id,

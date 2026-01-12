@@ -488,7 +488,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
             </Card>
 
             {/* File Upload Section */}
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Upload New Document</CardTitle>
               </CardHeader>
@@ -528,7 +528,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                   </Button>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Documents */}
             <div className="space-y-6">
