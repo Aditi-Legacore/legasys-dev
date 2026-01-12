@@ -36,7 +36,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+
 interface FileType {
+  createdAt: string | null;
   id: string;
   fileName: string;
   size: number;
@@ -103,6 +112,8 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("traffic");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+
 
   // Safe date formatting function
   const formatDate = (dateString: string | null | undefined, formatStr: string = 'MM/dd/yyyy') => {
@@ -232,6 +243,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
       }
 
       setUploadFile(null);
+      setIsUploadOpen(false); // 👈 CLOSE MODAL
       toast.success("File uploaded successfully");
     } catch (error) {
       console.error("Upload error:", error);
@@ -442,10 +454,11 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                 <Download className="h-4 w-4 mr-2" />
                 {isExporting ? "Exporting..." : "Export PDF"}
               </Button>
-              <Button onClick={handleEdit}>
+              <Button onClick={() => setIsUploadOpen(true)}>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Button>
+
             </div>
           </div>
         </div>
@@ -487,48 +500,67 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
               </CardContent>
             </Card>
 
+
             {/* File Upload Section */}
-            {/* <Card>
-              <CardHeader>
-                <CardTitle>Upload New Document</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="fileCategory">Category</Label>
-                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="traffic">Traffic Reports</SelectItem>
-                          <SelectItem value="medical">Medical Reports</SelectItem>
-                          <SelectItem value="bills">Medical Bills</SelectItem>
-                        </SelectContent>
-                      </Select>
+            <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+              <DialogContent className="max-w-lg p-0">
+                {/* REQUIRED for accessibility */}
+                <DialogHeader className="sr-only">
+                  <DialogTitle>Upload New Document</DialogTitle>
+                </DialogHeader>
+
+                {/* Your existing Card UI */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Upload New Document</CardTitle>
+                  </CardHeader>
+
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Category</Label>
+                          <Select
+                            value={selectedCategory}
+                            onValueChange={setSelectedCategory}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="traffic">Traffic Reports</SelectItem>
+                              <SelectItem value="medical">Medical Reports</SelectItem>
+                              <SelectItem value="bills">Medical Bills</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>File</Label>
+                          <Input
+                            type="file"
+                            onChange={(e) =>
+                              setUploadFile(e.target.files?.[0] || null)
+                            }
+                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                          />
+                        </div>
+                      </div>
+
+                      <Button
+                        onClick={handleFileUpload}
+                        disabled={!uploadFile || isUploading}
+                        className="w-full"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        {isUploading ? "Uploading..." : "Upload Document"}
+                      </Button>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="file">File</Label>
-                      <Input
-                        id="file"
-                        type="file"
-                        onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                      />
-                    </div>
-                  </div>
-                  <Button 
-                    onClick={handleFileUpload} 
-                    disabled={!uploadFile || isUploading}
-                    className="w-full"
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    {isUploading ? "Uploading..." : "Upload Document"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card> */}
+                  </CardContent>
+                </Card>
+              </DialogContent>
+            </Dialog>
+
 
             {/* Documents */}
             <div className="space-y-6">
