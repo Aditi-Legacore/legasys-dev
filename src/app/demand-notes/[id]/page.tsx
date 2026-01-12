@@ -111,7 +111,9 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("traffic");
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  // const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
 
@@ -206,52 +208,71 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
 
   // Handle file upload
   const handleFileUpload = async () => {
-    if (!uploadFile || !demandNote) {
-      toast.error("Please select a file to upload");
+    if (!uploadFiles.length || !demandNote) {
+      toast.error("Please select files to upload");
       return;
     }
-
+  
     setIsUploading(true);
+  
     try {
-      const formData = new FormData();
-      formData.append("file", uploadFile);
-      formData.append("demandNoteId", demandNote.id);
-      formData.append("fileCategory", selectedCategory);
-
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Upload failed");
+      const uploadedFiles = [];
+  
+      for (const file of uploadFiles) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("demandNoteId", demandNote.id);
+        formData.append("fileCategory", selectedCategory);
+  
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+  
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}`);
+        }
+  
+        const result = await response.json();
+        uploadedFiles.push(result.file);
       }
-
-      const result = await response.json();
-      
-      // Update the demand note with new file
-      setDemandNote(prev => prev ? {
-        ...prev,
-        files: [...prev.files, result.file]
-      } : null);
-
-      // Refresh timeline
-      const timelineResponse = await fetch(`/api/demand-notes/${id}/timeline`);
+  
+      // Update demand note files once
+      setDemandNote((prev) =>
+        prev
+          ? {
+              ...prev,
+              files: [...prev.files, ...uploadedFiles],
+            }
+          : null
+      );
+  
+      // Refresh timeline once
+      const timelineResponse = await fetch(
+        `/api/demand-notes/${id}/timeline`
+      );
       if (timelineResponse.ok) {
         const timelineData = await timelineResponse.json();
         setTimeline(timelineData);
       }
-
-      setUploadFile(null);
-      setIsUploadOpen(false); // 👈 CLOSE MODAL
-      toast.success("File uploaded successfully");
+  
+      setUploadFiles([]);
+      setIsUploadOpen(false); // ✅ close modal
+      toast.success("Files uploaded successfully");
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Failed to upload file");
+      toast.error("Failed to upload one or more files");
     } finally {
       setIsUploading(false);
     }
   };
+
+  // remove (✕) button per file so users can delete selected files before upload.
+  const handleRemoveFile = (index: number) => {
+    setUploadFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+  
+  
 
   // Handle file delete
   const handleDeleteFile = async (fileId: string) => {
@@ -369,9 +390,6 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
     router.back();
   };
 
-  const handleEdit = () => {
-    router.push(`/demand-notes/${demandNote?.id}/edit`);
-  };
 
   const getInitials = (name: string) =>
     name
@@ -538,18 +556,45 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                         <div className="space-y-2">
                           <Label>File</Label>
                           <Input
+                            id="file"
                             type="file"
+                            multiple
                             onChange={(e) =>
-                              setUploadFile(e.target.files?.[0] || null)
+                              setUploadFiles(e.target.files ? Array.from(e.target.files) : [])
                             }
                             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                           />
+                            { uploadFiles.length > 0 && (
+                              <ul className="space-y-2">
+                                {uploadFiles.map((file, idx) => (
+                                  <li
+                                    key={`${file.name}-${idx}`}
+                                    className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
+                                  >
+                                    <span className="truncate text-muted-foreground">
+                                      📄 {file.name}
+                                    </span>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveFile(idx)}
+                                      className="ml-2 rounded-full p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                      aria-label={`Remove ${file.name}`}
+                                    >
+                                      ✕
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+
                         </div>
                       </div>
 
                       <Button
                         onClick={handleFileUpload}
-                        disabled={!uploadFile || isUploading}
+                        disabled={uploadFiles.length === 0 || isUploading}
+
                         className="w-full"
                       >
                         <Upload className="h-4 w-4 mr-2" />
