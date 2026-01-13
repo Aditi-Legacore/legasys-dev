@@ -104,7 +104,33 @@ export default function DemandNotes() {
         router.push(`/demand-notes/${original.id}`);
       },
     },
+    {
+      label: "Request Documents",
+      icon: FileText,
+      onClick: async (row) => {
+        const original = row._original as DemandNote;
+  
+        try {
+          const response = await fetch(
+            `/api/demand-notes/${original.id}/request-documents`,
+            {
+              method: "POST",
+            }
+          );
+  
+          if (response.ok) {
+            alert("Document request sent successfully!");
+          } else {
+            alert("Failed to send document request.");
+          }
+        } catch (error) {
+          console.error("Error requesting documents:", error);
+          alert("An error occurred while requesting documents.");
+        }
+      },
+    },
   ];
+  
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">

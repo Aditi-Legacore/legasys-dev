@@ -26,6 +26,7 @@ export default function DemandNoteForm({ id }: { id?: string }) {
   const isEditMode = !!id;
 
   const [clientName, setClientName] = useState(isEditMode ? "John Doe" : "");
+  const [defendantPhoneEmail, setDefendantPhoneEmail] = useState("");
   const [demandDate, setDemandDate] = useState(
     isEditMode ? "2025-11-20" : new Date().toISOString().split("T")[0]
   );
@@ -52,6 +53,7 @@ export default function DemandNoteForm({ id }: { id?: string }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             clientName,
+            defendantPhoneEmail,
             demandDate,
             internalNotes,
             status: "generated",
@@ -178,6 +180,18 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                   />
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="defendantPhoneEmail">Defendant Phone/Email</Label>
+                  <Input
+                    id="defendantPhoneEmail"
+                    value={defendantPhoneEmail}
+                    onChange={(e) => setDefendantPhoneEmail(e.target.value)}
+                    placeholder="Enter phone or email"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="demandDate">Demand Date</Label>
                   <div className="relative">

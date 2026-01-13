@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
 
     const {
       clientName,
+      defendantPhoneEmail,
       demandDate,
       status = "draft",
       internalNotes,
@@ -37,8 +38,42 @@ export async function POST(request: NextRequest) {
     });
 
     if (!client) {
+      // Determine if defendantPhoneEmail is email or phone
+      const isEmail = defendantPhoneEmail && defendantPhoneEmail.includes('@');
+      const clientData: {
+        name: string;
+        email?: string;
+        phone?: string;
+      } = { name: clientName };
+
+      if (defendantPhoneEmail) {
+        if (isEmail) {
+          clientData.email = defendantPhoneEmail;
+        } else {
+          clientData.phone = defendantPhoneEmail;
+        }
+      }
+
       client = await prisma.defedantClient.create({
-        data: { name: clientName },
+        data: clientData,
+      });
+    } else if (defendantPhoneEmail) {
+      // Update existing client if phone/email provided
+      const isEmail = defendantPhoneEmail.includes('@');
+      const updateData: {
+        email?: string;
+        phone?: string;
+      } = {};
+
+      if (isEmail) {
+        updateData.email = defendantPhoneEmail;
+      } else {
+        updateData.phone = defendantPhoneEmail;
+      }
+
+      client = await prisma.defedantClient.update({
+        where: { id: client.id },
+        data: updateData,
       });
     }
 

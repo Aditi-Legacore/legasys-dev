@@ -1,9 +1,8 @@
-- [x] Create timeline API for demand notes
-- [ ] Verify all APIs work correctly
-- [ ] Ensure proper authentication and authorization
-- [ ] Test error handling
-=======
-### 4. Testing and Validation
-- [x] Verify all APIs work correctly
-- [x] Ensure proper authentication and authorization
-- [x] Test error handling
+# Task: Add Defendant Phone/Email to DemandNoteForm
+
+## Pending Tasks
+- [ ] Add defendantPhoneEmail state to DemandNoteForm.tsx
+- [ ] Add Defendant Phone/Email input field to the form
+- [ ] Update POST request in DemandNoteForm.tsx to include defendantPhoneEmail
+- [ ] Update backend API (/api/demand-notes/route.ts) to save phone/email to DefedantClient
+- [ ] Test the form submission and database save
