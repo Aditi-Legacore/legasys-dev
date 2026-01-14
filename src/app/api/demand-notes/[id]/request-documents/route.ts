@@ -44,18 +44,20 @@ export async function POST(
     const missingReportsText = missingCategories.join(', ');
     const message = `Dear ${demandNote.client.name},
 
-We require the following documents for your demand note:
-${missingReportsText}
+    We require the following documents for your demand note:
+    ${missingReportsText}
 
-Please provide these documents as soon as possible.
+    Please provide these documents as soon as possible.
 
-Best regards,
-Legal Team`;
+    Best regards,
+    Legal Team`;
 
     // Send via email if available
     let sentVia = "none";
     
     if (demandNote.client.email) {
+     
+      
       try {
         await sendEmail({
           to: demandNote.client.email,
