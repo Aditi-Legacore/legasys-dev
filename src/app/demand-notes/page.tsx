@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Filter, FileText, Eye, Loader2 } from "lucide-react";
+import { Plus, Search, Filter, FileText, Eye, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -102,6 +102,32 @@ export default function DemandNotes() {
       onClick: (row) => {
         const original = row._original as DemandNote;
         router.push(`/demand-notes/${original.id}`);
+      },
+    },
+    {
+      label: "Delete",
+      icon: Trash2,
+      onClick: async (row) => {
+        const original = row._original as DemandNote;
+        const confirmDelete = window.confirm(`Are you sure you want to delete the demand note for ${original.client?.name ?? "Unknown"}?`);
+        if (!confirmDelete) return;
+
+        try {
+          const response = await fetch(`/api/demand-notes/${original.id}`, {
+            method: "DELETE",
+          });
+
+          if (response.ok) {
+            // Remove from state
+            setDemandNotes((prev) => prev.filter((note) => note.id !== original.id));
+            alert("Demand note deleted successfully!");
+          } else {
+            alert("Failed to delete demand note.");
+          }
+        } catch (error) {
+          console.error("Error deleting demand note:", error);
+          alert("An error occurred while deleting the demand note.");
+        }
       },
     },
     {

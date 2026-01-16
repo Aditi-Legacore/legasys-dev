@@ -4,8 +4,8 @@ import { IntakeFormData } from '@/types/form';
 // Create a transporter using SMTP
 const createTransporter = (userEmail?: string) => nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587,
-  secure: false, // use true for port 465, false for 587
+  port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465,
+  secure: true, // use true for port 465, false for 587
   auth: {
     user: process.env.EMAIL_USER || userEmail,
     pass: process.env.EMAIL_PASS, // ⚠️ App Password (not your Gmail password)

@@ -84,4 +84,4 @@ export function DocumentPreviewModal({
       </DialogContent>
     </Dialog>
   );
-}
+} 

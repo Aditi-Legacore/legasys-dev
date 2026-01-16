@@ -216,7 +216,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
     setIsUploading(true);
   
     try {
-      const uploadedFiles = [];
+      const uploadedFiles: any[] = [];
   
       for (const file of uploadFiles) {
         const formData = new FormData();
