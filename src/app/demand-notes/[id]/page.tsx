@@ -468,10 +468,10 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={handleExportPDF} disabled={isExporting}>
+              {/* <Button variant="outline" onClick={handleExportPDF} disabled={isExporting}>
                 <Download className="h-4 w-4 mr-2" />
                 {isExporting ? "Exporting..." : "Export PDF"}
-              </Button>
+              </Button> */}
               <Button onClick={() => setIsUploadOpen(true)}>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
@@ -625,7 +625,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                     {(files as FileType[]).length === 0 ? (
                       <p className="text-sm text-gray-500">No files uploaded.</p>
                     ) : (
-                      <div className="space-y-3">
+                      <div className="space-y-3"> 
                         {(files as FileType[]).map((file) => (
                           <div
                             key={file.id}
