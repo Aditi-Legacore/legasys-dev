@@ -15,6 +15,7 @@ import {
   Loader2,
   Upload,
   Trash2,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +24,7 @@ import { StatusBadge, DemandNoteStatus } from "@/components/demand-notes/StatusB
 import { Badge } from "@/components/ui/badge";
 import { ActivityTimeline } from "@/components/demand-notes/ActivityTimeline";
 import { DocumentPreviewModal } from "@/components/demand-notes/DocumentPreviewModal";
+import { SummarizeJobModal } from "@/components/demand-notes/SummarizeJobModal";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -115,12 +117,13 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
 
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [summarizeFileId, setSummarizeFileId] = useState<string | null>(null);
 
 
   // Safe date formatting function
   const formatDate = (dateString: string | null | undefined, formatStr: string = 'MM/dd/yyyy') => {
     if (!dateString) return "Unknown date";
-    
+
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) {
@@ -138,7 +141,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        
+
         const [demandResponse, timelineResponse, notesResponse] = await Promise.all([
           fetch(`/api/demand-notes/${id}`),
           fetch(`/api/demand-notes/${id}/timeline`),
@@ -150,7 +153,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
         }
 
         const demandData = await demandResponse.json();
-        
+
         // Ensure files array exists and has proper uploadedAt dates
         const processedData = {
           ...demandData,
@@ -159,7 +162,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
             uploadedAt: file.uploadedAt || file.createdAt || new Date().toISOString(),
           }))
         };
-        
+
         setDemandNote(processedData);
 
         if (timelineResponse.ok) {
@@ -212,41 +215,41 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
       toast.error("Please select files to upload");
       return;
     }
-  
+
     setIsUploading(true);
-  
+
     try {
       const uploadedFiles: any[] = [];
-  
+
       for (const file of uploadFiles) {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("demandNoteId", demandNote.id);
         formData.append("fileCategory", selectedCategory);
-  
+
         const response = await fetch("/api/upload", {
           method: "POST",
           body: formData,
         });
-  
+
         if (!response.ok) {
           throw new Error(`Failed to upload ${file.name}`);
         }
-  
+
         const result = await response.json();
         uploadedFiles.push(result.file);
       }
-  
+
       // Update demand note files once
       setDemandNote((prev) =>
         prev
           ? {
-              ...prev,
-              files: [...prev.files, ...uploadedFiles],
-            }
+            ...prev,
+            files: [...prev.files, ...uploadedFiles],
+          }
           : null
       );
-  
+
       // Refresh timeline once
       const timelineResponse = await fetch(
         `/api/demand-notes/${id}/timeline`
@@ -255,7 +258,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
         const timelineData = await timelineResponse.json();
         setTimeline(timelineData);
       }
-  
+
       setUploadFiles([]);
       setIsUploadOpen(false); // ✅ close modal
       toast.success("Files uploaded successfully");
@@ -271,8 +274,8 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
   const handleRemoveFile = (index: number) => {
     setUploadFiles((prev) => prev.filter((_, i) => i !== index));
   };
-  
-  
+
+
 
   // Handle file delete
   const handleDeleteFile = async (fileId: string) => {
@@ -564,29 +567,29 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                             }
                             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                           />
-                            { uploadFiles.length > 0 && (
-                              <ul className="space-y-2">
-                                {uploadFiles.map((file, idx) => (
-                                  <li
-                                    key={`${file.name}-${idx}`}
-                                    className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
-                                  >
-                                    <span className="truncate text-muted-foreground">
-                                      📄 {file.name}
-                                    </span>
+                          {uploadFiles.length > 0 && (
+                            <ul className="space-y-2">
+                              {uploadFiles.map((file, idx) => (
+                                <li
+                                  key={`${file.name}-${idx}`}
+                                  className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
+                                >
+                                  <span className="truncate text-muted-foreground">
+                                    📄 {file.name}
+                                  </span>
 
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRemoveFile(idx)}
-                                      className="ml-2 rounded-full p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                      aria-label={`Remove ${file.name}`}
-                                    >
-                                      ✕
-                                    </button>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveFile(idx)}
+                                    className="ml-2 rounded-full p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                    aria-label={`Remove ${file.name}`}
+                                  >
+                                    ✕
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
 
                         </div>
                       </div>
@@ -625,7 +628,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                     {(files as FileType[]).length === 0 ? (
                       <p className="text-sm text-gray-500">No files uploaded.</p>
                     ) : (
-                      <div className="space-y-3"> 
+                      <div className="space-y-3">
                         {(files as FileType[]).map((file) => (
                           <div
                             key={file.id}
@@ -636,13 +639,22 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                               <div>
                                 <p className="font-medium">{file.fileName}</p>
                                 <p className="text-xs text-gray-500">
-                                  {formatFileSize(file.size)} • 
+                                  {formatFileSize(file.size)} •
                                   Uploaded {formatDate(file.uploadedAt, 'MM/dd/yyyy')}
                                 </p>
                               </div>
                             </div>
 
                             <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setSummarizeFileId(file.id)}
+                                className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                                title="Summarize this file"
+                              >
+                                <Sparkles className="h-4 w-4" />
+                              </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -786,6 +798,16 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
         fileName={previewFile?.name || ""}
         fileUrl={previewFile?.url || ""}
       />
+
+      {/* Summarize Job Modal */}
+      {demandNote && (
+        <SummarizeJobModal
+          isOpen={!!summarizeFileId}
+          onClose={() => setSummarizeFileId(null)}
+          demandNoteId={demandNote.id}
+          demandFileId={summarizeFileId}
+        />
+      )}
     </div>
   );
 }

@@ -34,6 +34,7 @@ model User {
   uploadedFiles DemandFile[]
   internalNotes DemandInternalNote[]
   statusHistories DemandStatusHistory[]
+  jobs          Job[]
 }
 
 model Account {
@@ -324,6 +325,7 @@ model DemandNote {
   statusHistory  DemandStatusHistory[]
   reminders      DemandReminder[]
   tags           DemandNoteTag[]
+  jobs           Job[]
 }
 
 model DefedantClient {
@@ -353,10 +355,46 @@ model DemandFile {
   fileUrl      String
   fileType     String?
   size         Int?
+  status       String      @default("uploaded")
+  filePath     String?
   createdAt    DateTime    @default(now())
 
   demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
   uploadedBy   User        @relation(fields: [uploadedById], references: [id])
+  jobs         Job[]
+}
+
+model Job {
+  id           String    @id @default(cuid())
+  demandNoteId String
+  demandFileId String?  // Added for per-file job tracking
+  createdById  String
+  status       String    @default("pending") // pending | in_progress | completed | failed
+  numTasks     Int       @default(0)
+  outputJson   Json?
+  createTs     DateTime  @default(now())
+  updateTs     DateTime  @updatedAt
+
+  demandNote   DemandNote @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
+  demandFile   DemandFile? @relation(fields: [demandFileId], references: [id])
+  createdBy    User       @relation(fields: [createdById], references: [id])
+  tasks        Task[]
+}
+
+model Task {
+  id         String   @id @default(cuid())
+  jobId      String
+  fileName   String
+  filePath   String
+  status     String   @default("pending") // pending | in_progress | completed | failed
+  pid        Int?
+  outputJson Json?
+  startTs    DateTime?
+  endTs      DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  job        Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
 }
 
 // -----------------------------

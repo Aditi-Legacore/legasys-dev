@@ -55,31 +55,31 @@ export async function POST(request: NextRequest) {
       traffic: "traffic reports",
       bills: "medical bills",
     };
-    
+
     const sanitizeFilename = (name: string) => {
       return name.replace(/[^a-zA-Z0-9._-]/g, "_");
     };
-    
+
     // Resolve folder based on category
-const categoryFolder = categoryFolderMap[fileCategory];
+    const categoryFolder = categoryFolderMap[fileCategory];
 
-// Build safe filename: demandId_originalFilename
-const safeOriginalName = sanitizeFilename(file.name);
-const finalFilename = `${demandNoteId}_${safeOriginalName}`;
+    // Build safe filename: demandId_originalFilename
+    const safeOriginalName = sanitizeFilename(file.name);
+    const finalFilename = `${demandNoteId}_${safeOriginalName}`;
 
-// Directory: public/uploads/<category folder>
-const uploadDir = path.join(
-  process.cwd(),
-  "public",
-  "uploads",
-  categoryFolder
-);
+    // Directory: public/uploads/<category folder>
+    const uploadDir = path.join(
+      process.cwd(),
+      "public",
+      "uploads",
+      categoryFolder
+    );
 
-// Full file path
-const filePath = path.join(uploadDir, finalFilename);
+    // Full file path
+    const filePath = path.join(uploadDir, finalFilename);
 
-// Public URL
-const fileUrl = `/uploads/${categoryFolder}/${finalFilename}`;
+    // Public URL
+    const fileUrl = `/uploads/${categoryFolder}/${finalFilename}`;
 
 
 
@@ -104,6 +104,8 @@ const fileUrl = `/uploads/${categoryFolder}/${finalFilename}`;
         fileName: file.name,
         size: buffer.length,
         fileUrl,
+        filePath, // Added
+        status: "uploaded", // Added
         uploadedById: session.user.id,
       },
       include: {
@@ -183,7 +185,7 @@ export async function DELETE(request: NextRequest) {
     // Delete from filesystem
     const fs = await import("fs");
     const filePath = path.join(process.cwd(), "public", file.fileUrl);
-    
+
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
