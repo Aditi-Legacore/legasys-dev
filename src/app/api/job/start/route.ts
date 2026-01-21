@@ -77,13 +77,38 @@ export async function POST(request: NextRequest) {
         });
 
         // Spawn Python Process
-        const pythonScriptPath = path.join(process.cwd(), "scripts", "process_job.py");
+        const pythonScriptPath = "D:/pdf-extraction-pipeline/main.py";
+        const pythonExecutable = "C:\\Users\\hp\\anaconda3\\python.exe";
 
-        // Using 'python' or 'python3' depending on environment. modifying to be configurable or generic?
-        // For now assuming python is available.
-        const pythonProcess = spawn("python", [pythonScriptPath, job.id], {
+        console.log("🐍 Spawning Python process...");
+        console.log("   Executable:", pythonExecutable);
+        console.log("   Script:", pythonScriptPath);
+        console.log("   Job ID:", job.id);
+
+        const pythonProcess = spawn(pythonExecutable, [pythonScriptPath, job.id], {
+            shell: true, // Important for Windows
             detached: true,
-            stdio: "ignore", // "ignore" so we don't wait for it
+            stdio: ['ignore', 'pipe', 'pipe'],
+        });
+
+        pythonProcess.on('error', (err) => {
+            console.error('❌ Failed to start Python process:', err);
+        });
+
+        pythonProcess.on('spawn', () => {
+            console.log('✅ Python process spawned successfully, PID:', pythonProcess.pid);
+        });
+
+        pythonProcess.stdout?.on('data', (data) => {
+            console.log(`🐍 [STDOUT]: ${data.toString().trim()}`);
+        });
+
+        pythonProcess.stderr?.on('data', (data) => {
+            console.error(`🐍 [STDERR]: ${data.toString().trim()}`);
+        });
+
+        pythonProcess.on('close', (code) => {
+            console.log(`🐍 Python process exited with code ${code}`);
         });
 
         pythonProcess.unref(); // Allow node process to complete without waiting for python child
