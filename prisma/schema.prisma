@@ -371,7 +371,7 @@ model Job {
   createdById  String
   status       String    @default("pending") // pending | in_progress | completed | failed
   numTasks     Int       @default(0)
-  outputJson   String?
+  outputSummary   String?
   createTs     DateTime  @default(now())
   updateTs     DateTime  @updatedAt
 
@@ -388,7 +388,7 @@ model Task {
   filePath   String
   status     String   @default("pending") // pending | in_progress | completed | failed
   pid        Int?
-  outputJson String?
+  outputSummary String?
   startTs    DateTime?
   endTs      DateTime?
   createdAt  DateTime @default(now())

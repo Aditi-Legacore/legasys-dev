@@ -20,7 +20,7 @@ interface JobTask {
     id: string;
     fileName: string;
     status: "pending" | "in_progress" | "completed" | "failed";
-    outputJson: any;
+    outputSummary: any;
 }
 
 interface JobStatus {
@@ -137,19 +137,19 @@ export function SummarizeJobModal({ isOpen, onClose, demandNoteId, demandFileId 
 
 
     // Helper to find the relevant task
-    const taskWithOutput = jobStatus?.tasks?.find(t => t.outputJson);
+    const taskWithOutput = jobStatus?.tasks?.find(t => t.outputSummary);
     const currentTask = jobStatus?.tasks?.[0]; // Assuming single file job
     const isProcessing = !jobStatus || jobStatus.status === "pending" || jobStatus.status === "in_progress";
     const isFailed = jobStatus?.status === "failed";
     const isCompleted = jobStatus?.status === "completed";
 
     const summaryText = (() => {
-        if (!taskWithOutput?.outputJson) return "";
-        if (typeof taskWithOutput.outputJson === "string") {
-            return taskWithOutput.outputJson || "";
+        if (!taskWithOutput?.outputSummary) return "";
+        if (typeof taskWithOutput.outputSummary === "string") {
+            return taskWithOutput.outputSummary || "";
         }
         try {
-            return taskWithOutput.outputJson || "";
+            return taskWithOutput.outputSummary || "";
         } catch {
             return "";
         }
