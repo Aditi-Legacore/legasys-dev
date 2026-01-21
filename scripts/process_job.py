@@ -1,98 +1,168 @@
-import os
+import argparse
+import signal
+import sys
 import time
-import json
 import psycopg2
-from dotenv import load_dotenv
+from datetime import datetime
 
-load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
+# ---------------------------
+# CONFIG
+# ---------------------------
+DB_CONFIG = {
+    "host": "localhost",
+    "dbname": "docs",
+    "user": "appuser",
+    "password": "secret"
+}
 
-POLL_INTERVAL = 5  # seconds
+POLL_SLEEP = 5  # seconds between tasks
 
-def get_db_connection():
-    return psycopg2.connect(DATABASE_URL)
 
-def fetch_next_job(cur):
-    cur.execute("""
-        SELECT id
-        FROM "Job"
-        WHERE status = 'pending'
-        ORDER BY "createTs"
-        LIMIT 1
-        FOR UPDATE SKIP LOCKED
-    """)
-    row = cur.fetchone()
-    return row[0] if row else None
+# ---------------------------
+# GLOBALS
+# ---------------------------
+SHUTDOWN = False
 
-def process_job(job_id, conn):
-    cur = conn.cursor()
-    print(f"Processing job {job_id}")
 
-    cur.execute("""
-        UPDATE "Job"
-        SET status = 'in_progress', "updateTs" = NOW()
-        WHERE id = %s
-    """, (job_id,))
+# ---------------------------
+# SIGNAL HANDLING
+# ---------------------------
+def handle_signal(signum, frame):
+    global SHUTDOWN
+    SHUTDOWN = True
+    print(f"[DAEMON] Received signal {signum}, shutting down...")
+
+
+signal.signal(signal.SIGTERM, handle_signal)
+signal.signal(signal.SIGINT, handle_signal)
+
+
+# ---------------------------
+# DB HELPERS
+# ---------------------------
+def get_conn():
+    return psycopg2.connect(**DB_CONFIG)
+
+
+def fetch_tasks(conn, job_id):
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT task_id, filename, file_path
+            FROM task
+            WHERE job_id = %s
+            ORDER BY task_id
+        """, (job_id,))
+        return cur.fetchall()
+
+
+def update_task_status(conn, task_id, status, output=None):
+    with conn.cursor() as cur:
+        cur.execute("""
+            UPDATE task
+            SET status = %s,
+                end_ts = %s,
+                output_json = %s
+            WHERE task_id = %s
+        """, (status, datetime.utcnow(), output, task_id))
     conn.commit()
 
-    cur.execute("""
-        SELECT id, "fileName", "filePath"
-        FROM "Task"
-        WHERE "jobId" = %s
-        ORDER BY id
-    """, (job_id,))
-    tasks = cur.fetchall()
 
-    for task_id, file_name, file_path in tasks:
+def mark_task_running(conn, task_id, pid):
+    with conn.cursor() as cur:
         cur.execute("""
-            UPDATE "Task"
-            SET status = 'in_progress', pid = %s, "startTs" = NOW()
-            WHERE id = %s
-        """, (os.getpid(), task_id))
-        conn.commit()
-
-        time.sleep(2)  # simulate processing
-
-        # output = {
-        #     "summary": f"Processed content of {file_name}",
-        #     "sentiment": "Neutral"
-        # }
-
-        cur.execute("""
-            UPDATE "Task"
-            SET status = 'pending',
-                "endTs" = NOW()
-            WHERE id = %s
-        """, (task_id))
-        conn.commit()
-
-    cur.execute("""
-        UPDATE "Job"
-        SET status = 'pending', "updateTs" = NOW()
-        WHERE id = %s
-    """, (job_id,))
+            UPDATE task
+            SET status = 'RUNNING',
+                pid = %s,
+                start_ts = %s
+            WHERE task_id = %s
+        """, (pid, datetime.utcnow(), task_id))
     conn.commit()
-    cur.close()
 
-def run_daemon():
-    print("Job daemon started")
-    conn = get_db_connection()
-    conn.autocommit = False
 
-    while True:
+def update_job_status(conn, job_id, status):
+    with conn.cursor() as cur:
+        cur.execute("""
+            UPDATE job
+            SET status = %s,
+                update_ts = %s
+            WHERE job_id = %s
+        """, (status, datetime.utcnow(), job_id))
+    conn.commit()
+
+
+# ---------------------------
+# TASK LOGIC (PLACEHOLDER)
+# ---------------------------
+def process_file(file_path):
+    """
+    Replace this with:
+    - pdf/text extraction
+    - chunking
+    - LLM calls
+    """
+    time.sleep(2)
+    return {
+        "summary": f"Processed file {file_path}"
+    }
+
+
+# ---------------------------
+# MAIN DAEMON LOOP
+# ---------------------------
+def run(job_id):
+    pid = os.getpid()
+    print(f"[DAEMON] Starting job {job_id}, pid={pid}")
+
+    conn = get_conn()
+
+    update_job_status(conn, job_id, "RUNNING")
+
+    tasks = fetch_tasks(conn, job_id)
+
+    for task_id, filename, file_path in tasks:
+        if SHUTDOWN:
+            update_job_status(conn, job_id, "ABORTED")
+            print("[DAEMON] Job aborted")
+            return
+
         try:
-            cur = conn.cursor()
-            job_id = fetch_next_job(cur)
-            cur.close()
+            print(f"[DAEMON] Running task {task_id} ({filename})")
+            mark_task_running(conn, task_id, pid)
 
-            if job_id:
-                process_job(job_id, conn)
-            else:
-                time.sleep(POLL_INTERVAL)
+            result = process_file(file_path)
+
+            update_task_status(
+                conn,
+                task_id,
+                status="DONE",
+                output=result
+            )
 
         except Exception as e:
-            print("Daemon error:", e)
-            time.sleep(5)
+            update_task_status(
+                conn,
+                task_id,
+                status="FAILED",
+                output={"error": str(e)}
+            )
+            update_job_status(conn, job_id, "FAILED")
+            print(f"[DAEMON] Task {task_id} failed: {e}")
+            return
 
+        time.sleep(POLL_SLEEP)
+
+    update_job_status(conn, job_id, "DONE")
+    print(f"[DAEMON] Job {job_id} completed successfully")
+
+
+# ---------------------------
+# ENTRYPOINT
+# ---------------------------
 if __name__ == "__main__":
-    run_daemon()
+    import os
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--job-id", required=True, type=int)
+    args = parser.parse_args()
+
+    run(args.job_id)

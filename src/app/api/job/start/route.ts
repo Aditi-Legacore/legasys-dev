@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         const files = await prisma.demandFile.findMany({
             where: {
                 demandNoteId,
-                id: demandFileId || undefined, // undefined means ignore this filter
+                id: demandFileId || undefined
             },
         });
 
@@ -65,10 +65,10 @@ export async function POST(request: NextRequest) {
         });
 
         // Create Tasks
-        const tasksData = files.map((file) => ({
+        const tasksData = files.map((file: any) => ({
             jobId: job.id,
             fileName: file.fileName,
-            filePath: file.filePath || "", // fallback if empty
+            filePath: file.fileUrl || "", // fallback if empty
             status: "pending",
         }));
 
