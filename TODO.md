@@ -1,8 +1,4 @@
-# TODO: Integrate Intake Form as Modal in Intake Table
+# TODO: Fix Next.js Dynamic API Routes Params Awaiting
 
-## Tasks
-- [x] Modify IntakeTable.tsx to include modal state and render IntakeForm in modal
-- [x] Update IntakeForm.tsx to accept onFormSubmit prop for custom submission handling
-- [x] Implement form submission logic to add new intake to table and close modal
-- [x] Apply glass bokeh effect to modal background
-- [x] Test the integration: open modal on button click, submit form, verify new intake added to table
+- [x] Update GET function in `src/app/api/intake/[id]/route.ts` to await `params` before accessing `id`
+- [x] Update POST function in `src/app/api/intake/[id]/pdf/route.tsx` to await `params` before accessing `id`
