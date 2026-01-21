@@ -145,11 +145,11 @@ export function SummarizeJobModal({ isOpen, onClose, demandNoteId, demandFileId 
 
     const summaryText = (() => {
         if (!taskWithOutput?.outputJson) return "";
-        if (typeof taskWithOutput.outputJson === "object") {
-            return taskWithOutput.outputJson.summary || "";
+        if (typeof taskWithOutput.outputJson === "string") {
+            return taskWithOutput.outputJson || "";
         }
         try {
-            return JSON.parse(taskWithOutput.outputJson).summary || "";
+            return taskWithOutput.outputJson || "";
         } catch {
             return "";
         }
