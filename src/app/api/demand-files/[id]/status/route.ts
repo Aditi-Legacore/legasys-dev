@@ -30,11 +30,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             },
             include: {
                 tasks: {
+                    // where: {
+                    //     demandFileId: fileId
+                    // },
                     orderBy: {
-                        id: 'asc'
-                    }
-                }
-            }
+                        id: 'asc',
+                    },
+                },
+            },
         });
 
         if (!job) {

@@ -57,17 +57,32 @@ export async function POST(request: NextRequest) {
         const job = await prisma.job.create({
             data: {
                 demandNoteId,
-                demandFileId, // Save file ID
                 createdById: session.user.id,
                 status: "pending",
                 numTasks: files.length,
             },
         });
 
+        // const job = await prisma.job.upsert({
+        //     where: {
+        //         demandNoteId,
+        //     },
+        //     update: {}, // do nothing if exists
+        //     create: {
+        //         demandNoteId,
+        //         createdById: session.user.id,
+        //         status: "pending",
+        //         numTasks: files.length,
+        //     },
+        // });
+
+
         // Create Tasks
         const tasksData = files.map((file: any) => ({
             jobId: job.id,
             fileName: file.fileName,
+            demandFileId: demandFileId,
+            outputFilePath: file.fileUrl.split("/").slice(0, -1).join("/") + "/",
             filePath: file.fileUrl || "", // fallback if empty
             status: "pending",
         }));
@@ -78,7 +93,7 @@ export async function POST(request: NextRequest) {
 
         // Spawn Python Process
         const pythonScriptPath = "D:/pdf-extraction-pipeline/main.py";
-        const pythonExecutable = "C:\\Users\\hp\\anaconda3\\python.exe";
+        const pythonExecutable = "C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python312\\python.exe";
 
         console.log("🐍 Spawning Python process...");
         console.log("   Executable:", pythonExecutable);

@@ -361,13 +361,12 @@ model DemandFile {
 
   demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
   uploadedBy   User        @relation(fields: [uploadedById], references: [id])
-  jobs         Job[]
+  tasks        Task[]      // ✅ added (opposite of Task.demandFile)
 }
 
 model Job {
   id           String    @id @default(cuid())
-  demandNoteId String
-  demandFileId String?  // Added for per-file job tracking
+  demandNoteId  String   @unique   // ✅ REQUIRED
   createdById  String
   status       String    @default("pending") // pending | in_progress | completed | failed
   numTasks     Int       @default(0)
@@ -376,7 +375,6 @@ model Job {
   updateTs     DateTime  @updatedAt
 
   demandNote   DemandNote @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
-  demandFile   DemandFile? @relation(fields: [demandFileId], references: [id])
   createdBy    User       @relation(fields: [createdById], references: [id])
   tasks        Task[]
 }
@@ -384,7 +382,9 @@ model Job {
 model Task {
   id         String   @id @default(cuid())
   jobId      String
+  demandFileId    String
   fileName   String
+  outputFilePath String?
   filePath   String
   status     String   @default("pending") // pending | in_progress | completed | failed
   pid        Int?
@@ -394,6 +394,7 @@ model Task {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  demandFile      DemandFile? @relation(fields: [demandFileId], references: [id])
   job        Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
 }
 
