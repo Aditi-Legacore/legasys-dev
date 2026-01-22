@@ -2,7 +2,8 @@ import { defineConfig } from "@prisma/config";
 
 export default defineConfig({
   schema: "./prisma/schema.prisma",
-  datasource: {
-    url: process.env.DATABASE_URL!, // <--- URL moved here
+
+  migrate: {
+    datasourceUrl: process.env.DATABASE_URL!,
   },
 });

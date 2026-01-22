@@ -54,27 +54,27 @@ export async function POST(request: NextRequest) {
         }
 
         // Create Job
-        const job = await prisma.job.create({
-            data: {
-                demandNoteId,
-                createdById: session.user.id,
-                status: "pending",
-                numTasks: files.length,
-            },
-        });
-
-        // const job = await prisma.job.upsert({
-        //     where: {
-        //         demandNoteId,
-        //     },
-        //     update: {}, // do nothing if exists
-        //     create: {
+        // const job = await prisma.job.create({
+        //     data: {
         //         demandNoteId,
         //         createdById: session.user.id,
         //         status: "pending",
         //         numTasks: files.length,
         //     },
         // });
+
+        const job = await prisma.job.upsert({
+            where: {
+                demandNoteId,
+            },
+            update: {}, // do nothing if exists
+            create: {
+                demandNoteId,
+                createdById: session.user.id,
+                status: "pending",
+                numTasks: files.length,
+            },
+        });
 
 
         // Create Tasks

@@ -20,25 +20,50 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         }
 
         // Find the latest job for this file
+        // const job = await prisma.job.findFirst({
+        //     where: {
+        //         // demandFileId: fileId,
+        //         createdById: session.user.id,
+        //     },
+        //     orderBy: {
+        //         createTs: 'desc',
+        //     },
+        //     include: {
+        //         tasks: {
+        //             where: {
+        //                 demandFileId: fileId
+        //             },
+        //             orderBy: {
+        //                 id: 'asc',
+        //             },
+        //         },
+        //     },
+        // });
+
         const job = await prisma.job.findFirst({
             where: {
-                demandFileId: fileId,
                 createdById: session.user.id,
+                tasks: {
+                    some: {
+                        demandFileId: fileId,
+                    },
+                },
             },
             orderBy: {
-                createTs: 'desc',
+                createTs: "desc",
             },
             include: {
                 tasks: {
-                    // where: {
-                    //     demandFileId: fileId
-                    // },
+                    where: {
+                        demandFileId: fileId,
+                    },
                     orderBy: {
-                        id: 'asc',
+                        id: "asc",
                     },
                 },
             },
         });
+
 
         if (!job) {
             return NextResponse.json({

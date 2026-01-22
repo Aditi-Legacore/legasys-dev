@@ -1,13 +1,10 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
 }
-
-
 
 
 
@@ -366,7 +363,7 @@ model DemandFile {
 
 model Job {
   id           String    @id @default(cuid())
-  demandNoteId  String   @unique   // ✅ REQUIRED
+  demandNoteId  String  @unique
   createdById  String
   status       String    @default("pending") // pending | in_progress | completed | failed
   numTasks     Int       @default(0)
