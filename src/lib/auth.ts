@@ -28,7 +28,10 @@ export const authOptions: AuthOptions = {
         const isValid = await compare(credentials.password, user.password);
         if (!isValid) throw new Error("Invalid credentials");
 
-        return user;
+        return {
+          ...user,
+          role: user.role || 'user', // default to 'user' if null
+        };
       },
     }),
     // GoogleProvider({
@@ -43,12 +46,14 @@ export const authOptions: AuthOptions = {
     jwt: async ({ token, user }) => {
       if (user) {
         token.id = user.id;
+        token.role = user.role;
       }
       return token;
     },
     session: async ({ session, token }) => {
       if (token) {
         session.user.id = token.id as string;
+        session.user.role = token.role as string;
       }
       return session;
     },
