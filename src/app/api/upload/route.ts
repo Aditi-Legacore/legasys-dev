@@ -120,6 +120,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Update Job publishStatus to 'draft'
+    await (prisma.job as any).updateMany({
+      where: { demandNoteId },
+      data: { publishStatus: 'draft' }
+    });
+
     // Add timeline entry
     await prisma.demandTimeline.create({
       data: {
@@ -193,6 +199,12 @@ export async function DELETE(request: NextRequest) {
     // Delete from database
     await prisma.demandFile.delete({
       where: { id: fileId },
+    });
+
+    // Update Job publishStatus to 'draft'
+    await (prisma.job as any).updateMany({
+      where: { demandNoteId: file.demandNoteId },
+      data: { publishStatus: 'draft' }
     });
 
     // Add timeline entry

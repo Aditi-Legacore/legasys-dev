@@ -353,6 +353,7 @@ model DemandFile {
   fileType     String?
   size         Int?
   status       String      @default("uploaded")
+  summaryStatus String      @default("not_summarized") // not_summarized | summarized
   filePath     String?
   createdAt    DateTime    @default(now())
 
@@ -367,7 +368,9 @@ model Job {
   createdById  String
   status       String    @default("pending") // pending | in_progress | completed | failed
   numTasks     Int       @default(0)
-  outputSummary   String?
+  combinedSummary String?
+  publishStatus String    @default("draft") // draft | published
+  // outputSummary   String?
   createTs     DateTime  @default(now())
   updateTs     DateTime  @updatedAt
 
@@ -386,6 +389,8 @@ model Task {
   status     String   @default("pending") // pending | in_progress | completed | failed
   pid        Int?
   outputSummary String?
+  editedSummary String?
+  editedSummaryTs DateTime?
   startTs    DateTime?
   endTs      DateTime?
   createdAt  DateTime @default(now())

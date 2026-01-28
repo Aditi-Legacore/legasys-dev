@@ -63,33 +63,36 @@ export async function POST(request: NextRequest) {
         //     },
         // });
 
-        const job = await prisma.job.upsert({
+        const job = await (prisma.job as any).upsert({
             where: {
                 demandNoteId,
             },
-            update: {}, // do nothing if exists
+            update: {
+                publishStatus: 'draft'
+            },
             create: {
                 demandNoteId,
                 createdById: session.user.id,
                 status: "pending",
                 numTasks: files.length,
+                publishStatus: 'draft'
             },
         });
 
 
         // Create Tasks
-        const tasksData = files.map((file: any) => ({
-            jobId: job.id,
-            fileName: file.fileName,
-            demandFileId: demandFileId,
-            outputFilePath: file.fileUrl.split("/").slice(0, -1).join("/") + "/",
-            filePath: file.fileUrl || "", // fallback if empty
-            status: "pending",
-        }));
+        // const tasksData = files.map((file: any) => ({
+        //     jobId: job.id,
+        //     fileName: file.fileName,
+        //     demandFileId: demandFileId,
+        //     outputFilePath: file.fileUrl.split("/").slice(0, -1).join("/") + "/",
+        //     filePath: file.fileUrl || "", // fallback if empty
+        //     status: "pending",
+        // }));
 
-        await prisma.task.createMany({
-            data: tasksData,
-        });
+        // await prisma.task.createMany({
+        //     data: tasksData,
+        // });
 
         // Spawn Python Process
         const pythonScriptPath = "D:/pdf-extraction-pipeline/main.py";

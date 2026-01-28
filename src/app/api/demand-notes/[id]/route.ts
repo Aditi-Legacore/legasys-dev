@@ -32,7 +32,11 @@ export async function GET(
         timeline: {
           orderBy: { createdAt: "desc" },
         },
-        files: true,
+        files: {
+          include: {
+            tasks: true,
+          },
+        },
       },
     });
 
@@ -79,29 +83,39 @@ export async function PUT(
       return NextResponse.json({ error: 'Demand note not found' }, { status: 404 });
     }
 
-    const { clientName, demandDate, status, internalNotes, totalAmount, description } = data;
+    const { clientName, demandDate, status, internalNotes, totalAmount, description, title } = data;
 
-    // Find or create client
-    let client = await prisma.defedantClient.findFirst({
-      where: { name: clientName },
+    // Find the current client to update or create a new one
+    const currentDemandNote = await prisma.demandNote.findUnique({
+      where: { id: demandNoteId },
+      include: { client: true }
     });
 
-    if (!client) {
-      client = await prisma.defedantClient.create({
+    if (!currentDemandNote) {
+      return NextResponse.json({ error: 'Demand note not found' }, { status: 404 });
+    }
+
+    let clientId = currentDemandNote.clientId;
+
+    if (clientName && clientName !== currentDemandNote.client.name) {
+      // Update the client name directly
+      const updatedClient = await prisma.defedantClient.update({
+        where: { id: currentDemandNote.clientId },
         data: { name: clientName },
       });
+      clientId = updatedClient.id;
     }
 
     // Update demand note
     const updatedDemandNote = await prisma.demandNote.update({
       where: { id: demandNoteId },
       data: {
-        clientId: client.id,
-        title: `Demand Note for ${clientName}`,
-        description: description || null,
-        totalAmount: totalAmount || 0,
-        dueDate: demandDate ? new Date(demandDate) : existingDemandNote.dueDate,
-        status: status || existingDemandNote.status,
+        clientId: clientId,
+        title: title || currentDemandNote.title,
+        description: description !== undefined ? description : currentDemandNote.description,
+        totalAmount: totalAmount !== undefined ? totalAmount : currentDemandNote.totalAmount,
+        dueDate: demandDate ? new Date(demandDate) : currentDemandNote.dueDate,
+        status: status || currentDemandNote.status,
       },
       include: {
         client: true,
@@ -129,6 +143,12 @@ export async function PUT(
         type: 'updated',
         message: 'Demand note updated',
       },
+    });
+
+    // Update associated Job records to set publishStatus to 'draft'
+    await (prisma.job as any).updateMany({
+      where: { demandNoteId: demandNoteId },
+      data: { publishStatus: 'draft' }
     });
 
     console.log("✅ Demand note updated:", updatedDemandNote);
