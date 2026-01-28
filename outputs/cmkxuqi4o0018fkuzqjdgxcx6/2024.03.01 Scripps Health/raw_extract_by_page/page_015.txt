@@ -1,0 +1,24 @@
+=== PAGE 15 START ===
+th
+VEDe 14 Me Net 4 Scripps Health
+Page
+416
+03/01/2024 - EDIin Scripps Mercy Hospital San Diego Emergency Department (continued)
+Flowsheets (continued)
+Complete
+Arrival Documentation
+Prehospital Treatment
+Py
+Yes
+ED Trek Updates
+ak
+Sent to CT Scan
+Sent to Radiology
+Patient Sent With
+GUG/ISAR
+1- Normal
+GENIE GUG Referral
+ISAR (ldentitication of Seniors at Risk) Screening
+:
+No
+=== PAGE 15 END ===

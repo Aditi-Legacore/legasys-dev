@@ -1,0 +1,48 @@
+=== PAGE 10 START ===
+SCRIPPS HEALTH
+Encinitas CA 92023-5498
+n Scripps Mercy Hospital San Diego Emergency Department (continued)
+03/01/2024 - ED in Scripps Mercy Hospital San Diego Emergency Department
+SH HIM ROI CV Procedure Log
+All Orders
+No orders found for this encounter
+03/01/2024 - ED in Scripps Mercy Hospital San Diego Emergency Department (continued)
+Delivery Summary
+History
+No documentation.
+Medication Administrations
+acetaminophen (TYLENOL) tablet 1,000 ma [827910290]
+Norton, Valerie Constance, MD
+Completed (Past End Date/Time)
+Do not exceed 4 g Acetaminophen per
+Other Information
+: Mascari, Katelyn
+A, RN
+Hessamian, Keon, MD
+Completed (Past End Date/Time)
+Take with food or snack to lessen
+stomach upset.
+Timestamps
+Action
+Dose
+Route
+Other Information
+Given
+600 mg
+oral
+E
+jascari, Katelyn
+A, RN
+Immunizations Given
+No documentation.
+Immunizations as of 3/1/2024
+MARTINEZ,LELIA
+M
+Moderna Sars-cov-2 Vaccine
+Lot
+ou Date
+Manufacturer
+#—_-Route/Site
+Ordering Provider
+NCD
+=== PAGE 10 END ===

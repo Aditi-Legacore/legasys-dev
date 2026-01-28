@@ -1,0 +1,26 @@
+=== PAGE 16 START ===
+03/01/2024 - EDIin Scripps Mercy Hospital San Diego Emergency Department (continued)
+Flowsheets (continued)
+LACE+ Score
+53
+2
+2
+1
+1
+P/F RATIO -HIDDEN
+OTHER
+Pain Assessment
+Pain Assessment
+Pain Assessment Timer
+}
+Yes
+Primary Head to Toe Assessment
+a Pow Name
+03/01/240824
+Respiratory
+Within Defined
+Limits
+Cardiac
+Within Defined
+Limits
+=== PAGE 16 END ===

@@ -1,0 +1,81 @@
+=== PAGE 10 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy Daily Note
+Date of Visit:
+06-07-24
+Treating
+Jenna Mayeda-Jones, DPT
+Therapist:
+Patient Name:
+Martinez, Lelia
+Referring MD:
+Felix Matthew Regala,
+Patient #:
+0150875
+Payor:
+* Batta Fulkerson Law
+Date of Birth:
+11-09-1948
+Visit Number:
+3
+Age:
+75
+Total Time:
+60 minutes
+Treatment Time:
+ 07:27 a - 08:27 a
+Certification
+05-24-24 - 07-04-24
+Period:
+Diagnosis:
+M 25.511
+Pain in right shoulder
+SUBJECTIVE:
+The patient reports today's pain at Shoulder to be 3 out of 10 at best and 9 out of 10 at worst.
+Comments: Current pain: 7/10. Pain will be assessed at regular intervals. Pain is assessed on verbal pain rating.
+Pt reported shoulder feels better but still struggles with using hand to go to restroom.
+OBJECTIVE:
+Objective Performance test: see objectives.
+ACTIVITY LOG:
+Time Based
+\Comment
+Status |
+Sets | Reps | Weight| Time |
+Done
+|CPT
+Performed by
+Activities
+Today
+Upper Extremity
+|5 F/5 B
+TO
+10
+Yes
+|Ther-Ex (97110) - UEMA (DPT)
+Ergometer
+increase
+[TPOO 1 |
+Jenna Mayeda-
+UE
+Jones
+ROM/flexi
+bility to
+improve
+ability to
+change/m
+aintain
+body
+position
+Shoulder Overheadi Flex/Abd
+TO
+4
+Yes
+{Ther-Ex (97110) -|BEHE (PT
+pulley AROM
+increase
+[TPOO 1|
+Tech) Beau
+UE
+Herrera
+=== PAGE 10 END ===

@@ -1,0 +1,42 @@
+=== PAGE 18 START ===
+aa.
+Ar:56:46
+Scripps
+Health
+VEDe 14 Me Net 4 Scripps Health
+Page
+419
+03/01/2024 - EDIin Scripps Mercy Hospital San Diego Emergency Department (continued)
+Flowsheets (continued)
+Sepsis Risk Score
+Suicide/Homicide Risk
+a Pow Name
+03/01/24 0816
+Columbia Suicide Severity Rating Scale
+No
+Travel/Exposure/TB Screening
+a Pow Name
+03/01/24 0815
+Tuberculosis Screening (all items must be valued)
+s
+Denies symptoms
+ Gonieg rgke nena
+TB Risk Screen
+Negative
+Vital Signs
+_
+Yes
+Yes
+Yes
+_
+_
+Yes
+Oxygen Therapy
+98 %
+Continuous
+None (Room air)
+Patient Education
+No documentation.
+Patient Instructions
+No documentation.
+=== PAGE 18 END ===

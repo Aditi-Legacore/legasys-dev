@@ -1,0 +1,55 @@
+=== PAGE 22 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy No Visit Discharge
+Treating
+Therapist:
+Referring MD:
+Arlyn Bacallan, PT
+Patient Name:
+Martinez, Lelia
+Patient #:
+0150875
+Date of Birth:
+11-09-1948
+Kristopher Downing,
+Payor:
+* Batta Fulkerson Law
+Visit Number:
+5
+Total Time:
+minutes
+Age:
+75
+Treatment Time:
+-
+Certification
+Period:
+Date of Onset:
+02-29-24
+Diagnosis:
+M 25.511
+Pain in right shoulder
+Date of First Visit
+Date of Last Attended Visit
+Total Visits
+Attended
+Canceled
+No-shows
+The patient was not in attendance for the discharge process, therefore updated data and progress towards goals
+is not
+available at this time.
+PLAN:
+Primary Discharge Reason: Self Discharged
+Discharge Comments:
+There has been no contact by Lelia to schedule any further appointments, so we are discharging this case pending any
+further contact or a new referral.
+Thank you again for the opportunity of working with your patient.
+If you would like any more detailed information
+regarding pt's status, we would be happy to forward that information on request.
+Thank you for your referral.
+Best regards,
+Arlyn Bacallan PT
+This document was electronically signed on 09-30-24 at 05:36 p
+by Arlyn Bacallan PT.
+=== PAGE 22 END ===

@@ -1,0 +1,71 @@
+=== PAGE 14 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy Daily Note
+Date of Visit:
+Treating
+Therapist:
+Referring MD:
+Sarah Larson, PTA
+Patient Name:
+Patient #:
+Date of Birth:
+Kristopher Downing,
+* Batta Fulkerson Law
+Martinez, Lelia
+Payor:
+Visit Number:
+4
+Total Time:
+Age:
+70 minutes
+75
+Treatment Time:
+Certification
+Period:
+Date of Onset:
+Diagnosis:
+Pain in right shoulder
+SUBJECTIVE:
+The patient reports today's pain at Shoulder to be 3 out of 10 at best and 9 out of 10 at worst.
+Comments: Current pain: 7/10. Pain will be assessed at regular intervals. Pain is assessed on verbal pain rating.
+6/13/24 Pt reports shoulder feeling a little bit better today.
+OBJECTIVE:
+Objective Performance test: see objectives.
+ACTIVITY LOG:
+Time Based
+IComment
+Status |
+Sets | Reps | Weight| Time |
+Done
+|CPT
+Performed by
+Activities
+Today
+Upper Extremity
+|5 F/5 B
+To
+10
+Yes
+|Ther-Ex (97110) -|SALA (PTA)
+Ergometer
+increase
+[TPOO 1|
+Sarah Larson
+UE
+ROM/flexi
+bility to
+improve
+ability to
+change/m
+aintain
+body
+position
+PROM- Shoulder
+_IFlex, Abd, ER, IR
+|To restore
+8
+Yes
+|Manual Therapy
+{SALA (PTA)
+=== PAGE 14 END ===

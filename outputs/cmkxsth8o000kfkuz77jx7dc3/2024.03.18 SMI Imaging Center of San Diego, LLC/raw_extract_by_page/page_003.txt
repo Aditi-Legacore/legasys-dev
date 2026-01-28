@@ -1,0 +1,37 @@
+=== PAGE 3 START ===
+Patient Name: Martinez, Lelia
+MRN: 20538
+Date of Birth: 11/9/1948
+FIN: n/a
+* XR Report - Auth (Verified) - Internal Provenance Source: Pacific Neurosurgery & Spine Medical Group Inc; Garcia, Mia *
+SMI Imaging Center of San Diego, LLC
+Patient Name: MARTINEZ, LELIA
+Dr. Sanjay Ghosh
+Date of Birth:
+11/09/1948
+7625 Mesa College Dr. Suite 110 A
+Account/ID:
+MALE 2 CVO
+San Diego
+CA 92111
+Study Date:
+03/18/2024
+Referral By: | Sanjay Ghosh, M.D.
+Phone: (649)810-1020
+PROCEDURE: CR Cervical (SPINE CERV 4 V)
+HISTORY:
+Neck pain.
+TECHNIQUE:
+Four views cervical spine including lateral weight-bearing flexion, extension, neutral position, and AP
+weight-bearing
+C 4-C 5, mild disc space narrowing with small marginal osteophytes
+C 5-C 6, small marginal osteophytes without significant disc space narrowing
+No significant facet arthropathy. No abnormalities ofalignment with flexion, extension, neutral position.
+Prevertebral soft tissues normal.
+IMPRESSION:
+Multilevel cervical spondylosis as described above.
+Page 1 of 1
+Facility: n/a
+$image$
+Page 75 of 77
+=== PAGE 3 END ===

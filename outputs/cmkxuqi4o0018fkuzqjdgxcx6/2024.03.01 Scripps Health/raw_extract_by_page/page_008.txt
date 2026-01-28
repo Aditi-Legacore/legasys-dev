@@ -1,0 +1,55 @@
+=== PAGE 8 START ===
+03/01/2024 - ED in Scripps Mercy Hospital San Diego Emergency Department (continued)
+Imaging
+- LMR (continued)
+in each report. The exposure data reported is indicative, but not determinative, of the radiation dose received by this
+patient.
+IMPRESSION:
+No acute fracture or malalignment
+release
+Testing Performed By
+«bab: Abbreviation Name
+Director
+Address
+Valid Date Range
+24- RAD
+SCRIPPS
+Unknown
+Unknown
+07/24/18 0646-
+Present
+RADIOLOGY
+Signed
+Electronically signed by Chou, Eric T, MD on 3/1/24 at 1001 PST
+CT cervical spine without contrast Reason: trauma [827910291]
+sy: Norton, Valerie Constance, MD on 03/01/24 0828
+tus: Completed
+i: Norton, Valerie Constance, MD
+Norton, Valerie Constance, MD 03/01/24
+0828
+:Norton, Valerie Constance, MD
+Once 03/01/24 0828 - 1 occurrence
+§: trauma
+SOT cervical spine without contrast Reason: trauma: Patient Communication
+“Not Released
+s Not seen
+Resulted: 03/01/24 1000, Result status: Final
+CT thoracic spine without contrast Reason: trauma [827910295]
+result
+:Norton, Valerie Constance, MD
+i’ Chou, Eric T, MD
+EXAMINATION: CT THORACIC SPINE WITHOUT CONTRAST
+HISTORY: trauma
+COMPARISON:
+None.
+TECHNIQUE: CT examination was performed of the thoracic without intravenous contrast.
+Dose reduction techniques
+were utilized for this examination including adjustment of the m A and/or k V according to the patient's size (BMI).
+FINDINGS:
+PARASPINAL AREA:
+Normal with no visible mass.
+BONES:
+No fracture or osseous lesion.
+DISC SPACES: No significant disc/facet abnormality, spinal stenosis, or foraminal stenosis.
+OTHER: None.
+=== PAGE 8 END ===

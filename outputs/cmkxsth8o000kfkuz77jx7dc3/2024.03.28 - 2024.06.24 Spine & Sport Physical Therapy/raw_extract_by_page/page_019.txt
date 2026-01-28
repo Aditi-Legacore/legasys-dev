@@ -1,0 +1,83 @@
+=== PAGE 19 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy Daily Note
+Date of Visit:
+04-16-24
+Treating
+Gary Desrouilleres, PTA
+Therapist:
+Patient Name:
+Martinez, Lelia
+Referring MD:
+Kristopher Downing,
+Patient #:
+0150875
+Payor:
+* Batta Fulkerson Law
+Date of Birth:
+11-09-1948
+Visit Number:
+6
+Age:
+75
+Total Time:
+61 minutes
+Treatment Time:
+10:00 a - 11:0 la
+Certification
+03-28-24 - 05-08-24
+Period:
+Date of Onset:
+02-29-24
+Diagnosis:
+M 25.511
+Pain in right shoulder
+M 54.2
+Cervicalgia
+SUBJECTIVE:
+The patient reports today's pain at R shoulder/neck to be 8 out of 10 at best and 10 out of 10 at worst.
+Comments: Current pain: 7/10
+Pain will be assessed at regular intervals. Pain is assessed on verbal pain rating.
+Pt reports 7/10 pain in R side of neck that travels distally to R periscapular area.
+OBJECTIVE:
+Objective Performance test: NT
+ACTIVITY LOG:
+Time Based
+IComment
+Status |
+Sets | Reps|
+Weight| Time |
+Done
+|CPT
+Performed by
+Activities
+Today
+UE Bike
+TO
+10
+Yes
+{Ther-Ex (97110) -|GADE (PTA)
+increase
+[TPOO 1]
+Gary
+UE
+Desrouilleres
+strength/
+NM
+control for
+self care
+activities
+Stretching
+bilat UT; cervical
+TO
+8
+Yes
+{Ther-Ex (97110)
+- |GADE (PTA)
+Exercises
+SNAGS
+increase
+[TPOO 1|
+|Gary
+=== PAGE 19 END ===

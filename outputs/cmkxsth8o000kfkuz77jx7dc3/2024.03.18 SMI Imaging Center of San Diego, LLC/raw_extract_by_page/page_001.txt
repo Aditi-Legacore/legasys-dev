@@ -1,0 +1,54 @@
+=== PAGE 1 START ===
+Patient Name: Martinez, Lelia
+MRN: 20538
+Date of Birth: 11/9/1948
+FIN: n/a
+* XR Report - Auth (Verified) - Internal Provenance Source: Pacific Neurosurgery & Spine Medical Group Inc; Garcia, Mia *
+SMI Imaging Center of San Diego, LLC
+Patient Name:
+MARTINEZ, LELIA
+Dr. Sanjay Ghosh
+Date of
+in
+MNoe
+7625 Mesa College Dr. Suite 110 A
+ccount/ID:
+.
+Study Date:
+03/18/2024
+ee ee
+Referral By:
+©Sanjay Ghosh, M.D.
+Prien (619}630-1010
+PROCEDURE: MR Cervical (MRI SPINE CERV W/O CO)
+HISTORY:
+Neck pain radiating into the right shoulder with concern for radiculopathy.
+TECHNIQUE:
+Multisequence, multiplanar imaging of the cervical spine performed without the use of intravenous
+contrast including sagittal T 2, sagittal STIR, sagittal T 1 as well as axial T 2 and gradient echo imaging.
+COMPARISON:
+Same day cervical spine radiographs, separately reported
+FINDINGS:
+Background of mild congenital spinal canal narrowing. The cervical lordosis maintained. Intraosseous
+hemangioma dorsally at C 5 and within the left lateral aspect of T 4. Mild Modic type 1 endplate changes
+at T 1-T 2. Craniocervical alignment is maintained. The visible contents of the posterior fossa are normal.
+The cervical vertebral and visible carotid arterial flow voids are maintained. No superficial or deep neck
+space mass identified. Additional degenerative findings level by level are indexed below:
+C 2-C 3: 1 mm anterolisthesis with mild disc desiccation. 2 mm central disc protrusion. No significant
+thecal sac narrowing. Moderate left and mild right facet hypertrophic change. Neural foramina remain
+patent.
+C 3-C 4: Mild disc desiccation. Small posterior disc bulge with dorsal annular fissuring. Minimal thecal
+sac narrowing. Moderate left and mild right facet hypertrophic change. Left asymmetric uncovertebral
+hypertrophy. Mild left and no significant right neural foraminal narrowing.
+C 4-C 5: Mild disc desiccation and height loss. Retrolisthesis. Broad-based 2 mm central disc protrusion.
+In combination with infolding there is moderate acquired canal stenosis. Moderate left-greater-than-right
+facet hypertrophic change. Left asymmetric uncovertebral hypertrophy. Mild left-greater-than-right
+neural foramina narrowing.
+C 5-C 6: Mild disc desiccation. Broad-based posterior disc osteophyte complex with mild acquired canal
+stenosis. Mild facet hypertrophic change. Left asymmetric uncovertebral hypertrophy. Mild left and no
+significant right neural foramina narrowing.
+Page 1 of 2
+Facility: n/a
+$image$
+Page 72 of 77
+=== PAGE 1 END ===

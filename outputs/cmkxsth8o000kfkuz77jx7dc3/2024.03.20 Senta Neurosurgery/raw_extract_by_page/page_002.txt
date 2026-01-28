@@ -1,0 +1,30 @@
+=== PAGE 2 START ===
+Person: Martinez, Lelia
+MRN:20538
+DOB: 11/9/1948
+Sex:Female
+Doc - Office-Clinic Notes
+MRI Cervical Spine: C 4-5 disc protrusion with moderate central stenosis. C 6-7 disc protrusion.
+Xrays Cervical Spine: No instability
+ASSESSMENT:
+Mrs. Martinez is a 75 year-old female who was involved in a MVA on 2/29/2024. The patient has C 4-5 disc protrusion. She
+also has a right shoulder injury.
+PLAN:
+1. Physical therapy
+2. Proceed with orthopedic evaluation for the right shoulder/upper arm
+3. RTC in 6 weeks or sooner with worsening symptoms
+Felix Regala, MPAP, PA-C
+Supervising Physician: Sanjay Ghosh, MD
+Senta Neurosurgery
+Doc - Progress Notes
+Document Type:
+Neurosurgery Progress Note
+Service Date/Time:
+4/30/2024 10:55 PDT
+Result Status:
+Auth (Verified)
+Document Title:
+Sign Information:
+Lopez,Erika (5/8/2024 10:56 PDT)
+Page 10 of 77
+=== PAGE 2 END ===

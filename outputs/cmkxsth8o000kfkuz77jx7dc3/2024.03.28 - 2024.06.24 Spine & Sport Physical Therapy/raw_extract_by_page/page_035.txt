@@ -1,0 +1,81 @@
+=== PAGE 35 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy Progress Note
+Date of Visit:
+05-03-24
+Treating
+Jenna Mayeda-Jones, DPT
+Therapist:
+Patient Name:
+Martinez, Lelia
+Referring MD:
+Kristopher Downing,
+Patient #:
+0150875
+Payor:
+* Batta Fulkerson Law
+Date of Birth:
+11-09-1948
+Visit Number:
+11
+Age:
+75
+Total Time:
+60 minutes
+Treatment Time:
+09:56 a - 10:56 a
+Certification
+05-04-24 - 06-14-24
+Period:
+Date of Onset:
+02-29-24
+Diagnosis:
+M 25.511
+Pain in right shoulder
+M 54.2
+Cervicalgia
+SUBJECTIVE:
+Lelia Martinez, attended for therapy evaluation on 03-28-24 for evaluation of Neck, Right Shoulder. The patient has
+attended 11 treatment sessions since the evaluation.
+Presenting Problems:
+The patient reports today's pain at R shoulder/neck to be 4 out of 10 at best and 8 out of 10 at worst.
+Comments: Current pain: 6/10
+Pain will be assessed at regular intervals. Pain is assessed on verbal pain rating.
+Functional Status
+Prior
+Current
+Activities of daily living
+Moderate
+Moderate
+difficulty
+difficulty
+Lifting
+items from floor
+Moderate
+Moderate
+difficulty
+difficulty
+Mobility
+Moderate
+Moderate
+difficulty
+difficulty
+Patient reports 45% improvement since starting therapy. Patient would like to continue addressing improving ROM,
+strength, postural endurance, and decreasing pain.
+Quick DASH
+Score: 48
+No. of Responses: 11
+Total:
+84.00
+Q-DASH
+84.00% disability/impairment where 0% represents ideal function.
+Sports Score:
+No. of Responses:
+0
+Total: NA
+Work Score:
+No. of Responses:
+0
+Total: NA
+=== PAGE 35 END ===

@@ -1,0 +1,65 @@
+=== PAGE 2 START ===
+History of Current Condition:
+Patient presents with signs and symptoms consistent with R shoulder pain. She reports date of injury to be Feb 2024.
+Reported mechanism of injury was from a MVA and rear ended. Skilled Therapy is necessary to address impairments,
+limitations, and functional deficits outlined, and return patient to their expected level of function.
+Identified Impairments: decreased shoulder ROM, decreased UE strength, and TTP: long head biceps and supraspinatus.
+Identified Activity Limitations/Performance Deficits Resulting from Impairments: difficulty reaching behind back and lifting
+overhead.
+R Shoulder/Neck Pain s/p MVA in Feb, 2024
+Medical Conditions
+Do you have any medical condition you currently suffer from or have experienced in the past?
+Yes
+The patient reports the following Medical Conditions:
+e Hypertension
+Current Medications
+The patient takes medications and/or over the counter supplements.
+Medication
+Dose
+Frequency
+Method
+Amlodipine
+lacetaminophen
+1000 mg
+Functional Status
+Prior
+Current
+Activities of daily living
+Within normal
+{Moderate
+limits
+Lifting above head
+Within normal
+|Moderate
+limits
+Lifting items from floor
+Within normal
+{Moderate
+limits
+Quick DASH
+Score: 41
+No.of Responses: 11
+Total:
+68.25
+Q-DASH
+68.25% disability/impairment where 0% represents ideal function.
+OBJECTIVE:
+Objective Performance test: see objectives.
+SHOULDER EVALUATION
+RANGE OF MOTION:
+Shoulder
+Initial
+Goal
+Comments
+AROM
+05-24-24
+uction
+(180
+79
+70-90
+48
+Shoulder
+Initial
+Goal
+Comments
+=== PAGE 2 END ===

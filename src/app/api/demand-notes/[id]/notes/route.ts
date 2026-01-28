@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -13,7 +13,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const demandNoteId = params.id;
+    const { id } = await params;
+    const demandNoteId = id;
 
     // Verify the demand note exists and belongs to the user
     const demandNote = await prisma.demandNote.findFirst({
@@ -50,7 +51,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -58,7 +59,8 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const demandNoteId = params.id;
+    const { id } = await params;
+    const demandNoteId = id;
     const { content } = await request.json();
 
     if (!content || typeof content !== 'string' || content.trim() === '') {

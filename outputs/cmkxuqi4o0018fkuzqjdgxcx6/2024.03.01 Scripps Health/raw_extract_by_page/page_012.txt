@@ -1,0 +1,40 @@
+=== PAGE 12 START ===
+03/01/2024 - EDItin Scripps Mercy Hospital San Diego Emergency Department (continued)
+we
+Other Orders - LMR (continued)
+Completed
+Hessamian, Keon, MD
+Norton, Valerie Constance, MD
+Once 03/01/24 1045 - 1 occurrence
+¥ “ibuprofen (MOTRIN) tablet 600 mq: Patient Communication
+Not Released
+x Not seen
+acetaminophen (TYLENOL) 500 ma tablet [827915065] (Active)
+Norton, Valerie Constance, MD on’03/01/24 1040
+Norton,‘Valerie Constance, MD 03/01/24
+>Norton, Valerie Constance, MD
+Norton, Valerie Constance, MD
+c
+mild pain (level 1-3)
+Routine Q 6 H PRN 03/01/24-
+Until
+Discontinued
+e. Standard
+acetaminophen (TYLENOL) 500 mg tablet [827915065]
+. Norton, Valerie Constance, MD on 03/01/24 1040
+}
+orton, Valerie Constance, MD 03/01/24
+1040
+: Active
+:Norton, Valerie Constance, MD
+‘Norton, Valerie Constance, MD
+. mild pain (level 1-3)
+Q 6 H PRN 03/01/24 - Until Discontinued
+acetaminophen (TYLENOL) 500 mq tablet [827915065]
+Take 2 tablets (1,000 mg total) by mouth every 6 (six) hours as needed for mild pain (level 1-3)
+Providers
+Norton, Valerie Constance, MD
+Pharmacy
+313 E. Washington St., San Diego CA 92103
+icetaminophen (TYLENOL) tablet: Patient Communication
+=== PAGE 12 END ===

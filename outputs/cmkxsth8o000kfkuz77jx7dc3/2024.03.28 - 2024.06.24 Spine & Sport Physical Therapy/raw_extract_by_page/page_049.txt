@@ -1,0 +1,88 @@
+=== PAGE 49 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy Daily Note
+Date of Visit:
+Treating
+Therapist:
+Referring MD:
+Jenna Mayeda-Jones, DPT
+Patient Name:
+Patient #:
+Date of Birth:
+Felix Matthew Regala,
+* Batta Fulkerson Law
+Martinez, Lelia
+Payor:
+Visit Number:
+15
+Total Time:
+Age:
+60 minutes
+75
+Treatment Time:
+Certification
+Period:
+Date of Onset:
+Diagnosis:
+Pain in right shoulder
+Cervicalgia
+SUBJECTIVE:
+The patient reports today's pain at R shoulder/neck to be 4 out of 10 at best and 8 out of 10 at worst.
+Comments: Current pain: 7/10
+Pain will be assessed at regular intervals. Pain is assessed on verbal pain rating.
+Pt reports 7/10 p! in her shoulder. Pt states taking pain medications today.
+ACTIVITY LOG:
+Time Based
+\Comment
+Status |
+Sets | Reps|
+Weight| Time |
+Done
+|CPT
+Performed by
+Activities
+Today
+UE Bike
+level 2.7
+TO
+10
+Yes
+[|Ther-Ex (97110) - JUCR (PT
+increase
+[TPOO 1|
+Tech) Julia
+UE
+ICramp
+strength/
+NM
+control for
+self care
+activities
+PROM-Shoulder
+jgentle PROM
+To restore
+5
+Yes
+{Manual Therapy
+UEMA (DPT)
+ROM/mobil
+(97140) - [TPO 07]Jenna Mayeda-
+lity to
+Jones
+restricted
+joints
+Manual Therapy
+|STM
+To control
+5
+Yes
+|Manual Therapy
+JEMA (DPT)
+Supraspinatus,
+__Ipain/swellij
+(97140) - [TPO 07]UDenna Mayeda-
+upper trap
+ng
+Jones
+=== PAGE 49 END ===

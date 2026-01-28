@@ -1,0 +1,47 @@
+=== PAGE 1 START ===
+Imaging Healthcare Specialists - Hillcrest
+San Diego, CA 92103
+Imaging Healthcare
+Phone #: (858)658-6500
+SPECIALISTS
+Your Partner in Health - For Every Imaging Need
+Online results, images and scheduling available at:
+imaginghealthcare.com/results
+Patient:
+MARTINEZ, LELIA M
+DOB:
+11/09/1948
+Age:
+75
+SAN DIEGO, CA 92154
+PROCEDURE:
+DEXA BONE DENSITY STUDY
+COMPARISON:
+INDICATIONS:
+Patient has osteoporosis on X-ray, previous DXA exam.
+TECHNIQUE:
+Lumbar spine and proximal femoral dual-energy X-ray absorptiometry (DXA) was performed on a central Hologic
+device. In peri-menopausal women and in men age 50 or older, current International Society for Clinical
+Densitometry (ISCD) Official Positions state that the WHO Classification is determined by the lower T-score from
+either the Spine Analysis or from the Hip Analysis. The reported Hip Analysis T-score is based on either the
+femoral Neck or the Total proximal femur ROI whichever is lower. Ifbilateral hip measurements are obtained,
+Official Positions state that there is insufficient evidence to recommend mean readings.
+Reference:
+Http://www.iscd.org/official-positions.
+HIP ANALYSIS:
+The following results are obtained from the left neck femoral region which is the most abnormal ROI:
+Bone mineral density (BMD) (g/cm 2): 0.628
+T-score (standard deviation relative to young adult mean BMD): -2.0
+Z-score (standard deviation relative to age matched control group): 0.0
+CHANGE SINCE PRIOR HIP EXAM:
+Increased bone mineral density.
+SPINE ANALYSIS:
+Lumbar spine region ofinterest:
+L 1 and L 4. L 2 and L 3 were excluded secondary to discordance likely from
+hypertrophic changes.
+Average bone mineral density (BMD) (g/cm 2): 0.780
+T-score (standard deviation relative to young adult mean BMD): -2.3
+Z-score (standard deviation relative to age matched control group: 0.1
+CHANGE SINCE PRIOR SPINE EXAM:
+Increased bone mineral density.
+=== PAGE 1 END ===

@@ -1,0 +1,59 @@
+=== PAGE 1 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy Initial Evaluation
+Date of Visit:
+05-24-24
+Treating =Arlyn Bacallan, PT
+Therapist:
+Patient Name:
+Martinez, Lelia
+Referring MD:
+Kristopher Downing, MD
+Patient #:
+0150875
+Payor:
+* Batta Fulkerson Law
+Date of Birth:
+11-09-1948
+Visit Number:
+1
+Age:
+75
+Total Time:
+45 minutes
+Treatment Time:
+10:00 a - 10:45 a
+Certification
+05-24-24 - 07-04-24
+Period:
+Diagnosis:
+M 25.511
+Pain in right shoulder
+SUBJECTIVE:
+Lelia Martinez is a 75 year old female who presents to therapy today for evaluation of Shoulder. The patient was referred
+by Kristopher Downing , MD.
+She reports date of injury to be 2 months ago. Reported mechanism of injury was from a
+MVA and rear ended.
+Frequency of symptoms: intermittent
+Quality of pain: dull ache
+Aggravating factors: difficulty reaching behind back and lifting overhead.
+Alleviating factors: acetaminophen 1000 mg, Heat
+History of smoking: none
+History of urinary incontinence: difficulty getting to the bathroom.
+Falls in the past year: 0. Number of injuries from falls: 0
+Occupation: retired
+Occupational Demands: none
+Recreational/Exercise Activities: walk 2 blocks
+Presenting Problems:
+The patient reports:
+e Awakened by pain, severe
+e Difficulty dressing, severe
+e Loss of motion - stiffness, severe
+e Lifting, severe
+e Reaching overhead, severe
+The patient reports today's pain at Shoulder to be 3 out of 10 at best and 9 out of 10 at worst.
+Comments: Current pain: 7/10. Pain will be assessed at regular intervals. Pain is assessed on verbal pain rating.
+MEDICAL HISTORY
+Current Injury
+=== PAGE 1 END ===

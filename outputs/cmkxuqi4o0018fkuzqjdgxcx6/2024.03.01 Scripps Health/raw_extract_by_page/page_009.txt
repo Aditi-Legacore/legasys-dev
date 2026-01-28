@@ -1,0 +1,57 @@
+=== PAGE 9 START ===
+03/01/2024 - ED in Scripps Mercy Hospital San Diego Emergency Department (continued)
+Imaging
+- LMR (continued)
+EXPOSURE:
+This patient received a total of 2 exposure event(s) during this CT examination. The CTDIvol and DLP radiation dose
+values for each exposure are:
+Exposure:; Series:; Anatomy: L Spine; Phantom:
+32 cm;
+CTDIvol: 28; DLP: 837
+Exposure:; Series:; Anatomy: Neck;
+Phantom: 32 cm; CTDIvol: 14;
+DLP: 249
+Thefollowing accession numbers are related to this dose report {3011999955}:
+3011999953
+The dose indicators for CT are the volume Computed Tomography (CT) Dose Index (CTDIvol) and the Dose Length
+Product (DLP), and are measured
+in units of m Gyand m Gy-cm, respectively. These indicators are not patient dose, but
+values generated from the CT scanner acquisition factors. The report includes radiation exposure data for exposures
+received during this examination.
+If multiple reports are produced from this examination, the exposure data is duplicated
+in each report. The exposure data reported is indicative, but not determinative, of the radiation dose received by this
+patient.
+IMPRESSION:
+No acute fracture or malalignment
+release
+Testing Performed By
+Lab - Abbreviation
+Name
+Director
+Address
+Valid Date Range
+SCRIPPS
+Unknown
+Unknown
+07/24/18 0646-
+Present
+RADIOLOGY
+Signed
+Electronically signed by Chou, Eric T, MD on 3/1/24 at 1000 PST
+CT thoracic spine without contrast Reason: trauma [827910292]
+Norton, Valerie Constance, MD on 03/01/24 0828
+Completed
+r. Norton, Valerie Constance, MD
+orton, Valerie Constance, MD 03/01/24
+0828
+s: Norton, Valerie Constance, MD
+Once 03/01/24 0828- 1 occurrence
+trauma
+Not Released
+® Not seen
+Imaging-
+Cardiac Cath
+No documentation.
+Procedures - LMR
+No documentation.
+=== PAGE 9 END ===

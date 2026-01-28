@@ -1,0 +1,82 @@
+=== PAGE 6 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy Daily Note
+Date of Visit:
+05-31-24
+Treating =Arlyn Bacallan, PT
+Therapist:
+Patient Name:
+Martinez, Lelia
+Referring MD:
+Felix Matthew Regala,
+Patient #:
+0150875
+Payor:
+* Batta Fulkerson Law
+Date of Birth:
+11-09-1948
+Visit Number:
+2
+Age:
+75
+Total Time:
+61 minutes
+Treatment Time:
+10:00 a - 11:0 la
+Certification
+05-24-24 - 07-04-24
+Period:
+Diagnosis:
+M 25.511
+Pain in right shoulder
+SUBJECTIVE:
+The patient reports today's pain at Shoulder to be 3 out of 10 at best and 9 out of 10 at worst.
+Comments: Current pain: 7/10. Pain will be assessed at regular intervals. Pain is assessed on verbal pain rating.
+Pt didn't express p! @ the start of today's session
+OBJECTIVE:
+Objective Performance test: see objectives.
+ACTIVITY LOG:
+Time Based
+\Comment
+Status |
+Sets | Reps | Weight| Time |
+Done
+|CPT
+Performed by
+Activities
+Today
+Upper Extremity
+|5 F/5 B
+TO
+10
+Yes
+[Therapeutic
+AHCU (PT
+Ergometer
+increase
+Activity (97530) -
+[Tech) Ahmad
+UE
+[TPOO 9]
+(Curry
+ROM/flexi
+bility to
+improve
+ability to
+change/m
+aintain
+body
+position
+Shoulder AAROM=|Cane Flex, Abd,
+TO
+5
+Yes
+|Ther-Ex (97110) - |AHCU (PT
+ER, IR 2 x 10
+increase
+[TPOO 1|
+Tech) Ahmad
+UE
+(Curry
+=== PAGE 6 END ===

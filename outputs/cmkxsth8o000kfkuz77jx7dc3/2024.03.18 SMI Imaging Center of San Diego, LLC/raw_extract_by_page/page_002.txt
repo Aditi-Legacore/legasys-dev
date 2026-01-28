@@ -1,0 +1,30 @@
+=== PAGE 2 START ===
+Patient Name: Martinez, Lelia
+MRN: 20538
+Date of Birth: 11/9/1948
+FIN: n/a
+* XR Report - Auth (Verified) - Internal Provenance Source: Pacific Neurosurgery & Spine Medical Group Inc; Garcia, Mia *
+MARTINEZ, LELIA - MR Cervical (MRI SPINE CERV W/O CO)
+Continued:
+C 6-C 7: Mild disc desiccation. 2 mm left central disc protrusion. In combination ligamentum flavum
+infolding there is mild acquired canal stenosis. Left asymmetric uncovertebral hypertrophy. Moderate left
+and no significant right neural foramina narrowing.
+C 7-T 1: Mild disc desiccation. No acquired canal stenosis. Mild-to-moderate facet hypertrophic change.
+Neural foramina are patent.
+T 1-T 5: Sagittal sequences only. No high-grade canal or neural foraminal narrowing.
+IMPRESSION:
+1. Background of mild congenital spinal canal narrowing with superimposed degenerative disc disease
+most pronounced at C 4-C 5 where retrolisthesis is associated with a 2 mm central disc protrusion and
+moderate acquired canal stenosis. No high-grade spinal canal narrowing or frank cord compression any
+level.
+2. Multilevel uncovertebral and facet hypertrophic change resulting in various degrees of neural
+foramina narrowing, up to moderate in severity on the left at C 6-C 7. No high-grade foraminal stenosis or
+frank impingement upon the exiting cervical nerve roots.
+3. Mild Modic type 1 endplate changes at T 1-T 2.
+interpreted By: Marin Mc Donald, M.D.
+MARTINEZ, LELIA - MR Cervical (MRI SPINE CERV W/O CO)
+Page 2 of 2
+Facility: n/a
+$image$
+Page 73 of 77
+=== PAGE 2 END ===

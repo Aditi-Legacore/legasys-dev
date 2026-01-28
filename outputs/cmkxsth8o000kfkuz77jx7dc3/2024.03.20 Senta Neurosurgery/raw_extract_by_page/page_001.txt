@@ -1,0 +1,52 @@
+=== PAGE 1 START ===
+Person: Martinez, Lelia
+MRN:20538
+DOB: 11/9/1948
+Sex:Female
+Doc - Office-Clinic Notes
+Amanda W. Gumbert, MMS, PA-C
+Senta Neurosurgery
+Document Type:
+Neurosurgery Note
+Service Date/Time:
+3/20/2024 09:50 PDT
+Result Status:
+Auth (Verified)
+Document Title:
+Neurosurgery Progress Note
+Sign Information:
+Ghosh MD,Sanjay (4/1/2024 10:18 PDT); Regala PA,Felix
+(3/20/2024 10:37 PDT)
+Neurosurgery Progress Note
+Internal Provenance Source: Pacific Neurosurgery & Spine Medical Group Inc; Regala PA, Felix
+Patient:
+Martinez, Lelia
+MRN: 20538
+FIN: 77495
+Age:
+75 years
+Sex: Female
+DOB: 11/9/1948
+Associated Diagnoses:
+None
+Author:
+Regala PA, Felix
+SANJAY GHOSH, MD, FAANS, FACS.
+= SE
+NT
+NN
+Director
+of Neurological
+and
+Spina Surgery
+euinie
+WWW.SANJAYGHOSHMD.COM
+HISTORY: This is a follow-up visit on a very pleasant 75 year-old female who was involved in a MVA on 2/29/2024. The
+patient's main complain is right shoulder pain and right upper arm pain. She has difficulties raising her right arm over her
+head. She also has neck pain. She rates her pain level as 9/10. She is here to review imaging studies.
+PHYSICAL EXAMINATION:
+Vitals: Blood Pressure: 150/75 Heart Rate: 68 Temperature: 98.3 Respiration: 16
+Motor: 5/5 bilateral deltoids, biceps, triceps, grip. 5/5 bilateral knee extension/flexion, foot dorsi/plantarflexion, EHL
+DIAGNOSTIC STUDIES:
+Page 9 of 77
+=== PAGE 1 END ===

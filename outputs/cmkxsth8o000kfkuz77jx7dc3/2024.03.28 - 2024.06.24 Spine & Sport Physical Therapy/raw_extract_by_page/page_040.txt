@@ -1,0 +1,84 @@
+=== PAGE 40 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy Daily Note
+Date of Visit:
+Treating
+Therapist:
+Referring MD:
+Christine Collins, PTA
+Patient Name:
+Felix Matthew Regala,
+* Batta Fulkerson Law
+Martinez, Lelia
+Patient #:
+0150875
+Date of Birth:
+11-09-1948
+Payor:
+Visit Number:
+12
+Total Time:
+Age:
+75
+60 minutes
+Treatment Time:
+Certification
+Period:
+Date of Onset:
+02-29-24
+Diagnosis:
+M 25.511
+Pain in right shoulder
+M 54.2
+Cervicalgia
+SUBJECTIVE:
+The patient reports today's pain at R shoulder/neck to be 4 out of 10 at best and 8 out of 10 at worst.
+Comments: Current pain: 6/10
+Pain will be assessed at regular intervals. Pain is assessed on verbal pain rating.
+Patient reports 45% improvement since starting therapy. Patient would like to continue addressing improving ROM,
+strength, postural endurance, and decreasing pain.
+ACTIVITY LOG:
+Time Based
+i Comment
+Status |
+Sets | Reps|
+Weight| Time |
+Done
+|CPT
+Performed by
+Activities
+Today
+UE Bike
+TO
+10
+Yes
+{Ther-Ex (97110) -|CHCO 1 (PTA)
+increase
+[TPOO 1|
+Christine
+UE
+Collins
+strength/
+NM
+control for
+self care
+activities
+Stretching
+bilat UT; cervical
+TO
+8
+Yes
+|Ther-Ex (97110) -|CHCO 1 (PTA)
+Exercises
+SNAGS
+increase
+[TPOO 1|
+Christine
+UE
+Collins
+strength/
+NM
+control for
+self care
+=== PAGE 40 END ===

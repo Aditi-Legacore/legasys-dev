@@ -1,0 +1,80 @@
+=== PAGE 52 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy Daily Note
+Date of Visit:
+Treating
+Therapist:
+Referring MD:
+Arlyn Bacallan, PT
+Patient Name:
+Patient #:
+Date of Birth:
+Felix Matthew Regala,
+* Batta Fulkerson Law
+Martinez, Lelia
+Payor:
+Visit Number:
+16
+Total Time:
+Age:
+60 minutes
+75
+Treatment Time:
+Certification
+Period:
+Date of Onset:
+Diagnosis:
+Pain in right shoulder
+Cervicalgia
+SUBJECTIVE:
+The patient reports today's pain at R shoulder/neck to be 4 out of 10 at best and 8 out of 10 at worst.
+Comments: Current pain: 7/10
+Pain will be assessed at regular intervals. Pain is assessed on verbal pain rating.
+Pt reports 6/10 p! in her shoulder. Pt stated neck is feeling much better. Pt states taking pain medications today.
+ACTIVITY LOG:
+Comment
+Status
+Sets
+Reps
+Weight
+Time
+Done
+|CPT
+Performed by
+Time Based
+Activities
+Today
+UE Bike
+level 2.7
+To
+increase
+JUCR (PT
+Tech) Julia
+ICramp
+[TPOO 1]
+UE
+strength/
+NM
+control for
+self care
+activities
+To
+increase
+ARBA (PT)
+Supine flex, chest
+ICane-Shoulder
+ROM
+Arlyn Bacallan
+[TPOO 1]
+UE
+ROM/flexi
+bility for
+self care
+activities
+Supine Chin Tucks
+20 x c rotation
+TO
+Yes
+Ther-Ex (97110) - UCR (PT
+=== PAGE 52 END ===

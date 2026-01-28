@@ -1,0 +1,58 @@
+=== PAGE 6 START ===
+03/01/2024 - ED in Scripps Mercy Hospital San Diego Emergency Department (continued)
+Imaging
+- LMR (continued)
+. Norton, Valerie Constance, MD
+’.Norton, Valerie Constance, MD 03/01/24
+0828
+s:Norton, Valerie Constance, MD
+Once 03/01/24 0829 - 1 occurrence
+¥*POC US e FAST: Patient Communication
+Not Released
+x
+Resulted: 03/01/24 0940, Result status: Final
+X-ray chest 2 views with pa/ap and lateral [827910296]
+result
+r Norton, Valerie Constance, MD
+G
+oy Chou, Eric T, MD
+SCRIPPS RADIOLOGY
+EXAMINATION: X-RAY CHEST 2 VIEWS WITH PA/AP AND LATERAL
+HISTORY:
+mva
+COMPARISON:
+None.
+FINDINGS:
+LINES/TUBES: Not applicable.
+LUNGS: No significant parenchymal abnormality.
+PLEURA: No significant abnormality.
+VASCULATURE:
+Normal. Unremarkable pulmonary vasculature.
+CARDIAC:
+Normal. No cardiac silhouette abnormality.
+MEDIASTINUMHILA:
+Normal. No visible mass or adenopathy.
+BONES:
+No suspicious abnormality.
+OTHER:
+Negative.
+IMI
+ION:
+No acute pulmonary disease
+release
+Testing Performed By
+Lab - Abbreviation
+Name
+Director
+Address
+Valid Date Range
+24- RAD
+SCRIPPS
+Unknown
+Unknown
+07/24/18 0646 - Present
+RADIOLOGY
+Signed
+Electronically signed by Chou, Eric T, MD on 3/1/24 at 0940 PST
+X-ray chest 2 views with pa/ap and lateral [827910293]
+=== PAGE 6 END ===

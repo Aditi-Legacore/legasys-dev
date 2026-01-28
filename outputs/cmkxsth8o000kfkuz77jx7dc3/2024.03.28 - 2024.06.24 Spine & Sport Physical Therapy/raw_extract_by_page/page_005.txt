@@ -1,0 +1,62 @@
+=== PAGE 5 START ===
+Objective measures will be used to chart progress. Pt understands and agrees with this treatment plan. The patient's rehab
+potential is good. She and/or family is aware of her diagnosis. The plans and goals have been developed and discussed
+with the patient. Patient consents to treatment plan and goals and gives verbal informed consent.
+Goals
+Short-Long
+Time Framel Result
+Comment
+Patient will be independent in progressive
+Short Term
+4 weeks
+New
+monitored HEP.
+Improve all shoulder strength by 1 grade to
+|Long Term
+6 weeks
+New
+assist with ADL's.
+Able to complete all ADL with no inc in
+Long Term
+6 weeks
+New
+symptoms.
+Quick DASH will improve by 9-11 points
+Long Term
+6 weeks
+New
+(MCID)
+All R shoulder ROM grossly WEL
+Long Term
+6 weeks
+New
+All cervical spine ROM grossly WFL
+Long Term
+6 weeks
+New
+Assessment of Complexity:
+Medical and Therapy History: No personal factors and/or comorbidities that impact the plan of care.
+Patient Examination: Examination of body systems was completed using standardized tests and measures addressing 1-2
+elements from any of the following: body structures and functions, activity limitations, and/or participation restrictions.
+Clinical Presentation: With stable and/or uncomplicated characteristics.
+Clinical Decision Making: Low complexity using standardized patient assessment instrument and/or measurable assessment
+of functional outcome.
+Based on the documented information above, the patient complexity is determined to be low.
+MIPS Quality Measures
+Measure 130: Documentation of Current Medications in the Medical Record
+Eligible clinician attests to documenting in the medical record they obtained, updated, or reviewed the patient's current
+medications.
+Measure 181: Elder Maltreatment Screen and Follow-Up Plan
+Elder maltreatment screen documented as negative, follow-up is not required.
+Measure: 182: Functional Outcome Assessment
+Functional outcome assessment documented as positive using a standardized tool ANDa care plan based on identified
+deficiencies is documented within two days of the functional outcome assessment: Therapeutic exercises, therapeutic
+activity, manual therapy, functional lifting, modalities as needed
+Measure: 128: Preventive Care and Screening: Body Mass Index (BMI) Screening and Follow-Up
+BMI is documented within normal parameters and no follow-up plan is required.
+Measure 155: Falls: Plan of Care
+Patient has not had more than 2 falls or any falls with injury in the past year.
+Measure 48: Percentage of female patients aged 65 years and older who were assessed for the presence or
+absence of urinary incontinence within 12 months
+Presence or absence of urinary incontinence assessed: negative
+=== PAGE 5 END ===

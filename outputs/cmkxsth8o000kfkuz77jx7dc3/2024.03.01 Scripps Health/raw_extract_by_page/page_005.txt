@@ -1,0 +1,44 @@
+=== PAGE 5 START ===
+Notes - LMR (continued)
+~: Patient Communication
+x Not seen
+Labs - LMR
+No documentation.
+Imaging
+- LMR
+Imaging
+Norton, Valerie Constance, MD
+3/1/2024 8:44 AM
+POC US e FAST
+Performed by: Norton, Valerie Constance, MD
+Authorized by: Norton, Valerie Constance, MD
+Procedure details:
+Technique:
+Abdominal, cardiac and chest
+Abdominal findings:
+Hepatorenal free fluid: not identified
+Rectovesical free fluid: not identified
+Splenorenal free fluid: not identified
+Cardiac findings:
+Heart: Visualized
+Wall motion: identified
+Pericardial effusion: not identified
+Chest findings:
+L lung sliding: identified
+R lung sliding: identified
+Fluid in thorax: not identified
+Testing Performed By
+Lab - Abbreviation
+Name
+Director
+Address
+Valid Date Range
+22- IMG
+IMAGING
+Unknown
+Unknown
+07/16/14
+1111 - Present
+ieniront
+i by: Norton, Valerie Constance, MD on 03/01/24 0828
+=== PAGE 5 END ===

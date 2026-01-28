@@ -1,0 +1,82 @@
+=== PAGE 55 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy Daily Note
+Date of Visit:
+Treating
+Therapist:
+Referring MD:
+06-10-24
+Gary Desrouilleres, PTA
+Patient Name:
+Patient #:
+Date of Birth:
+Felix Matthew Regala,
+* Batta Fulkerson Law
+Martinez, Lelia
+Payor:
+Visit Number:
+17
+Total Time:
+Age:
+53 minutes
+75
+Treatment Time:
+Certification
+Period:
+Date of Onset:
+Diagnosis:
+Pain in right shoulder
+Cervicalgia
+SUBJECTIVE:
+The patient reports today's pain at R shoulder/neck to be 4 out of 10 at best and 8 out of 10 at worst.
+Comments: Current pain: 7/10
+Pain will be assessed at regular intervals. Pain is assessed on verbal pain rating.
+Pt reports neck is feeling better. Pt states
+R shoulder is getting bad but continues to feel limited ROM and pain with
+R
+shoulder extension.
+ACTIVITY LOG:
+Time Based
+i Comment
+Status |
+Sets | Reps|
+Weight| Time |
+Done
+|CPT
+Performed by
+Activities
+Today
+UE Bike
+level 2.7
+TO
+10
+Yes
+{Ther-Ex (97110) -|GADE (PTA)
+increase
+[TPOO 1|
+Gary
+UE
+Desrouilleres
+strength/
+NM
+control for
+self care
+activities
+Shoulder IR Towel |2 x 30
+TO
+3
+Yes
+{Therapeutic
+IGADE (PTA)
+Stretch
+increase
+Activity (97530) - |Gary
+UE
+[TPOO 09|
+Desrouilleres
+ROM/flexi
+bility for
+self care
+activities
+=== PAGE 55 END ===

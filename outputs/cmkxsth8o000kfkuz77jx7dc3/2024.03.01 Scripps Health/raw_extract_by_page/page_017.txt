@@ -1,0 +1,49 @@
+=== PAGE 17 START ===
+03/01/2024 - EDIin‘Scripps Mercy Hospital San Diego Emergency Department (continued)
+Flowsheets (continued)
+Neurological
+8
+3
+Within Defined
+Limits
+Peripheral Vascular
+Within Defined
+Limits
+HEENT
+Skin Color/Condition
+Within Defined
+Limits
+Gastrointestinal
+Within Defined
+i
+Limits
+Genitourinary
+Within Defined
+Limits
+Endocrine
+Within Defined
+Limits
+Musculoskeletal
+4
+3
+}
+Within Defined
+Limits
+Psychosocial
+S
+i
+Within Defined
+Limits
+Morse Fall Risk
+No
+No
+None/bedrest/nurse
+assist
+No
+Normal/bedrest/whe
+elchair
+Oriented to own
+ability
+0
+Sepsis Risk Score
+=== PAGE 17 END ===

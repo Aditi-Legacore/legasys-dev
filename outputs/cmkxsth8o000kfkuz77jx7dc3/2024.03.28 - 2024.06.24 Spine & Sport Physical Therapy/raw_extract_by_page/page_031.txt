@@ -1,0 +1,75 @@
+=== PAGE 31 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy Daily Note
+Date of Visit:
+Treating
+Therapist:
+Referring MD:
+Jenna Mayeda-Jones, DPT
+Patient Name:
+Patient #:
+Date of Birth:
+Kristopher Downing,
+* Batta Fulkerson Law
+Martinez, Lelia
+Payor:
+Visit Number:
+10
+Total Time:
+Age:
+50 minutes
+75
+Treatment Time:
+Certification
+Period:
+Date of Onset:
+Diagnosis:
+Pain in right shoulder
+Cervicalgia
+SUBJECTIVE:
+The patient reports today's pain at R shoulder/neck to be 8 out of 10 at best and 10 out of 10 at worst.
+Comments: Current pain: 8/10
+Pain will be assessed at regular intervals. Pain is assessed on verbal pain rating.
+Pt states she is still in pn but feels like shoulder is improving.
+OBJECTIVE:
+Objective Performance test: NT
+ACTIVITY LOG:
+Time Based
+IComment
+Status |
+Sets | Reps|
+Weight| Time |
+Done
+|CPT
+Performed by
+Activities
+Today
+UE Bike
+TO
+10
+Yes
+{Ther-Ex (97110)
+- JEMA (DPT)
+increase
+[TPOO 1|
+Jenna Mayeda-
+UE
+Jones
+strength/
+NM
+control for
+self care
+activities
+Stretching
+bilat UT; cervical
+TO
+4
+Yes
+{Ther-Ex (97110) -|BEHE (PT
+Exercises
+SNAGS
+increase
+[TPOO 1|
+Tech) Beau
+=== PAGE 31 END ===

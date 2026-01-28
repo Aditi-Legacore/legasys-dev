@@ -1,0 +1,72 @@
+=== PAGE 58 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy Progress Note
+Date of Visit:
+06-17-24
+Treating =Arlyn Bacallan, PT
+Therapist:
+Patient Name:
+Martinez, Lelia
+Referring MD:
+Felix Matthew Regala,
+Patient #:
+0150875
+Payor:
+* Batta Fulkerson Law
+Date of Birth:
+11-09-1948
+Visit Number:
+18
+Age:
+75
+Total Time:
+60 minutes
+Treatment Time:
+Certification
+Period:
+Date of Onset:
+02-29-24
+Diagnosis:
+M 25.511
+Pain in right shoulder
+M 54.2
+Cervicalgia
+SUBJECTIVE:
+Lelia Martinez, attended for therapy evaluation on 03-28-24 for evaluation of Neck,.
+The patient has attended 18 treatment
+sessions since the evaluation.
+Presenting Problems:
+The patient reports today's pain at R shoulder/neck to be 4 out of 10 at best and 8 out of 10 at worst.
+Comments: Current pain: 7/10
+Pain will be assessed at regular intervals. Pain is assessed on verbal pain rating.
+Functional Status
+Prior
+Current
+Activities of daily living
+Moderate
+Moderate
+difficulty
+difficulty
+Lifting
+items from floor
+Moderate
+Moderate
+difficulty
+difficulty
+Mobility
+Moderate
+Moderate
+difficulty
+difficulty
+Patient reports current pain level 5/10,
+pain at best 4/10, pain at worst 7/10.
+Patient reports 50% improvement since
+starting therapy. Patient would like to continue addressing pain with turning head to the right, decreased ROM, and
+decreased strength.
+Neck Disability Index completed on 06-17-24
+Score:
+42% - Moderate Impairment
+OBJECTIVE:
+SHOULDER EVALUATION
+=== PAGE 58 END ===

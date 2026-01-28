@@ -1,0 +1,70 @@
+=== PAGE 7 START ===
+s
+%
+=
+Scripps Mercy Hospital San Diego Emergency Department (continued)
+03/01/2024- EDI
+Imaging
+- LMR (continued)
+Norton, Valerie Constance, MD on 03/01/24 0828
+Completed
+Norton, Valerie Constance, MD
+0828
+Norton, Valerie Constance, MD 03/01/24
+Norton, Valerie Constance, MD
+Once 03/01/24 0828 - 1 occurrence
+Questionnaire
+Scray chest 2 views with pa/ap and lateral: Patient Communication
+“Not Released
+s Not seen
+Resulted: 03/01/24 1001, Result status: Final
+CT cervical spine without contrast Reason: trauma [827910294]
+result
+:Norton, Valerie Constance, MD
+i’ Chou, Eric T, MD
+:SCRIPPS RADIOLOGY
+EXAMINATION: CT CERVICAL SPINE WITHOUT CONTRAST
+HISTORY: trauma
+COMPARISON:
+None.
+TECHNIQUE: CT examination was performed of the cervical spine without intravenous contrast.
+Dose reduction
+techniques were utilized for this examination including adjustment of the m A and/or k V according to the patient's size
+(BMI).
+FINDINGS:
+CRANIOCERVICAL AREA:
+Normal foramen magnum with no Chiari malformation.
+BONES:
+No fracture or osseous lesion.
+CERVICAL DISCS: Mild degenerative disc disease C 4-C 5.
+PARASPINAL AREA:
+Normal with no visible mass.
+BASE OF NECK: Negative.
+Incidentally detected thyroid nodules less than 1 cm in diameter in patients less than 35
+years of age, and less than 1.5 cm in diameter in patients greater than 35 years of age, do not typically require further
+imaging evaluation.
+LUNG APICES:
+No abnormality on limited evaluation.
+SUPPORTING GUIDELINES FOR NODULES ON LIMITED PORTIONS OF LUNGS (American Medical Association
+2019): Not applicable: No nodule(s) or stabilityof findings compared to prior study.
+OTHER:
+None.
+EXPOSURE:
+This patient received a total of 2 exposure event(s) during this CT examination. The CTDIvol and DLP radiation dose
+values for each exposure are:
+Exposure: ; Series: ; Anatomy: Neck;
+Phantom: 32 cm; CTDIvol: 14;
+DLP: 249
+Exposure: ; Series: ; Anatomy: L Spine;
+Phantom: 32 cm;
+CTDIvol: 28;
+DLP: 837
+The following accession numbers are related to this dose report {3011999953}:
+3011999955
+The dose indicators for CT arethe volume Computed Tomography (CT) Dose Index (CTDIvol) and the Dose Length
+Product (DLP), and are measured
+in units of m Gy and m Gy-cm, respectively. These indicators are not patient dose, but
+values generated from the CT scanner acquisition factors. The report includes radiation exposure data for exposures
+received during this examination.
+If multiple reports are produced from this examination, the exposure data is duplicated
+=== PAGE 7 END ===

@@ -1,0 +1,80 @@
+=== PAGE 18 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy Daily Note
+Date of Visit:
+06-20-24
+Treating
+Gary Desrouilleres, PTA
+Therapist:
+Patient Name:
+Martinez, Lelia
+Referring MD:
+Kristopher Downing,
+Patient #:
+0150875
+Payor:
+* Batta Fulkerson Law
+Date of Birth:
+11-09-1948
+Visit Number:
+5
+Age:
+75
+Total Time:
+62 minutes
+Treatment Time:
+09:00 a - 10:02 a
+Certification
+05-24-24 - 07-04-24
+Period:
+Date of Onset:
+02-29-24
+Diagnosis:
+M 25.511
+Pain in right shoulder
+SUBJECTIVE:
+The patient reports today's pain at Shoulder to be 3 out of 10 at best and 9 out of 10 at worst.
+Comments: Current pain: 7/10. Pain will be assessed at regular intervals. Pain is assessed on verbal pain rating.
+Pt reports to be feeling much better today. Pt states she is a 2/10 pain level without pain meds.
+OBJECTIVE:
+Objective Performance test: see objectives.
+ACTIVITY LOG:
+Time Based
+|Comment
+Status |
+Sets | Reps | Weight| Time |
+Done |CPT
+Performed by
+Activities
+Today
+Upper Extremity
+|5 F/5 B
+TO
+10
+Yes
+{Ther-Ex
+IGADE (PTA)
+Ergometer
+increase
+(97110) -
+Gary
+UE
+[TPOO 1|
+Desrouilleres
+ROM/flexi
+bility to
+improve
+ability to
+change/m
+aintain
+body
+position
+Shoulder
+Flex/Abd 3 min
+TO
+6
+Yes
+|Ther-Ex
+IGADE (PTA)
+=== PAGE 18 END ===

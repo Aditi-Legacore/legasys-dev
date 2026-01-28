@@ -1,0 +1,27 @@
+=== PAGE 2 START ===
+Continued Report - Page 2 of 2
+Patient:
+MARTINEZ, LELIA M
+DOB: —
+11/09/1948
+Age:
+75
+SAN DIEGO, CA 92154
+WHO CLASSIFICATION:
+Osteopenia (T-score -1.0 to -2.5).
+ADDITIONAL FINDINGS:
+No significant additional findings.
+FRACTURE RISK ASSESSMENT (FRAX) 10 YEAR FRACTURE PROBABILITY:
+FRAX is a computer-based algorithm which uses easily obtained clinical risk factors combined with femoral neck
+BMD or femoral neck T-scores to estimate an individual 10-year fracture probability. FRAX with BMD predicts
+fracture risk better than clinical risk factors or BMD alone. It is not appropriate to use FRAX to monitor treatment
+response.
+Major Osteoporotic Fractures: 7.4%
+Hip Fracture: 1.8%
+In general, FRAX-calculated risk of 20% or more for a major fracture and/or a FRAX-calculated risk of 3% or
+more for a hip fracture are considered indications for pharmacological treatment.
+Dictated and Electronically Authenticated by: Borso, Maya, M.D. on 03/07/2024 08:57 AM Proofread by: Borso,
+Maya, M.D. on 03/07/2024 08:57 AM
+IMAGING HEALTHCARE SPECIALISTS
+Page 2 of 2
+=== PAGE 2 END ===

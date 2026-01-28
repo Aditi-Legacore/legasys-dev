@@ -1,0 +1,61 @@
+=== PAGE 1 START ===
+SPINE&SPORT
+PHYSICAL THERAPY
+Physical Therapy Initial Evaluation
+Date of Visit:
+03-28-24
+Treating
+Alexander Rheaume, PT, DPT
+Therapist:
+Patient Name:
+Martinez, Lelia
+Referring MD:
+Felix Matthew Regala,
+Patient #:
+0150875
+Payor:
+* Batta Fulkerson Law
+Date of Birth:
+11-09-1948
+Visit Number:
+1
+Age:
+75
+Total Time:
+60 minutes
+Treatment Time:
+09:15 a - 10:15 a
+Certification
+03-28-24 - 05-08-24
+Period:
+Date of Onset:
+02-29-24
+Diagnosis:
+M 25.511
+Pain in right shoulder
+M 54.2
+Cervicalgia
+SUBJECTIVE:
+Lelia Martinez is a 75 year old female who presents to therapy today for evaluation of Neck. The patient was referred by
+Felix Matthew Regala .She reports date of injury to be 2/29/24. Reported mechanism of injury was a car accident. She
+states that she was rear-ended in a hit-and-run accident. She felt dizzy after the accident, but had no loss of consciousness.
+However, she has been experiencing R shoulder pain since the accident that occasionally affects her neck. MD referral also
+suggests C/S HNP.
+Frequency of symptoms: constant
+Quality of pain: ache, stabbing intermittently
+Aggravating factors: reaching OH, reaching behind back, dressing, household ADLs
+Alleviating factors: rest, warm compress
+History of smoking: none
+History of urinary incontinence: none
+Falls in the past year: none. Number of injuries from falls:
+none
+Occupation: Retired
+Occupational Demands: n/a
+Recreational/Exercise Activities: walking as tolerated
+Presenting Problems:
+The patient reports today's pain at R shoulder/neck to be 8 out of 10 at best and 10 out of 10 at worst.
+Comments: Current pain: 9/10
+Pain will be assessed at regular intervals. Pain is assessed on verbal pain rating.
+MEDICAL HISTORY
+Current Injury
+=== PAGE 1 END ===

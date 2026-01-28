@@ -1,0 +1,76 @@
+=== PAGE 20 START ===
+Discharge Instructions - Discharge Instructions (continued)
+Questionnaires
+No documentation.
+Coding Summary
+Account Information
+Hospital Account
+Primary Payor
+Affiliated Recurring Accounts
+Gombined from HAR
+3900955202 -
+MEDICARE [430]
+None
+None
+MARTINEZ,LELIA
+M
+Admission Information
+Emergency
+Non-healthcare
+Facility Point Of
+Origin
+Emergency
+Medicine
+SCRIPPS
+Scripps Mercy
+HEALTH
+Hospital San
+Diego Emergency
+Department
+Walk In
+P
+Norton, Valerie
+Constance, MD
+Discharge
+Informatior
+‘Discharge
+Discharge
+(Routine)
+Constance, MD
+Hospital San Diego
+Emergency
+Department
+Admission Diagnoses/
+Reasons for Visit (ICD-10-CM)
+Description
+Comments
+Cervicalgia
+Final Diagnoses
+(ICD-10-CM)
+Affects
+so S 008,
+Description
+POA
+ce
+HAC
+BE
+$16.1 XXA
+Strain of muscle, fascia and tendon at neck level, initial
+{Principal
+encounter
+0
+External Causes of Injury (ICD-10-CM)
+Affects
+Code
+Description
+POA
+CC
+HAC
+DRG
+V 49.40 XA
+Driver injured
+in collision with unspecified motor vehicles in
+92.414
+Local residential or business street as the place of
+occurrence of the external cause
+=== PAGE 20 END ===
