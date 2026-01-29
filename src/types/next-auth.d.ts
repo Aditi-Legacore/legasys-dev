@@ -5,11 +5,15 @@ declare module 'next-auth' {
     user: {
       id: string;
       role: string;
+      status: boolean;
+      forcePasswordReset: boolean;
     } & DefaultSession['user'];
   }
 
   interface User {
     id: string;
     role: string;
+    status: boolean;
+    forcePasswordReset: boolean;
   }
 }
