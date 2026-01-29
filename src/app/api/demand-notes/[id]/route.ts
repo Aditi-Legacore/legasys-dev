@@ -14,10 +14,10 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
+    const { id: demandNoteId } = await params;
 
     const demandNote = await prisma.demandNote.findUnique({
-      where: { id },
+      where: { id: demandNoteId },
       include: {
         client: true,
         createdBy: {
@@ -70,8 +70,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = await params;
-    const demandNoteId = id;
+    const { id: demandNoteId } = await params;
     const data = await request.json();
 
     // Verify the demand note exists and belongs to the user
@@ -176,8 +175,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = await params;
-    const demandNoteId = id;
+    const { id: demandNoteId } = await params;
 
     // Verify the demand note exists and belongs to the user
     const existingDemandNote = await prisma.demandNote.findFirst({

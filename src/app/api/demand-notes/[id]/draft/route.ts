@@ -21,7 +21,11 @@ export async function GET(
         });
 
         if (job?.combinedSummary) {
-            return NextResponse.json({ summaries: job.combinedSummary, isExisting: true });
+            return NextResponse.json({
+                summaries: job.combinedSummary,
+                isExisting: true,
+                publishStatus: job.publishStatus || 'draft'
+            });
         }
 
         // Otherwise aggregate from scratch
@@ -50,7 +54,11 @@ export async function GET(
             });
         }
 
-        return NextResponse.json({ summaries, isExisting: false });
+        return NextResponse.json({
+            summaries,
+            isExisting: false,
+            publishStatus: job?.publishStatus || 'draft'
+        });
     } catch (err) {
         console.error("❌ GET /api/demand-notes/[id]/draft error:", err);
         return NextResponse.json(
@@ -71,18 +79,30 @@ export async function PUT(
         }
 
         const { id: demandNoteId } = await params;
-        const { summaries } = await request.json();
+        const { summaries, status, useDummy } = await request.json();
 
-        // Update Job table
-        const updatedJob = await (prisma.job as any).update({
+        let contentToSave = summaries;
+        if (useDummy) {
+            contentToSave = "<p>This is a dummy consolidated summary paragraph generated for all uploaded files. It represents the collective data from the documents provided.</p>";
+        }
+
+        // Create or update Job record
+        const updatedJob = await (prisma.job as any).upsert({
             where: { demandNoteId },
-            data: {
-                combinedSummary: summaries,
-                publishStatus: 'draft'
+            update: {
+                combinedSummary: contentToSave,
+                publishStatus: status || 'draft'
+            },
+            create: {
+                demandNoteId,
+                createdById: session.user.id,
+                combinedSummary: contentToSave,
+                publishStatus: status || 'draft',
+                status: 'pending' // Default status for a new job record
             }
         });
 
-        return NextResponse.json({ success: true, combinedSummary: updatedJob.combinedSummary });
+        return NextResponse.json({ success: true, combinedSummary: updatedJob.combinedSummary, publishStatus: updatedJob.publishStatus });
     } catch (err) {
         console.error("❌ PUT /api/demand-notes/[id]/draft error:", err);
         return NextResponse.json(
