@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Plus, Search, Filter, FileText, Eye, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { StatusBadge, DemandNoteStatus } from "@/components/demand-notes/StatusBadge";
 import CommonTable, { Column, Action } from "@/components/ui/CommonTable";
+import Pagination from "@/components/ui/pagination";
 import { useRouter } from "next/navigation";
 
 interface DemandNote {
@@ -31,6 +32,8 @@ export default function DemandNotes() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     async function load() {
@@ -48,15 +51,29 @@ export default function DemandNotes() {
   }, []);
 
   // FILTERING
-  const filteredNotes = demandNotes.filter((note) => {
-    const clientName = note.client?.name ?? "";
-    const matchesSearch = clientName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || note.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredNotes = useMemo(() => {
+    return demandNotes.filter((note) => {
+      const clientName = note.client?.name ?? "";
+      const matchesSearch = clientName.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === "all" || note.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [demandNotes, searchQuery, statusFilter]);
+
+  // Paginated notes
+  const paginatedNotes = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredNotes.slice(startIndex, endIndex);
+  }, [filteredNotes, currentPage, itemsPerPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
 
   // TABLE DATA → convert DemandNote → Record<string, unknown>
-  const tableData: Record<string, unknown>[] = filteredNotes.map((n) => ({
+  const tableData: Record<string, unknown>[] = paginatedNotes.map((n) => ({
     id: n.id,
     clientName: n.client?.name ?? "Unknown",
     dueDate: n.dueDate,
@@ -220,6 +237,14 @@ export default function DemandNotes() {
             emptyMessage="No demand notes found"
           />
         )}
+
+        {/* Pagination */}
+        <Pagination
+          totalItems={filteredNotes.length}
+          itemsPerPage={itemsPerPage}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </main>
   );
