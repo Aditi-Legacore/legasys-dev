@@ -191,7 +191,7 @@ export default function DemandNotes() {
 
         {/* Filters */}
         <Card>
-          <CardContent className="p-4 flex gap-4">
+          <CardContent className="px-2 flex gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" />
               <Input
