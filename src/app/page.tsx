@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import LineChart from '@/components/charts/LineChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,25 +10,37 @@ import AddUserModal from '@/components/users/AddUserModal';
 import UserListModal from '@/components/users/UserListModal';
 
 export default function Home() {
+  const { data: session, status } = useSession();
+
   const [openAddUser, setOpenAddUser] = useState(false);
   const [openUserList, setOpenUserList] = useState(false);
+
+  // wait for session
+  if (status === 'loading') return null;
+
+  // role check
+  const isNormalUser = session?.user?.role === 'user';
 
   return (
     <div className="min-h-screen p-8 bg-muted/30">
       {/* Header actions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <div className="flex gap-3">
-          <Button onClick={() => setOpenAddUser(true)}>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Add New User
-          </Button>
-          <Button variant="outline" onClick={() => setOpenUserList(true)}>
-            <Users className="mr-2 h-4 w-4" />
-            User List
-          </Button>
 
-        </div>
+        {/* 🔐 ADMIN / STAFF ONLY */}
+        {!isNormalUser && (
+          <div className="flex gap-3">
+            <Button onClick={() => setOpenAddUser(true)}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add New User
+            </Button>
+
+            <Button variant="outline" onClick={() => setOpenUserList(true)}>
+              <Users className="mr-2 h-4 w-4" />
+              User List
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Main grid */}
@@ -37,9 +50,18 @@ export default function Home() {
             <CardTitle>User Overview</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            <p>Total Users: <span className="font-medium text-foreground">1,248</span></p>
-            <p className="mt-2">Active This Month: <span className="font-medium text-foreground">312</span></p>
-            <p className="mt-2">New This Week: <span className="font-medium text-foreground">27</span></p>
+            <p>
+              Total Users:{' '}
+              <span className="font-medium text-foreground">1,248</span>
+            </p>
+            <p className="mt-2">
+              Active This Month:{' '}
+              <span className="font-medium text-foreground">312</span>
+            </p>
+            <p className="mt-2">
+              New This Week:{' '}
+              <span className="font-medium text-foreground">27</span>
+            </p>
           </CardContent>
         </Card>
 
@@ -53,16 +75,19 @@ export default function Home() {
         </Card>
       </div>
 
-      {/* Add User Modal */}
-      <AddUserModal
-        open={openAddUser}
-        onClose={() => setOpenAddUser(false)}
-      />
-      <UserListModal
-        open={openUserList}
-        onClose={() => setOpenUserList(false)}
-      />
-
+      {/* Modals */}
+      {!isNormalUser && (
+        <>
+          <AddUserModal
+            open={openAddUser}
+            onClose={() => setOpenAddUser(false)}
+          />
+          <UserListModal
+            open={openUserList}
+            onClose={() => setOpenUserList(false)}
+          />
+        </>
+      )}
     </div>
   );
 }

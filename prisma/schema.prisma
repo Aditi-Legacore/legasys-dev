@@ -20,7 +20,7 @@ model User {
   caseType           String?
   emailVerified      DateTime?
   image              String?
-  status             String?
+  status             Boolean               @default(false)
   role               String?
   createdById        String?
   forcePasswordReset Boolean               @default(false)
