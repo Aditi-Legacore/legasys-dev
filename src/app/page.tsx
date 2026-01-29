@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, UserPlus } from 'lucide-react';
 import AddUserModal from '@/components/users/AddUserModal';
+import UserListModal from '@/components/users/UserListModal';
 
 export default function Home() {
   const [openAddUser, setOpenAddUser] = useState(false);
+  const [openUserList, setOpenUserList] = useState(false);
 
   return (
     <div className="min-h-screen p-8 bg-muted/30">
@@ -20,10 +22,11 @@ export default function Home() {
             <UserPlus className="mr-2 h-4 w-4" />
             Add New User
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" onClick={() => setOpenUserList(true)}>
             <Users className="mr-2 h-4 w-4" />
             User List
           </Button>
+
         </div>
       </div>
 
@@ -55,6 +58,11 @@ export default function Home() {
         open={openAddUser}
         onClose={() => setOpenAddUser(false)}
       />
+      <UserListModal
+        open={openUserList}
+        onClose={() => setOpenUserList(false)}
+      />
+
     </div>
   );
 }
