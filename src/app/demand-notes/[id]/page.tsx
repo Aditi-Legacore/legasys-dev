@@ -1195,11 +1195,11 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                           <table className="w-full">
                             <thead className="sticky top-0 bg-gray-50 border-b">
                               <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <th className="px-4 py-3">Document Name</th>
-                                <th className="px-4 py-3">Document Type</th>
-                                <th className="px-4 py-3">Upload Date</th>
-                                <th className="px-4 py-3">Status</th>
-                                <th className="px-4 py-3 text-right">Actions</th>
+                                <th className="px-4 py-2">Document Name</th>
+                                <th className="px-4 py-2">Document Type</th>
+                                <th className="px-4 py-2">Upload Date</th>
+                                <th className="px-4 py-2">Status</th>
+                                <th className="px-4 py-2 text-right">Actions</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
@@ -1207,7 +1207,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                                 new Map(demandNote.files.map(f => [f.id, f])).values()
                               ).map(file => (
                                 <tr key={file.id} className="hover:bg-gray-50 transition-colors">
-                                  <td className="px-4 py-3">
+                                  <td className="px-4 py-2">
                                     <div className="flex items-center gap-3">
                                       <FileText className="h-5 w-5 text-blue-500 flex-shrink-0" />
                                       <span className="text-sm font-medium text-gray-900">
@@ -1215,25 +1215,25 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                                       </span>
                                     </div>
                                   </td>
-                                  <td className="px-4 py-3">
+                                  <td className="px-4 py-2">
                                     <Badge variant="outline" className="capitalize">
                                       {file.fileCategory === "traffic" && "🚗 Traffic"}
                                       {file.fileCategory === "medical" && "🏥 Medical"}
                                       {file.fileCategory === "bills" && "💊 Bills"}
                                     </Badge>
                                   </td>
-                                  <td className="px-4 py-3">
+                                  <td className="px-4 py-2">
                                     <div className="flex items-center gap-1 text-sm text-gray-500">
                                       <Calendar className="h-3.5 w-3.5" />
                                       {formatDate(file.uploadedAt, 'MM/dd/yyyy')}
                                     </div>
                                   </td>
-                                  <td className="px-4 py-3">
+                                  <td className="px-4 py-2">
                                     <Badge variant="secondary" className="text-xs">
                                       {file.status}
                                     </Badge>
                                   </td>
-                                  <td className="px-4 py-3">
+                                  <td className="px-4 py-2">
                                     <div className="flex gap-1 justify-end">
                                       <Button
                                         variant="ghost"
@@ -1315,10 +1315,10 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                         <table className="w-full">
                           <thead className="sticky top-0 bg-gray-50 border-b">
                             <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              <th className="px-4 py-3">Document Name</th>
-                              <th className="px-4 py-3">Document Type</th>
-                              <th className="px-4 py-3">Chronology</th>
-                              <th className="px-4 py-3 w-2/5">Summary123</th>
+                              <th className="px-4 py-2">Document Name</th>
+                              <th className="px-4 py-2">Document Type</th>
+                              <th className="px-4 py-2">Chronology</th>
+                              <th className="px-4 py-2 w-2/5">Summary123</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-200">
@@ -1326,7 +1326,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                               .sort((a, b) => new Date(a.uploadedAt || a.createdAt || "").getTime() - new Date(b.uploadedAt || b.createdAt || "").getTime())
                               .map((file, index) => (
                                 <tr key={file.id} className="hover:bg-gray-50 transition-colors">
-                                  <td className="px-4 py-3">
+                                  <td className="px-4 py-2">
                                     <div className="flex items-center gap-3">
                                       <FileText className="h-5 w-5 text-blue-500 flex-shrink-0" />
                                       <span className="text-sm font-medium text-gray-900">
@@ -1334,14 +1334,14 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                                       </span>
                                     </div>
                                   </td>
-                                  <td className="px-4 py-3">
+                                  <td className="px-4 py-2">
                                     <Badge variant="outline" className="capitalize">
                                       {file.fileCategory === "traffic" && "🚗 Traffic"}
                                       {file.fileCategory === "medical" && "🏥 Medical"}
                                       {file.fileCategory === "bills" && "💊 Bills"}
                                     </Badge>
                                   </td>
-                                  <td className="px-4 py-3">
+                                  <td className="px-4 py-2">
                                     <div className="flex items-center gap-2">
                                       <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
                                         {index + 1}
@@ -1351,7 +1351,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                                       </div>
                                     </div>
                                   </td>
-                                  <td className="px-4 py-3">
+                                  <td className="px-4 py-2">
                                     <div className="flex items-center gap-2">
                                       <div className="flex-1 min-w-0">
                                         <p

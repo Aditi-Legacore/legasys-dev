@@ -115,21 +115,21 @@ export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableP
     {
       key: 'clientName',
       label: 'Client Name',
-      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium',
+      className: 'px-4 py-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium',
       sortable: true,
       link: (row) => `/intake-preview/${row.id}`
     },
     {
       key: 'accidentDate',
       label: 'Date of Loss',
-      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      className: 'px-4 py-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
       sortable: true,
       render: (value): React.ReactNode => formatDate(value as string)
     },
     {
       key: 'accidentDescription',
       label: 'Accident Description',
-      className: 'px-4 py-4',
+      className: 'px-4 py-2',
       render: (value): React.ReactNode => {
         const description = value as string | null | undefined;
         const truncatedText =
@@ -169,7 +169,7 @@ export default function CaseIntakeManagement({ intakes, onDelete }: IntakeTableP
     {
       key: 'isDraft',
       label: 'Status',
-      className: 'px-4 py-4',
+      className: 'px-4 py-2',
       sortable: true,
       render: (value): React.ReactNode => (
         <Badge

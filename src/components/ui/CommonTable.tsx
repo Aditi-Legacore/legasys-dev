@@ -137,14 +137,14 @@ export default function CommonTable({
           <thead className="bg-muted/50 dark:bg-gray-700 border-b border-border dark:border-gray-600">
             <tr>
               {showSerialNumber && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider whitespace-nowrap">
+                <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider whitespace-nowrap">
                   {serialNumberLabel}
                 </th>
               )}
               {visibleColumns.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-6 py-3 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider whitespace-nowrap ${column.className || ''} ${column.sortable ? 'cursor-pointer hover:bg-muted/70 dark:hover:bg-gray-600' : ''}`}
+                  className={`px-4 py-2 text-left text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider whitespace-nowrap ${column.className || ''} ${column.sortable ? 'cursor-pointer hover:bg-muted/70 dark:hover:bg-gray-600' : ''}`}
                   onClick={() => column.sortable && handleSort(column.key)}
                 >
                   <div className="flex items-center gap-1">
@@ -165,7 +165,7 @@ export default function CommonTable({
                 </th>
               ))}
               {actions.length > 0 && (
-                <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider whitespace-nowrap">
+                <th className="px-4 py-2 text-center text-xs font-medium text-muted-foreground dark:text-white uppercase tracking-wider whitespace-nowrap">
                   Actions
                 </th>
               )}
@@ -181,7 +181,7 @@ export default function CommonTable({
                 onClick={() => onRowClick?.(row, rowIndex)}
               >
                 {showSerialNumber && (
-                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                  <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
                     {rowIndex + 1}
                   </td>
                 )}
@@ -216,7 +216,7 @@ export default function CommonTable({
                 })}
 
                 {actions.length > 0 && (
-                  <td className="px-6 py-4 text-center whitespace-nowrap">
+                  <td className="px-4 py-2 text-center whitespace-nowrap">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
