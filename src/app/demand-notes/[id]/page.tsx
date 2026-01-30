@@ -1884,8 +1884,8 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-8 duration-500">
           <Button
             onClick={handleDownloadDoc}
-            size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-white shadow-2xl rounded-full px-8 py-6 h-auto flex items-center gap-3 group"
+            size="sm"
+            className="bg-primary text-white hover:text-blue-900 shadow-2xl rounded-full px-4 py-2 h-auto flex items-center gap-3 group"
           >
             <div className="bg-white/20 p-2 rounded-full group-hover:scale-110 transition-transform">
               <Download className="h-5 w-5" />
