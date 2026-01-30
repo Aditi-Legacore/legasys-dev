@@ -244,7 +244,7 @@ export default function DemandNoteForm({ id }: { id?: string }) {
             <button
               type="button"
               onClick={() => setShowAdditionalInfo(!showAdditionalInfo)}
-              className="flex items-center bg-blue-400 rounded-b-md gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center bg-blue-400 rounded-md gap-2 text-sm  hover:text-foreground transition-colors"
             >
               {showAdditionalInfo ? (
                 <>
