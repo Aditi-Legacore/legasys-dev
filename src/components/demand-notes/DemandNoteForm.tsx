@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp } from 'lucide-react'; // Import icons
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +41,8 @@ export default function DemandNoteForm({ id }: { id?: string }) {
   const [trafficFiles, setTrafficFiles] = useState<UploadedFile[]>([]);
   const [medicalFiles, setMedicalFiles] = useState<UploadedFile[]>([]);
   const [billFiles, setBillFiles] = useState<UploadedFile[]>([]);
+
+  const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
 
   const directoryName = `dn_${demandDate.replace(/-/g, "_")}_${Math.random()
     .toString(36)
@@ -168,10 +172,11 @@ export default function DemandNoteForm({ id }: { id?: string }) {
               <h2 className="text-lg font-semibold text-foreground">
                 Basic Information
               </h2>
+              
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="clientName">Defendant Name</Label>
+                  <Label htmlFor="clientName">Client Name *</Label>
                   <Input
                     id="clientName"
                     value={clientName}
@@ -181,7 +186,7 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="defendantPhoneEmail">Defendant Phone/Email</Label>
+                  <Label htmlFor="defendantPhoneEmail">Client Phone/Email *</Label>
                   <Input
                     id="defendantPhoneEmail"
                     value={defendantPhoneEmail}
@@ -201,10 +206,26 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                       value={demandDate}
                       onChange={(e) => setDemandDate(e.target.value)}
                     />
-                    <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    {/* <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" /> */}
+                  </div>
+                </div>
+              
+              
+                <div className="space-y-2">
+                  <Label htmlFor="demandDate">Date of Loss *</Label>
+                  <div className="relative">
+                    <Input
+                      id="dateofloss"
+                      type="date"
+                      // value={dateofloss}
+                      onChange={(e) => setDemandDate(e.target.value)}
+                    />
+                    {/* <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" /> */}
                   </div>
                 </div>
               </div>
+              
+           
 
               {isEditMode && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -220,6 +241,153 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                 </div>
               )}
             </div>
+            <button
+              type="button"
+              onClick={() => setShowAdditionalInfo(!showAdditionalInfo)}
+              className="flex items-center bg-blue-400 rounded-b-md gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {showAdditionalInfo ? (
+                <>
+                  Hide Additional Info
+                  <ChevronUp className="h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Show Additional Info
+                  <ChevronDown className="h-4 w-4" />
+                </>
+              )}
+            </button>
+
+            {/* Additional Info - Collapsible */}
+            {showAdditionalInfo && (
+              <div className="bg-card border border-border rounded-lg p-6 space-y-6 animate-in fade-in duration-300 mt-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-foreground">
+                    Additional Info
+                  </h2>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setShowAdditionalInfo(false)}
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Hide
+                    <ChevronUp className="h-4 w-4" />
+                  </button>
+                </div>
+                
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="defendantName">Defendant Name</Label>
+                      <Input
+                        id="defendantName"
+                        // value={defendantName}
+                        // onChange={(e) => setDefendantName(e.target.value)}
+                        placeholder="Enter defendant name"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="claimNumber">Claim Number</Label>
+                      <Input
+                        id="claimNumber"
+                        // value={claimNumber}
+                        // onChange={(e) => setClaimNumber(e.target.value)}
+                        placeholder="Enter claim number"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="insuranceName">Insurance Company Name</Label>
+                      <Input
+                        id="insuranceName"
+                        // value={insuranceName}
+                        // onChange={(e) => setInsuranceName(e.target.value)}
+                        placeholder="Enter insurance company name"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="adjuster">Adjuster</Label>
+                      <Input
+                        id="adjuster"
+                        // value={adjuster}
+                        // onChange={(e) => setAdjuster(e.target.value)}
+                        placeholder="Enter adjuster name"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="insuranceAddress">Insurance Company Address</Label>
+                    <Input
+                      id="insuranceAddress"
+                      // value={insuranceAddress}
+                      // onChange={(e) => setInsuranceAddress(e.target.value)}
+                      placeholder="Enter insurance company address"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone</Label>
+                      <Input
+                        id="phone"
+                        // value={phone}
+                        // onChange={(e) => setPhone(e.target.value)}
+                        placeholder="Enter phone number"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="fax">Fax</Label>
+                      <Input
+                        id="fax"
+                        // value={fax}
+                        // onChange={(e) => setFax(e.target.value)}
+                        placeholder="Enter fax number"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="claimType">Claim Type</Label>
+                      <select
+                        id="claimType"
+                        // value={claimType}
+                        // onChange={(e) => setClaimType(e.target.value)}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <option value="">Select claim type</option>
+                        <option value="auto">Auto Accident</option>
+                        <option value="property">Property Damage</option>
+                        <option value="liability">General Liability</option>
+                        <option value="workers-comp">Workers Compensation</option>
+                        <option value="medical">Medical Malpractice</option>
+                        <option value="product">Product Liability</option>
+                        <option value="premises">Premises Liability</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="additionalNotes">Additional Notes</Label>
+                    <textarea
+                      id="additionalNotes"
+                      // value={additionalNotes}
+                      // onChange={(e) => setAdditionalNotes(e.target.value)}
+                      placeholder="Enter any additional notes"
+                      rows={4}
+                      className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[80px]"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Document Uploads */}
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
