@@ -67,16 +67,16 @@ export async function POST(req: Request) {
       to: user.email,
       subject: "Your Login Details – Action Required",
       text: `
-Your account has been created.
+        Your account has been created.
 
-Login URL:
-${loginUrl}
+        Login URL:
+        ${loginUrl}
 
-Temporary Password:
-${tempPassword}
+        Temporary Password:
+        ${tempPassword}
 
-⚠️ Important:
-You must reset your password after logging in for the first time.
+        ⚠️ Important:
+        You must reset your password after logging in for the first time.
       `,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 16px;">
