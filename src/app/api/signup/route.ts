@@ -5,7 +5,7 @@ import nodemailer from "nodemailer";
 
 export async function POST(req: Request) {
   try {
-    const { salutation, firstName, lastName, dob, email, password, caseType } = await req.json();
+    const { salutation, firstName, lastName, dob, email, password, role } = await req.json();
 
     if (!email || !password || !firstName || !lastName || !dob ) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -27,8 +27,8 @@ export async function POST(req: Request) {
         lastName,
         dob: new Date(dob),
         email,
+        role,
         password: hashed,
-        caseType,
         uniqueUserId,
       },
     });

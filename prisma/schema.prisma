@@ -7,7 +7,6 @@ generator client {
 }
 
 
-
 model User {
   id                 String                @id @default(cuid())
   email              String                @unique
@@ -75,7 +74,7 @@ model VerificationToken {
 }
 
 model IntakeInfo {
-  id                           String         @id @default(cuid())
+  id                           String        @id @default(cuid())
   userId                       String?
   clientName                   String
   gender                       String?
@@ -149,10 +148,8 @@ model IntakeInfo {
   currentTreatmentTo           DateTime?
   hearAboutUs                  String?
   hearAboutUsDetail            String?
-  createdAt                    DateTime       @default(now())
-  updatedAt                    DateTime       @updatedAt
-  isDraft                      Boolean        @default(true)
-  referenceId                  String?
+  createdAt                    DateTime      @default(now())
+  updatedAt                    DateTime      @updatedAt
   currentDoctorHospital2       String?
   currentDoctorHospital3       String?
   currentHospitalAddressPhone2 String?
@@ -174,6 +171,7 @@ model IntakeInfo {
   hospitalName                 String?
   hospitalized                 String?
   injuryDescription            String?
+  isDraft                      Boolean       @default(true)
   passengerAge                 String?
   priorAttorneys2              String?
   priorAttorneys3              String?
@@ -189,109 +187,102 @@ model IntakeInfo {
   priorTreatmentFrom3          DateTime?
   priorTreatmentTo2            DateTime?
   priorTreatmentTo3            DateTime?
+  referenceId                  String?
   relationshipToYou            String?
   seatbeltUsed                 String?
   treatmentDetails             String?
-  user                         User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  Document Document[]
-  LeadId String? @unique
-  Lead   Lead? @relation(fields: [LeadId], references: [id])
-
-  // New models for notes and activity logs
-  activityLogs                ActivityLog[]  @relation("IntakeToActivityLogs")
-  Notes Note[]
+  LeadId                       String?       @unique
+  activityLogs                 ActivityLog[] @relation("IntakeToActivityLogs")
+  Document                     Document[]
+  Lead                         Lead?         @relation(fields: [LeadId], references: [id])
+  user                         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Notes                        Note[]
 }
 
 model Lead {
-  id            String   @id @default(cuid())
-  dueDate       DateTime
-  name          String
-  caseType      String
-  status        String   @default("new")
-  contact       String
-  phone         String
-  email         String
-  matter        String   @default("-")
-  description   String?
+  id             String      @id @default(cuid())
+  dueDate        DateTime
+  name           String
+  caseType       String
+  status         String      @default("new")
+  contact        String
+  phone          String
+  matter         String      @default("-")
+  description    String?
   referralSource String?
-  referenceId   String?  @unique
-  dateOfBirth   DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  intakeInfo  IntakeInfo?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  dateOfBirth    DateTime?
+  email          String
+  referenceId    String?     @unique
+  intakeInfo     IntakeInfo?
 }
 
 model Document {
-  id          String      @id @default(cuid())
-  intakeId    String
-  fileName    String
-  filePath    String
-  mimeType    String?
-  uploadedAt  DateTime    @default(now())
-  intake      IntakeInfo  @relation(fields: [intakeId], references: [id], onDelete: Cascade)
+  id         String     @id @default(cuid())
+  intakeId   String
+  fileName   String
+  filePath   String
+  mimeType   String?
+  uploadedAt DateTime   @default(now())
+  intake     IntakeInfo @relation(fields: [intakeId], references: [id], onDelete: Cascade)
 }
 
 model Matter {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  status      String   @default("Open")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  id              String           @id @default(cuid())
+  title           String
+  description     String?
+  status          String           @default("Open")
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   formSubmissions FormSubmission[]
 }
 
 model FormTemplate {
-  id        String   @id @default(cuid())
-  title     String
-  language  String   @default("English")
-  fields    Json
-  createdBy String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id          String           @id @default(cuid())
+  title       String
+  language    String           @default("English")
+  fields      Json
+  createdBy   String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   submissions FormSubmission[]
 }
 
 model FormSubmission {
-  id         String   @id @default(cuid())
+  id         String       @id @default(cuid())
   templateId String
   userId     String?
   matterId   String?
-  status     String   @default("Pending")
+  status     String       @default("Pending")
   data       Json
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  template FormTemplate @relation(fields: [templateId], references: [id])
-  user     User?        @relation(fields: [userId], references: [id])
-  matter   Matter?      @relation(fields: [matterId], references: [id])
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  matter     Matter?      @relation(fields: [matterId], references: [id])
+  template   FormTemplate @relation(fields: [templateId], references: [id])
+  user       User?        @relation(fields: [userId], references: [id])
 }
 
 model Note {
-  id         String   @id @default(cuid())
-  intakeId   String
-  content    String
+  id          String     @id @default(cuid())
+  intakeId    String
+  content     String
   createdById String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  intake     IntakeInfo @relation(fields: [intakeId], references: [id], onDelete: Cascade)
-  createdBy  User      @relation(fields: [createdById], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdBy   User       @relation(fields: [createdById], references: [id])
+  intake      IntakeInfo @relation(fields: [intakeId], references: [id], onDelete: Cascade)
 }
 
 model ActivityLog {
-  id              String   @id @default(uuid())
+  id               String     @id @default(uuid())
   intakeId         String
-  activityType    String
+  activityType     String
   shortDescription String
   longDescription  String
-  createdBy       String
-  createdAt       DateTime @default(now())
-
-  intake          IntakeInfo  @relation("IntakeToActivityLogs", fields: [intakeId], references: [id], onDelete: Cascade)
+  createdBy        String
+  createdAt        DateTime   @default(now())
+  intake           IntakeInfo @relation("IntakeToActivityLogs", fields: [intakeId], references: [id], onDelete: Cascade)
 }
 
 model OTP {
@@ -305,186 +296,148 @@ model OTP {
 }
 
 model DemandNote {
-  id             String       @id @default(cuid())
-  clientId       String
-  createdById    String
-  title          String
-  description    String?
-  referenceNumber String?     @unique
-  totalAmount    Float
-  dueDate        DateTime?
-  status         String       @default("draft") // draft | sent | overdue | paid
-  priority       String?      // low | medium | high
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  // relations  
-  client         DefedantClient       @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  createdBy      User         @relation(fields: [createdById], references: [id])
-
-  files          DemandFile[]
-  internalNotes  DemandInternalNote[]
-  timeline       DemandTimeline[]
-  statusHistory  DemandStatusHistory[]
-  reminders      DemandReminder[]
-  tags           DemandNoteTag[]
-  jobs           Job[]
+  id              String                @id @default(cuid())
+  clientId        String
+  createdById     String
+  title           String
+  description     String?
+  referenceNumber String?               @unique
+  totalAmount     Float
+  dueDate         DateTime?
+  status          String                @default("draft")
+  priority        String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  files           DemandFile[]
+  internalNotes   DemandInternalNote[]
+  client          DefedantClient        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  createdBy       User                  @relation(fields: [createdById], references: [id])
+  tags            DemandNoteTag[]
+  reminders       DemandReminder[]
+  statusHistory   DemandStatusHistory[]
+  timeline        DemandTimeline[]
+  jobs            Job?
 }
 
 model DefedantClient {
-  id         String       @id @default(cuid())
-  name       String
-  email      String?
-  phone      String?
-  address    String?
-  gstNumber  String?
-  panNumber  String?
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-
+  id          String       @id @default(cuid())
+  name        String
+  email       String?
+  phone       String?
+  address     String?
+  gstNumber   String?
+  panNumber   String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   demandNotes DemandNote[]
 }
 
-// -----------------------------
-// Files
-// -----------------------------
-
 model DemandFile {
-  id           String      @id @default(cuid())
-  demandNoteId String
-  uploadedById String
-  fileCategory String?
-  fileName     String
-  fileUrl      String
-  fileType     String?
-  size         Int?
-  status       String      @default("uploaded")
-  summaryStatus String      @default("not_summarized") // not_summarized | summarized
-  filePath     String?
-  createdAt    DateTime    @default(now())
-
-  demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
-  uploadedBy   User        @relation(fields: [uploadedById], references: [id])
-  tasks        Task[]      // ✅ added (opposite of Task.demandFile)
+  id            String     @id @default(cuid())
+  demandNoteId  String
+  uploadedById  String
+  fileName      String
+  fileUrl       String
+  fileType      String?
+  size          Int?
+  createdAt     DateTime   @default(now())
+  fileCategory  String?
+  status        String     @default("uploaded")
+  filePath      String?
+  summaryStatus String     @default("not_summarized")
+  demandNote    DemandNote @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
+  uploadedBy    User       @relation(fields: [uploadedById], references: [id])
+  tasks         Task[]
 }
 
 model Job {
-  id           String    @id @default(cuid())
-  demandNoteId  String  @unique
-  createdById  String
-  status       String    @default("pending") // pending | in_progress | completed | failed
-  numTasks     Int       @default(0)
+  id              String     @id @default(cuid())
+  demandNoteId    String     @unique
+  createdById     String
+  status          String     @default("pending")
+  numTasks        Int        @default(0)
+  createTs        DateTime   @default(now())
+  updateTs        DateTime   @updatedAt
   combinedSummary String?
-  publishStatus String    @default("draft") // draft | published
-  // outputSummary   String?
-  createTs     DateTime  @default(now())
-  updateTs     DateTime  @updatedAt
-
-  demandNote   DemandNote @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
-  createdBy    User       @relation(fields: [createdById], references: [id])
-  tasks        Task[]
+  publishStatus   String     @default("draft")
+  createdBy       User       @relation(fields: [createdById], references: [id])
+  demandNote      DemandNote @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
+  tasks           Task[]
 }
 
 model Task {
-  id         String   @id @default(cuid())
-  jobId      String
+  id              String     @id @default(cuid())
+  jobId           String
+  fileName        String
+  filePath        String
+  status          String     @default("pending")
+  pid             Int?
+  startTs         DateTime?
+  endTs           DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  outputSummary   String?
   demandFileId    String
-  fileName   String
-  outputFilePath String?
-  filePath   String
-  status     String   @default("pending") // pending | in_progress | completed | failed
-  pid        Int?
-  outputSummary String?
-  editedSummary String?
+  outputFilePath  String?
+  editedSummary   String?
   editedSummaryTs DateTime?
-  startTs    DateTime?
-  endTs      DateTime?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  demandFile      DemandFile? @relation(fields: [demandFileId], references: [id])
-  job        Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  demandFile      DemandFile @relation(fields: [demandFileId], references: [id])
+  job             Job        @relation(fields: [jobId], references: [id], onDelete: Cascade)
 }
 
-// -----------------------------
-// Internal Notes
-// -----------------------------
-
 model DemandInternalNote {
-  id           String      @id @default(cuid())
+  id           String     @id @default(cuid())
   demandNoteId String
   createdById  String
   content      String
-  createdAt    DateTime    @default(now())
-
-  demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
-  createdBy    User        @relation(fields: [createdById], references: [id])
+  createdAt    DateTime   @default(now())
+  createdBy    User       @relation(fields: [createdById], references: [id])
+  demandNote   DemandNote @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
 }
-
-// -----------------------------
-// Timeline
-// -----------------------------
 
 model DemandTimeline {
-  id           String      @id @default(cuid())
+  id           String     @id @default(cuid())
   demandNoteId String
-  type         String      // created | email-sent | status-updated | file-uploaded | note-added
+  type         String
   message      String
   metadata     Json?
-  createdAt    DateTime    @default(now())
-
-  demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  demandNote   DemandNote @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
 }
 
-// -----------------------------
-// Status History
-// -----------------------------
-
 model DemandStatusHistory {
-  id           String      @id @default(cuid())
+  id           String     @id @default(cuid())
   demandNoteId String
   changedById  String
   oldStatus    String?
   newStatus    String
-  createdAt    DateTime    @default(now())
-
-  demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
-  changedBy    User        @relation(fields: [changedById], references: [id])
+  createdAt    DateTime   @default(now())
+  changedBy    User       @relation(fields: [changedById], references: [id])
+  demandNote   DemandNote @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
 }
-
-// -----------------------------
-// Reminders
-// -----------------------------
 
 model DemandReminder {
-  id           String      @id @default(cuid())
+  id           String     @id @default(cuid())
   demandNoteId String
   remindAt     DateTime
-  sent         Boolean     @default(false)
-  type         String      // email | sms | whatsapp
-  createdAt    DateTime    @default(now())
-
-  demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
+  sent         Boolean    @default(false)
+  type         String
+  createdAt    DateTime   @default(now())
+  demandNote   DemandNote @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
 }
 
-// -----------------------------
-// Tags + Pivot
-// -----------------------------
-
 model DemandTag {
-  id        String        @id @default(cuid())
-  name      String        @unique
+  id        String          @id @default(cuid())
+  name      String          @unique
   color     String?
-  createdAt DateTime      @default(now())
-
+  createdAt DateTime        @default(now())
   notes     DemandNoteTag[]
 }
 
 model DemandNoteTag {
-  id           String      @id @default(cuid())
+  id           String     @id @default(cuid())
   demandNoteId String
   tagId        String
-
-  demandNote   DemandNote  @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
-  tag          DemandTag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  demandNote   DemandNote @relation(fields: [demandNoteId], references: [id], onDelete: Cascade)
+  tag          DemandTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
 }
