@@ -16,11 +16,19 @@ export async function POST(req: Request) {
       );
     }
 
-    const { email, password } = await req.json();
+    const { email, password, role } = await req.json();
 
-    if (!email || !password) {
+    const allowedRoles = ["Super Admin", "Legacore User", "Customer"];
+    if (!email || !password || !role) {
       return NextResponse.json(
-        { error: "Email and password are required" },
+        { error: "Email, password, and role are required" },
+        { status: 400 }
+      );
+    }
+
+    if (!allowedRoles.includes(role)) {
+      return NextResponse.json(
+        { error: "Invalid role. Allowed roles: Super Admin, Legacore User, Customer" },
         { status: 400 }
       );
     }
@@ -44,7 +52,7 @@ export async function POST(req: Request) {
       data: {
         email,
         password: hashedPassword,
-        role: "user",
+        role,
         createdById: session.user.id, // 👈 admin id
       },
     });
@@ -68,12 +76,11 @@ export async function GET() {
     }
 
     const users = await prisma.user.findMany({
-      where: {
-        role: "user",
-      },
+      
       select: {
         id: true,
         email: true,
+        role: true,
         password: true, // hashed password
         createdAt: true,
       },

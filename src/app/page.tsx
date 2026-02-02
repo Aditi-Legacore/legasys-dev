@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation'; // Add this import
 
 import LineChart from '@/components/charts/LineChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,14 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Users, UserPlus } from 'lucide-react';
 
 import AddUserModal from '@/components/users/AddUserModal';
-import UserListModal from '@/components/users/UserListModal';
 import ResetPasswordModal from '@/components/auth/ResetPasswordModal';
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const router = useRouter(); // Initialize router
 
   const [openAddUser, setOpenAddUser] = useState(false);
-  const [openUserList, setOpenUserList] = useState(false);
   const [showReset, setShowReset] = useState(false);
   
   useEffect(() => {
@@ -27,14 +27,17 @@ export default function Home() {
       setShowReset(true);
     }
   }, [session]);
+
+  // Handle User List button click
+  const handleUserListClick = () => {
+    router.push('/users'); // Navigate to users page
+  };
+
   // wait for session
   if (status === 'loading') return null;
 
   // role check
   const isNormalUser = session?.user?.role === 'user';
-
-  // 🔐 force password reset logic
- 
 
   return (
     <>
@@ -59,7 +62,7 @@ export default function Home() {
                 Add New User
               </Button>
 
-              <Button variant="outline" onClick={() => setOpenUserList(true)}>
+              <Button variant="outline" onClick={handleUserListClick}>
                 <Users className="mr-2 h-4 w-4" />
                 User List
               </Button>
@@ -99,18 +102,12 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* Modals */}
+        {/* Modals - Only AddUserModal remains */}
         {!isNormalUser && (
-          <>
-            <AddUserModal
-              open={openAddUser}
-              onClose={() => setOpenAddUser(false)}
-            />
-            <UserListModal
-              open={openUserList}
-              onClose={() => setOpenUserList(false)}
-            />
-          </>
+          <AddUserModal
+            open={openAddUser}
+            onClose={() => setOpenAddUser(false)}
+          />
         )}
       </div>
     </>

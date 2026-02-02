@@ -6,6 +6,7 @@ import {
   ClipboardList,
   FileText,
   FolderOpen,
+  Users,
 } from "lucide-react";
 
 export interface MenuItem {
@@ -23,6 +24,11 @@ export const menuItems: MenuItem[] = [
     label: "Dashboard",
     path: "/",
     icon: LayoutDashboard,
+  },
+  {
+    label: "Users List",
+    path: "/users",
+    icon: Users,
   },
   {
     label: "Leads",
@@ -65,4 +71,5 @@ export const menuItems: MenuItem[] = [
     path: "/demand-notes",
     icon: FolderOpen,
   },
+  
 ];
