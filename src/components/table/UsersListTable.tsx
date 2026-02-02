@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Send } from 'lucide-react';
+import { Send, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 import CommonTable, { Column, Action } from '@/components/ui/CommonTable';
 import Pagination from '@/components/ui/pagination';
@@ -127,6 +127,47 @@ export default function UsersListTable() {
         }
       },
       className: 'text-blue-600 dark:text-blue-400'
+    },
+    {
+      label: 'Delete',
+      icon: Trash,
+      onClick: async (row) => {
+        const confirmed = window.confirm(`Are you sure you want to delete user ${row.email}?`);
+        if (!confirmed) return;
+
+        try {
+          const res = await fetch('/api/admin/users', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: row.id }),
+          });
+
+          if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error || 'Failed to delete user');
+          }
+
+          toast.success('User deleted successfully');
+          // Refresh the users list
+          const fetchUsers = async () => {
+            setLoading(true);
+            try {
+              const res = await fetch('/api/admin/users');
+              const data = await res.json();
+              setUsers(data.users || []);
+            } catch (error) {
+              console.error('Error fetching users:', error);
+              toast.error('Failed to refresh users list');
+            } finally {
+              setLoading(false);
+            }
+          };
+          fetchUsers();
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : 'Failed to delete user');
+        }
+      },
+      className: 'text-red-600 dark:text-red-400'
     }
   ];
 

@@ -21,9 +21,10 @@ import {
 interface AddUserModalProps {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export default function AddUserModal({ open, onClose }: AddUserModalProps) {
+export default function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('');
@@ -45,6 +46,7 @@ export default function AddUserModal({ open, onClose }: AddUserModalProps) {
       setPassword('');
       setRole('');
       onClose();
+      onSuccess?.();
     } else {
       alert('Failed to create user');
     }
