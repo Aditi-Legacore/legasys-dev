@@ -12,6 +12,7 @@ interface User {
   role: string;
   createdAt: string;
   password: string | null;
+  status: boolean;
 }
 
 export default function UsersListTable() {
@@ -81,6 +82,21 @@ export default function UsersListTable() {
       label: 'Role',
       className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
       sortable: true
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      className: 'px-4 py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400',
+      render: (value) => (
+        <button
+          className={`px-3 py-1 rounded-full text-xs font-medium ${
+            value ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+          }`}
+          disabled
+        >
+          {value ? 'Active' : 'Inactive'}
+        </button>
+      )
     },
     {
       key: 'createdAt',

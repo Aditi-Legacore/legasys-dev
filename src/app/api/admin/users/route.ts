@@ -76,13 +76,14 @@ export async function GET() {
     }
 
     const users = await prisma.user.findMany({
-      
+
       select: {
         id: true,
         email: true,
         role: true,
         password: true, // hashed password
         createdAt: true,
+        status: true,
       },
       orderBy: {
         createdAt: "desc",
