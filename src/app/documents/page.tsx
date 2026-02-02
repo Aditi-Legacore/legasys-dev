@@ -182,7 +182,7 @@ export default function DocumentsPage() {
 
         {loading ? (
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="card-body p-6">
               <div className="text-center text-gray-500 py-10">Loading documents...</div>
             </CardContent>
           </Card>

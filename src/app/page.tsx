@@ -55,19 +55,7 @@ export default function Home() {
           <h1 className="text-2xl font-semibold">Dashboard</h1>
 
           {/* ADMIN / STAFF ONLY */}
-          {!isNormalUser && (
-            <div className="flex gap-3">
-              <Button onClick={() => setOpenAddUser(true)}>
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add New User
-              </Button>
-
-              <Button variant="outline" onClick={handleUserListClick}>
-                <Users className="mr-2 h-4 w-4" />
-                User List
-              </Button>
-            </div>
-          )}
+          
         </div>
 
         {/* Main grid */}
@@ -101,14 +89,6 @@ export default function Home() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Modals - Only AddUserModal remains */}
-        {!isNormalUser && (
-          <AddUserModal
-            open={openAddUser}
-            onClose={() => setOpenAddUser(false)}
-          />
-        )}
       </div>
     </>
   );
