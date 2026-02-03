@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 
         // Spawn Python Process
         const pythonScriptPath = "D:/pdf-extraction-pipeline/main.py";
-        const pythonExecutable = "C:\Users\HP\AppData\Local\Microsoft\WindowsApps\python.exe";
+        const pythonExecutable = "C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python312\\python.exe";
 
         console.log("🐍 Spawning Python process...");
         console.log("   Executable:", pythonExecutable);

@@ -317,6 +317,7 @@ model DemandNote {
   middleName        String?
   lastName          String?
   defendantPhoneEmail  String?
+  clientPhoneEmail  String?
 
  
   // Defendant / insurance
