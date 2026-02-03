@@ -16,18 +16,35 @@ export async function POST(request: NextRequest) {
 
     const {
       clientName,
+      salutation,
+      firstName,
+      middleName,
+      lastName,
       defendantPhoneEmail,
-      demandDate,
+
+      demandCreatedDate,
+      dateOfLoss,
       status = "draft",
+
+      defendantName,
+      claimNumber,
+      insuranceName,
+      adjuster,
+      insuranceAddress,
+      phone,
+      fax,
+      claimType,
+
       internalNotes,
-      totalAmount = 0,
+      additionalNotes,
       description,
+      totalAmount = 0,
       files = {},
     } = data;
 
-    if (!clientName || !demandDate) {
+    if (!clientName || !demandCreatedDate) {
       return NextResponse.json(
-        { error: "clientName and demandDate are required" },
+        { error: "clientName and demandCreatedDate are required" },
         { status: 400 }
       );
     }
@@ -84,9 +101,25 @@ export async function POST(request: NextRequest) {
         createdById: session.user.id,
         title: `Demand Note for ${clientName}`,
         description: description || null,
+        clientName,
+        salutation,
+        firstName,
+        middleName,
+        lastName,
         totalAmount,
-        dueDate: new Date(demandDate),
+        dueDate: new Date(dateOfLoss),
         status,
+        defendantName,
+        defendantPhoneEmail,
+        claimNumber,
+        insuranceName,
+        adjuster,
+        insuranceAddress,
+        phone,
+        fax,
+        claimType,
+
+        additionalNotes,
       },
       include: {
         client: true,

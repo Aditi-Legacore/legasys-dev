@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
-import { ChevronDown, ChevronUp } from 'lucide-react'; // Import icons
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,108 +27,132 @@ export default function DemandNoteForm({ id }: { id?: string }) {
   const router = useRouter();
   const isEditMode = !!id;
 
-  const [clientName, setClientName] = useState(isEditMode ? "John Doe" : "");
-  const [defendantPhoneEmail, setDefendantPhoneEmail] = useState("");
-  const [demandDate, setDemandDate] = useState(
-    isEditMode ? "2025-11-20" : new Date().toISOString().split("T")[0]
+  // Basic Info States
+  const [salutation, setSalutation] = useState("Mr.");
+  const [firstName, setFirstName] = useState(isEditMode ? "John" : "");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState(isEditMode ? "Doe" : "");
+  const [clientPhoneEmail, setClientPhoneEmail] = useState("");
+  const [demandCreatedDate, setDemandCreatedDate] = useState(
+    new Date().toISOString().split("T")[0]
   );
+  const [dateOfLoss, setDateOfLoss] = useState("");
   const [status, setStatus] = useState<DemandNoteStatus>(
     isEditMode ? "doc-uploaded" : "initiated"
   );
   const [internalNotes, setInternalNotes] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Additional Info States
+  const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
+  const [defendantName, setDefendantName] = useState("");
+  const [claimNumber, setClaimNumber] = useState("");
+  const [insuranceName, setInsuranceName] = useState("");
+  const [adjuster, setAdjuster] = useState("");
+  const [insuranceAddress, setInsuranceAddress] = useState("");
+  const [phone, setPhone] = useState("");
+  const [fax, setFax] = useState("");
+  const [claimType, setClaimType] = useState("");
+  const [additionalNotes, setAdditionalNotes] = useState("");
+
+  // File States
   const [trafficFiles, setTrafficFiles] = useState<UploadedFile[]>([]);
   const [medicalFiles, setMedicalFiles] = useState<UploadedFile[]>([]);
   const [billFiles, setBillFiles] = useState<UploadedFile[]>([]);
 
-  const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
-
-  const directoryName = `dn_${demandDate.replace(/-/g, "_")}_${Math.random()
+  const directoryName = `dn_${demandCreatedDate.replace(/-/g, "_")}_${Math.random()
     .toString(36)
     .substring(2, 8)}`;
 
-    const handleGenerate = async () => {
-      try {
-        setIsGenerating(true);
+  const handleGenerate = async () => {
+    try {
+      setIsGenerating(true);
 
-        const response = await fetch("/api/demand-notes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            clientName,
-            defendantPhoneEmail,
-            demandDate,
-            internalNotes,
-            status: "generated",
-          }),
-        });
+      // Combine first, middle, and last names
+      const clientName = `${salutation} ${firstName} ${middleName ? middleName + ' ' : ''}${lastName}`.trim();
 
-        const data = await response.json();
+      const response = await fetch("/api/demand-notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientName,
+          salutation,
+          firstName,
+          middleName,
+          lastName,
+          clientPhoneEmail,
+          demandCreatedDate,
+          dateOfLoss,
+          internalNotes,
+          status: "generated",
+          // Additional info
+          defendantName,
+          claimNumber,
+          insuranceName,
+          adjuster,
+          insuranceAddress,
+          phone,
+          fax,
+          claimType,
+          additionalNotes
+        }),
+      });
 
-        if (!response.ok) {
-          toast.error("Failed to create demand note.");
-          return;
-        }
+      const data = await response.json();
 
-        const demandNoteId = data.id;
+      if (!response.ok) {
+        toast.error("Failed to create demand note.");
+        return;
+      }
 
-        if (!demandNoteId) {
-          console.error("Demand note ID is missing from response:", data);
-          toast.error("Failed to get demand note ID. Cannot upload files.");
-          return;
-        }
+      const demandNoteId = data.id;
 
-        // Upload files individually
-        const allFiles = [...trafficFiles, ...medicalFiles, ...billFiles];
-        for (const fileInfo of allFiles) {
-          if (fileInfo.file) {
-            console.log("Uploading file:", fileInfo.fileName, "to demandNoteId:", demandNoteId, "category:", fileInfo.fileCategory);
-            try {
-              const formData = new FormData();
-              formData.append("file", fileInfo.file);
-              formData.append("demandNoteId", demandNoteId);
-              formData.append("fileCategory", fileInfo.fileCategory);
+      if (!demandNoteId) {
+        console.error("Demand note ID is missing from response:", data);
+        toast.error("Failed to get demand note ID. Cannot upload files.");
+        return;
+      }
 
-              const uploadResponse = await fetch("/api/upload", {
-                method: "POST",
-                body: formData,
-              });
+      // Upload files individually
+      const allFiles = [...trafficFiles, ...medicalFiles, ...billFiles];
+      for (const fileInfo of allFiles) {
+        if (fileInfo.file) {
+          try {
+            const formData = new FormData();
+            formData.append("file", fileInfo.file);
+            formData.append("demandNoteId", demandNoteId);
+            formData.append("fileCategory", fileInfo.fileCategory);
 
-              if (!uploadResponse.ok) {
-                console.log("Upload response status:", uploadResponse.status, uploadResponse.statusText);
-                let errorData;
-                try {
-                  errorData = await uploadResponse.json();
-                  console.log("Parsed error data:", errorData);
-                } catch {
-                  errorData = { error: `HTTP ${uploadResponse.status}: ${uploadResponse.statusText}` };
-                }
-                console.error("Upload failed for file:", fileInfo.fileName, errorData);
-                toast.error(`Failed to upload ${fileInfo.fileName}: ${errorData.error || "Unknown error"}`);
-              } else {
-                console.log("Uploaded file:", fileInfo.fileName);
+            const uploadResponse = await fetch("/api/upload", {
+              method: "POST",
+              body: formData,
+            });
+
+            if (!uploadResponse.ok) {
+              let errorData;
+              try {
+                errorData = await uploadResponse.json();
+              } catch {
+                errorData = { error: `HTTP ${uploadResponse.status}: ${uploadResponse.statusText}` };
               }
-            } catch (uploadError) {
-              console.error("Upload error for file:", fileInfo.fileName, uploadError);
-              toast.error(`Failed to upload ${fileInfo.fileName}: ${uploadError instanceof Error ? uploadError.message : "Unknown error"}`);
+              toast.error(`Failed to upload ${fileInfo.fileName}: ${errorData.error || "Unknown error"}`);
             }
+          } catch (uploadError) {
+            toast.error(`Failed to upload ${fileInfo.fileName}: ${uploadError instanceof Error ? uploadError.message : "Unknown error"}`);
           }
         }
-
-        toast.success("Demand note generated & saved!!!!");
-        setStatus("generated");
-        // if (demandNoteId) {
-        //   router.push(`/demand-notes/${demandNoteId}`);
-        // }
-        router.push("/demand-notes");
-      } catch (err) {
-        console.error(err);
-        toast.error("An error occurred while generating the demand note.");
-      } finally {
-        setIsGenerating(false);
       }
-    };
+
+      toast.success("Demand note generated & saved!");
+      setStatus("generated");
+      router.push("/demand-notes");
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred while generating the demand note.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleSaveDraft = () => {
     toast.success("Draft saved successfully!");
@@ -151,7 +175,7 @@ export default function DemandNoteForm({ id }: { id?: string }) {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-foreground">
-                {isEditMode ? `Edit Demand Note – ${clientName}` : "New Demand Note"}
+                {isEditMode ? `Edit Demand Note – ${firstName} ${lastName}` : "New Demand Note"}
               </h1>
               {isEditMode && (
                 <p className="text-sm text-muted-foreground mt-1">
@@ -172,60 +196,93 @@ export default function DemandNoteForm({ id }: { id?: string }) {
               <h2 className="text-lg font-semibold text-foreground">
                 Basic Information
               </h2>
-              
 
+              {/* Date Fields - Top Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="clientName">Client Name *</Label>
+                  <Label htmlFor="demandCreatedDate">Demand Created Date *</Label>
                   <Input
-                    id="clientName"
-                    value={clientName}
-                    onChange={(e) => setClientName(e.target.value)}
-                    placeholder="Enter client name"
+                    id="demandCreatedDate"
+                    type="date"
+                    value={demandCreatedDate}
+                    readOnly
+                    className="bg-muted/50"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="defendantPhoneEmail">Client Phone/Email *</Label>
+                  <Label htmlFor="dateOfLoss">Date of Loss (DOL) *</Label>
                   <Input
-                    id="defendantPhoneEmail"
-                    value={defendantPhoneEmail}
-                    onChange={(e) => setDefendantPhoneEmail(e.target.value)}
+                    id="dateOfLoss"
+                    type="date"
+                    value={dateOfLoss}
+                    onChange={(e) => setDateOfLoss(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Client Name Fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="salutation">Salutation</Label>
+                  <select
+                    id="salutation"
+                    value={salutation}
+                    onChange={(e) => setSalutation(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <option value="Mr.">Mr.</option>
+                    <option value="Mrs.">Mrs.</option>
+                    <option value="Ms.">Ms.</option>
+                    <option value="Miss">Miss</option>
+                    <option value="Dr.">Dr.</option>
+                    <option value="Prof.">Prof.</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">Client First Name *</Label>
+                  <Input
+                    id="firstName"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Enter first name"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="middleName">Middle Name</Label>
+                  <Input
+                    id="middleName"
+                    value={middleName}
+                    onChange={(e) => setMiddleName(e.target.value)}
+                    placeholder="Enter middle name"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Enter last name"
+                  />
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="clientPhoneEmail">Client Phone/Email *</Label>
+                  <Input
+                    id="clientPhoneEmail"
+                    value={clientPhoneEmail}
+                    onChange={(e) => setClientPhoneEmail(e.target.value)}
                     placeholder="Enter phone or email"
                   />
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="demandDate">Demand Date</Label>
-                  <div className="relative">
-                    <Input
-                      id="demandDate"
-                      type="date"
-                      value={demandDate}
-                      onChange={(e) => setDemandDate(e.target.value)}
-                    />
-                    {/* <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" /> */}
-                  </div>
-                </div>
-              
-              
-                <div className="space-y-2">
-                  <Label htmlFor="demandDate">Date of Loss *</Label>
-                  <div className="relative">
-                    <Input
-                      id="dateofloss"
-                      type="date"
-                      // value={dateofloss}
-                      onChange={(e) => setDemandDate(e.target.value)}
-                    />
-                    {/* <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" /> */}
-                  </div>
-                </div>
-              </div>
-              
-           
 
               {isEditMode && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -241,10 +298,12 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                 </div>
               )}
             </div>
+
+            {/* Additional Info Toggle Button */}
             <button
               type="button"
               onClick={() => setShowAdditionalInfo(!showAdditionalInfo)}
-              className="flex items-center bg-blue-400 rounded-md gap-2 text-sm  hover:text-foreground transition-colors"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-400 rounded-md text-sm hover:bg-blue-500 transition-colors"
             >
               {showAdditionalInfo ? (
                 <>
@@ -261,21 +320,10 @@ export default function DemandNoteForm({ id }: { id?: string }) {
 
             {/* Additional Info - Collapsible */}
             {showAdditionalInfo && (
-              <div className="bg-card border border-border rounded-lg p-6 space-y-6 animate-in fade-in duration-300 mt-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Additional Info
-                  </h2>
-                  
-                  <button
-                    type="button"
-                    onClick={() => setShowAdditionalInfo(false)}
-                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Hide
-                    <ChevronUp className="h-4 w-4" />
-                  </button>
-                </div>
+              <div className="bg-card border border-border rounded-lg p-6 space-y-6 animate-in fade-in duration-300">
+                <h2 className="text-lg font-semibold text-foreground">
+                  Additional Information
+                </h2>
                 
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -283,8 +331,8 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                       <Label htmlFor="defendantName">Defendant Name</Label>
                       <Input
                         id="defendantName"
-                        // value={defendantName}
-                        // onChange={(e) => setDefendantName(e.target.value)}
+                        value={defendantName}
+                        onChange={(e) => setDefendantName(e.target.value)}
                         placeholder="Enter defendant name"
                       />
                     </div>
@@ -293,8 +341,8 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                       <Label htmlFor="claimNumber">Claim Number</Label>
                       <Input
                         id="claimNumber"
-                        // value={claimNumber}
-                        // onChange={(e) => setClaimNumber(e.target.value)}
+                        value={claimNumber}
+                        onChange={(e) => setClaimNumber(e.target.value)}
                         placeholder="Enter claim number"
                       />
                     </div>
@@ -305,8 +353,8 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                       <Label htmlFor="insuranceName">Insurance Company Name</Label>
                       <Input
                         id="insuranceName"
-                        // value={insuranceName}
-                        // onChange={(e) => setInsuranceName(e.target.value)}
+                        value={insuranceName}
+                        onChange={(e) => setInsuranceName(e.target.value)}
                         placeholder="Enter insurance company name"
                       />
                     </div>
@@ -315,8 +363,8 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                       <Label htmlFor="adjuster">Adjuster</Label>
                       <Input
                         id="adjuster"
-                        // value={adjuster}
-                        // onChange={(e) => setAdjuster(e.target.value)}
+                        value={adjuster}
+                        onChange={(e) => setAdjuster(e.target.value)}
                         placeholder="Enter adjuster name"
                       />
                     </div>
@@ -326,8 +374,8 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                     <Label htmlFor="insuranceAddress">Insurance Company Address</Label>
                     <Input
                       id="insuranceAddress"
-                      // value={insuranceAddress}
-                      // onChange={(e) => setInsuranceAddress(e.target.value)}
+                      value={insuranceAddress}
+                      onChange={(e) => setInsuranceAddress(e.target.value)}
                       placeholder="Enter insurance company address"
                     />
                   </div>
@@ -337,8 +385,8 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                       <Label htmlFor="phone">Phone</Label>
                       <Input
                         id="phone"
-                        // value={phone}
-                        // onChange={(e) => setPhone(e.target.value)}
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
                         placeholder="Enter phone number"
                       />
                     </div>
@@ -347,8 +395,8 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                       <Label htmlFor="fax">Fax</Label>
                       <Input
                         id="fax"
-                        // value={fax}
-                        // onChange={(e) => setFax(e.target.value)}
+                        value={fax}
+                        onChange={(e) => setFax(e.target.value)}
                         placeholder="Enter fax number"
                       />
                     </div>
@@ -357,9 +405,9 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                       <Label htmlFor="claimType">Claim Type</Label>
                       <select
                         id="claimType"
-                        // value={claimType}
-                        // onChange={(e) => setClaimType(e.target.value)}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        value={claimType}
+                        onChange={(e) => setClaimType(e.target.value)}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       >
                         <option value="">Select claim type</option>
                         <option value="auto">Auto Accident</option>
@@ -378,11 +426,11 @@ export default function DemandNoteForm({ id }: { id?: string }) {
                     <Label htmlFor="additionalNotes">Additional Notes</Label>
                     <textarea
                       id="additionalNotes"
-                      // value={additionalNotes}
-                      // onChange={(e) => setAdditionalNotes(e.target.value)}
+                      value={additionalNotes}
+                      onChange={(e) => setAdditionalNotes(e.target.value)}
                       placeholder="Enter any additional notes"
                       rows={4}
-                      className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[80px]"
+                      className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[80px]"
                     />
                   </div>
                 </div>
@@ -528,7 +576,7 @@ export default function DemandNoteForm({ id }: { id?: string }) {
 
             <Button
               onClick={handleGenerate}
-              disabled={isGenerating || !clientName || trafficFiles.length === 0}
+              disabled={isGenerating || !firstName || trafficFiles.length === 0}
               className="bg-primary hover:bg-primary/90"
             >
               {isGenerating ? (
