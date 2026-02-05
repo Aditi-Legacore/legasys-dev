@@ -1278,14 +1278,14 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                     </TabsTrigger>
 
                     <TabsTrigger
-                      value="chronology"
+                      value="indexing"
                       className="py-2.5 px-4 font-medium text-base text-neutral-600
                         hover:text-primary border-0 border-b-2 border-transparent
                         data-[state=active]:text-primary
                         data-[state=active]:border-primary
                         rounded-none shadow-none"
                     >
-                      Chronology & Summary
+                      Indexing & Summary
                     </TabsTrigger>
 
                     <TabsTrigger
@@ -1523,13 +1523,13 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                     </Card>
                   </TabsContent>
 
-                  {/* ---------------- CHRONOLOGY TAB ---------------- */}
-                  <TabsContent value="chronology" className="p-0">
+                  {/* ---------------- INDEXING TAB ---------------- */}
+                  <TabsContent value="indexing" className="p-0">
                     <Card>
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <div>
-                            <CardTitle>Document Chronology & Summary</CardTitle>
+                            <CardTitle>Document Indexing & Summary</CardTitle>
                             <p className="text-sm text-muted-foreground">
                               Documents ordered by upload date with editable summaries
                             </p>
@@ -1725,7 +1725,7 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                             <FileText className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                             <p className="text-sm">No documents available</p>
                             <p className="text-xs text-gray-400 mt-1">
-                              Upload documents to view chronology and add summaries
+                              Upload documents to view indexing and add summaries
                             </p>
                           </div>
                         )}

@@ -152,7 +152,7 @@ export default function DemandNotes() {
       icon: FileText,
       onClick: async (row) => {
         const original = row._original as DemandNote;
-  
+
         try {
           const response = await fetch(
             `/api/demand-notes/${original.id}/request-documents`,
@@ -160,7 +160,7 @@ export default function DemandNotes() {
               method: "POST",
             }
           );
-  
+
           if (response.ok) {
             alert("Document request sent successfully!");
           } else {
@@ -173,7 +173,7 @@ export default function DemandNotes() {
       },
     },
   ];
-  
+
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
@@ -214,6 +214,7 @@ export default function DemandNotes() {
                 <SelectItem value="doc-uploaded">Uploaded</SelectItem>
                 <SelectItem value="verified">Verified</SelectItem>
                 <SelectItem value="generated">Generated</SelectItem>
+                <SelectItem value="sent">Published</SelectItem>
               </SelectContent>
             </Select>
           </CardContent>
