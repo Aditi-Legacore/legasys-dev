@@ -12,7 +12,8 @@ import {
   User,
   Clock,
   Eye,
-  Loader2, 
+  Loader2,
+  Pencil,
   Upload,
   Trash2,
   Sparkles,
@@ -21,6 +22,8 @@ import {
   ChevronDown,
   ChevronUp,
   GripVertical,
+  Save,
+  FileDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,6 +53,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DefaultCardComponent from "@/components/default-card-component";
+import { Textarea } from "@/components/ui/textarea";
 
 interface FileType {
   createdAt: string | null;
@@ -164,6 +168,26 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
   const [job, setJob] = useState<any>(null);
   const [isDraftEdited, setIsDraftEdited] = useState(false);
 
+  // Indexing and Summary states
+  const [isIndexing, setIsIndexing] = useState(false);
+  const [indexingProgress, setIndexingProgress] = useState<'idle' | 'indexing' | 'in-progress' | 'complete'>('idle');
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [summaryStatuses, setSummaryStatuses] = useState<Record<string, 'pending' | 'in-progress' | 'complete'>>({});
+  const [expandedSummaries, setExpandedSummaries] = useState<Record<string, boolean>>({});
+  const [isProcessingDisabled, setIsProcessingDisabled] = useState(false);
+  const [summaryModalFileId, setSummaryModalFileId] = useState<string | null>(null);
+  const [summarizationJobId, setSummarizationJobId] = useState<string | null>(null);
+  const [summarizationProgress, setSummarizationProgress] = useState<string>('0%');
+
+  // NEW: Summary Modal States
+  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
+  const [summaryModalFile, setSummaryModalFile] = useState<{ id: string; name: string } | null>(null);
+  const [modalAiSummary, setModalAiSummary] = useState<string>("");
+  const [modalEditedSummary, setModalEditedSummary] = useState<string>("");
+  const [modalSummaryMode, setModalSummaryMode] = useState<"ai" | "edited">("ai");
+  const [isModalLoading, setIsModalLoading] = useState(false);
+  const [isSavingSummary, setIsSavingSummary] = useState(false);
+
   // Dynamic import for ReactQuill to avoid SSR issues
   const [ReactQuill, setReactQuill] = useState<any>(null);
   useEffect(() => {
@@ -197,10 +221,11 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
       try {
         if (!silent && !demandNote) setIsLoading(true);
 
-        const [demandResponse, timelineResponse, notesResponse] = await Promise.all([
+        const [demandResponse, timelineResponse, notesResponse, draftResponse] = await Promise.all([
           fetch(`/api/demand-notes/${id}`),
           fetch(`/api/demand-notes/${id}/timeline`),
           fetch(`/api/demand-notes/${id}/notes`),
+          fetch(`/api/demand-notes/${id}/draft`),
         ]);
 
         if (!demandResponse.ok) {
@@ -234,6 +259,16 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
         if (notesResponse.ok) {
           const notesData = await notesResponse.json();
           setNotes(notesData);
+        }
+
+        // Load draft summaries if available
+        if (draftResponse.ok) {
+          const draftData = await draftResponse.json();
+          if (draftData.summaries) {
+            setDraftContent(draftData.summaries);
+            setJob({ publishStatus: draftData.publishStatus || "draft" });
+            setIsDraftEdited(false);
+          }
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -541,12 +576,12 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
     });
   };
 
-  const handleOpenSummaryPanel = async (fileId: string, fileName: string) => {
-    setSummaryPanelFileId(fileId);
-    setSummaryLoadingFileId(fileId);
-    setIsSummaryLoading(true);
-    setPanelSummaryText("");
-    setSummaryMode("ai"); // Default to AI
+  // NEW: Open Summary Modal
+  const handleOpenSummaryModal = async (fileId: string, fileName: string) => {
+    setSummaryModalFile({ id: fileId, name: fileName });
+    setIsSummaryModalOpen(true);
+    setIsModalLoading(true);
+    setModalSummaryMode("ai");
 
     try {
       const response = await fetch(`/api/demand-files/${fileId}/summary`);
@@ -555,30 +590,18 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
         const data = await response.json();
         const ai = data.summary || "";
         const edited = data.editedSummary || "";
-        const aiTs = data.summaryTs || null;
-        const editedTs = data.editedSummaryTs || null;
 
-        setAiSummary(ai);
-        setEditedSummary(edited);
-        setAiSummaryTs(aiTs);
-        setEditedSummaryTs(editedTs);
-
-        setPanelSummaryText(ai || "No summary available");
+        setModalAiSummary(ai);
+        setModalEditedSummary(edited);
       } else {
         // Fallback to existing summary if API fails
         const file = demandNote?.files.find(f => f.id === fileId);
         const task = (file as any)?.tasks?.[0];
         const existingSummary = task?.outputSummary || "";
         const existingEdited = task?.editedSummary || "";
-        const existingAiTs = task?.endTs || null;
-        const existingEditedTs = task?.editedSummaryTs || null;
 
-        setAiSummary(existingSummary);
-        setEditedSummary(existingEdited);
-        setAiSummaryTs(existingAiTs);
-        setEditedSummaryTs(existingEditedTs);
-
-        setPanelSummaryText(existingSummary || "No summary available");
+        setModalAiSummary(existingSummary);
+        setModalEditedSummary(existingEdited);
       }
     } catch (error) {
       console.error("Error fetching summary:", error);
@@ -587,19 +610,77 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
       const task = (file as any)?.tasks?.[0];
       const existingSummary = task?.outputSummary || "";
       const existingEdited = task?.editedSummary || "";
-      const existingAiTs = task?.endTs || null;
-      const existingEditedTs = task?.editedSummaryTs || null;
 
-      setAiSummary(existingSummary);
-      setEditedSummary(existingEdited);
-      setAiSummaryTs(existingAiTs);
-      setEditedSummaryTs(existingEditedTs);
-
-      setPanelSummaryText(existingSummary || "No summary available");
+      setModalAiSummary(existingSummary);
+      setModalEditedSummary(existingEdited);
     } finally {
-      setIsSummaryLoading(false);
-      setSummaryLoadingFileId(null);
+      setIsModalLoading(false);
     }
+  };
+
+  // NEW: Close Summary Modal
+  const handleCloseSummaryModal = () => {
+    setIsSummaryModalOpen(false);
+    setSummaryModalFile(null);
+    setModalAiSummary("");
+    setModalEditedSummary("");
+    setModalSummaryMode("ai");
+  };
+
+  // NEW: Save Edited Summary
+  const handleSaveEditedSummary = async () => {
+    if (!summaryModalFile) return;
+
+    setIsSavingSummary(true);
+    try {
+      const response = await fetch(`/api/demand-files/${summaryModalFile.id}/summary`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ summary: modalEditedSummary })
+      });
+
+      if (!response.ok) throw new Error("Failed to save");
+
+      const data = await response.json();
+      setModalEditedSummary(data.editedSummary);
+
+      setJob((prev: any) => ({ ...prev, publishStatus: "draft" }));
+      toast.success("Summary saved successfully");
+    } catch (error) {
+      toast.error("Failed to save summary");
+    } finally {
+      setIsSavingSummary(false);
+    }
+  };
+
+  // NEW: Copy Summary to Clipboard
+  const handleCopySummaryModal = () => {
+    const textToCopy = modalSummaryMode === "ai" ? modalAiSummary : modalEditedSummary;
+    navigator.clipboard.writeText(textToCopy);
+    toast.success("Summary copied to clipboard");
+  };
+
+  // NEW: Export Summary
+  const handleExportSummaryModal = () => {
+    const textToExport = modalSummaryMode === "ai" ? modalAiSummary : modalEditedSummary;
+    const fileName = summaryModalFile ? `summary_${summaryModalFile.name}.txt` : 'summary.txt';
+
+    const blob = new Blob([textToExport], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success("Summary exported successfully");
+  };
+
+  const handleOpenSummaryPanel = async (fileId: string, fileName: string) => {
+    // Use the new modal instead
+    handleOpenSummaryModal(fileId, fileName);
   };
 
   const handleCloseSummaryPanel = () => {
@@ -852,6 +933,118 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
       .join("")
       .toUpperCase();
 
+  // Handle common indexing operation
+  const handleCommonIndexing = async () => {
+    setIsIndexing(true);
+    setIsProcessingDisabled(true);
+    setIndexingProgress('indexing');
+
+    try {
+      // Simulate indexing process
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setIndexingProgress('in-progress');
+
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setIndexingProgress('complete');
+
+      toast.success("Indexing completed successfully");
+
+      // Reset after 2 seconds
+      setTimeout(() => {
+        setIndexingProgress('idle');
+        setIsIndexing(false);
+        setIsProcessingDisabled(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Indexing error:", error);
+      toast.error("Failed to complete indexing");
+      setIndexingProgress('idle');
+      setIsIndexing(false);
+      setIsProcessingDisabled(false);
+    }
+  };
+
+  // Handle common summary operation
+  const handleCommonSummary = async () => {
+    if (!demandNote?.files || demandNote.files.length === 0) {
+      toast.error("No files to summarize");
+      return;
+    }
+
+    setIsSummarizing(true);
+    setIsProcessingDisabled(true);
+    setSummarizationProgress('0%');
+
+    try {
+      // Start a job for all files
+      const response = await fetch("/api/job/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          demandNoteId: demandNote.id,
+          demandFileIds: demandNote.files.map(f => f.id)
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to start summarization job");
+      }
+
+      const data = await response.json();
+      setSummarizationJobId(data.jobId);
+
+      // Poll for job status
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusResponse = await fetch(`/api/job/status?jobId=${data.jobId}`);
+          if (!statusResponse.ok) throw new Error("Failed to fetch status");
+
+          const statusData = await statusResponse.json();
+          const jobStatus = statusData.job.status;
+
+          // Update progress based on job status
+          if (jobStatus === "pending") {
+            setSummarizationProgress('5%'); // 0-10% range, using 5%
+          } else if (jobStatus === "in_progress") {
+            setSummarizationProgress('45%');
+          } else if (jobStatus === "completed") {
+            setSummarizationProgress('100%');
+            clearInterval(pollInterval);
+            // Close progress bar after 2 seconds
+            setTimeout(() => {
+              setIsSummarizing(false);
+              setIsProcessingDisabled(false);
+              setSummarizationJobId(null);
+              setSummarizationProgress('0%');
+            }, 2000);
+            toast.success("All summaries completed");
+          } else if (jobStatus === "failed") {
+            clearInterval(pollInterval);
+            setIsSummarizing(false);
+            setIsProcessingDisabled(false);
+            setSummarizationJobId(null);
+            setSummarizationProgress('0%');
+            toast.error("Summarization failed");
+          }
+        } catch (error) {
+          console.error("Polling error:", error);
+          clearInterval(pollInterval);
+          setIsSummarizing(false);
+          setIsProcessingDisabled(false);
+          setSummarizationJobId(null);
+          setSummarizationProgress('0%');
+          toast.error("Failed to check summarization status");
+        }
+      }, 3000);
+
+    } catch (error) {
+      console.error("Summary error:", error);
+      toast.error("Failed to start summarization");
+      setIsSummarizing(false);
+      setIsProcessingDisabled(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -927,12 +1120,11 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
           </div>
         </div>
 
-        {/* Content Layout: Two-Column Grid */}
+        {/* Content Layout: Modified Grid */}
         <div className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Column: Demand Note Info + Upload/Chronology */}
-            <div className="lg:col-span-8 space-y-6">
-              {/* Basic Information */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+            {/* Basic Information - 8 columns */}
+            <div className="lg:col-span-8">
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -1007,194 +1199,437 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                   )}
                 </CardContent>
               </Card>
+            </div>
 
-              {/* Tab Navigation using DefaultCardComponent and Tabs */}
-              <DefaultCardComponent title="Demand Note Documents">
-                <Tabs defaultValue="upload" className="gap-0">
-                  {/* TAB HEADER */}
-                  <div className="flex items-center justify-between border-b border-neutral-200 dark:border-slate-600">
-                    <TabsList className="bg-transparent rounded-none h-[50px] p-0">
-                      <TabsTrigger
-                        value="upload"
-                        className="py-2.5 px-4 font-medium text-base text-neutral-600
-                        hover:text-primary border-0 border-b-2 border-transparent
-                        data-[state=active]:text-primary
-                        data-[state=active]:border-primary
-                        rounded-none shadow-none"
+            {/* Activity Timeline - 4 columns, sticky on right */}
+            <div className="lg:col-span-4">
+              <div className="sticky top-6">
+                <Card>
+                  <CardHeader className="cursor-pointer" onClick={() => setIsActivityTimelineOpen(!isActivityTimelineOpen)}>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base">Activity Timeline</CardTitle>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
                       >
-                        Document Upload
-                      </TabsTrigger>
-
-                      <TabsTrigger
-                        value="chronology"
-                        className="py-2.5 px-4 font-medium text-base text-neutral-600
-                        hover:text-primary border-0 border-b-2 border-transparent
-                        data-[state=active]:text-primary
-                        data-[state=active]:border-primary
-                        rounded-none shadow-none"
-                      >
-                        Chronology & Summary
-                      </TabsTrigger>
-
-                      <TabsTrigger
-                        value="draft"
-                        className="py-2.5 px-4 font-medium text-base text-neutral-600
-                        hover:text-primary border-0 border-b-2 border-transparent
-                        data-[state=active]:text-primary
-                        data-[state=active]:border-primary
-                        rounded-none shadow-none"
-                      >
-                        Draft
-                      </TabsTrigger>
-                    </TabsList>
-                  </div>
-
-                  {/* TAB CONTENT */}
-                  <div className="pt-6">
-                    {/* ---------------- UPLOAD TAB ---------------- */}
-                    <TabsContent value="upload" className="p-0 space-y-6">
-                      {/* Upload Section */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Upload Documents</CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                            Drag and drop files or click to select
-                          </p>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-6">
-                            {/* Category Selection */}
-                            <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-                              <Label className="text-sm font-medium">Document Type:</Label>
-                              <Select
-                                value={selectedCategory}
-                                onValueChange={setSelectedCategory}
-                              >
-                                <SelectTrigger className="w-full lg:w-48">
-                                  <SelectValue placeholder="Select category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="traffic">🚗 Traffic Reports</SelectItem>
-                                  <SelectItem value="medical">🏥 Medical Reports</SelectItem>
-                                  <SelectItem value="bills">💊 Medical Bills</SelectItem>
-                                </SelectContent>
-                              </Select>
+                        {isActivityTimelineOpen ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  {isActivityTimelineOpen && (
+                    <CardContent className="max-h-[400px] overflow-y-auto">
+                      {activityEvents.length > 0 ? (
+                        <div className="space-y-4">
+                          {activityEvents.map((event) => (
+                            <div key={event.id} className="flex gap-3">
+                              <div className="flex-shrink-0 w-2 h-2 mt-1.5 rounded-full bg-blue-500" />
+                              <div className="flex-1 space-y-1">
+                                <p className="text-sm text-foreground">{event.description}</p>
+                                <p className="text-xs text-muted-foreground">{event.timestamp}</p>
+                              </div>
                             </div>
+                          ))}
+                          {allActivityEvents.length > 3 && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowAllActivities(!showAllActivities);
+                              }}
+                              className="text-xs w-full"
+                            >
+                              {showAllActivities ? "Show Less" : `Show All (${allActivityEvents.length})`}
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No activity yet</p>
+                      )}
+                    </CardContent>
+                  )}
+                </Card>
+              </div>
+            </div>
+          </div>
 
-                            {/* Drag and Drop Zone */}
-                            <div
-                              onDragEnter={handleDrag}
-                              onDragLeave={handleDrag}
-                              onDragOver={handleDrag}
-                              onDrop={handleDrop}
-                              className={`
+          {/* Full Width Document Section */}
+          <div className="w-full">
+            {/* Tab Navigation using DefaultCardComponent and Tabs */}
+            <DefaultCardComponent title="Demand Note Documents">
+              <Tabs defaultValue="upload" className="gap-0">
+                {/* TAB HEADER */}
+                <div className="flex items-center justify-between border-b border-neutral-200 dark:border-slate-600">
+                  <TabsList className="bg-transparent rounded-none h-[50px] p-0">
+                    <TabsTrigger
+                      value="upload"
+                      className="py-2.5 px-4 font-medium text-base text-neutral-600
+                        hover:text-primary border-0 border-b-2 border-transparent
+                        data-[state=active]:text-primary
+                        data-[state=active]:border-primary
+                        rounded-none shadow-none"
+                    >
+                      Document Upload
+                    </TabsTrigger>
+
+                    <TabsTrigger
+                      value="chronology"
+                      className="py-2.5 px-4 font-medium text-base text-neutral-600
+                        hover:text-primary border-0 border-b-2 border-transparent
+                        data-[state=active]:text-primary
+                        data-[state=active]:border-primary
+                        rounded-none shadow-none"
+                    >
+                      Chronology & Summary
+                    </TabsTrigger>
+
+                    <TabsTrigger
+                      value="draft"
+                      className="py-2.5 px-4 font-medium text-base text-neutral-600
+                        hover:text-primary border-0 border-b-2 border-transparent
+                        data-[state=active]:text-primary
+                        data-[state=active]:border-primary
+                        rounded-none shadow-none"
+                    >
+                      Draft
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+
+                {/* TAB CONTENT */}
+                <div className="pt-6">
+                  {/* ---------------- UPLOAD TAB ---------------- */}
+                  <TabsContent value="upload" className="p-0 space-y-6">
+                    {/* Upload Section */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Upload Documents</CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          Drag and drop files or click to select
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-6">
+                          {/* Category Selection */}
+                          <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+                            <Label className="text-sm font-medium">Document Type:</Label>
+                            <Select
+                              value={selectedCategory}
+                              onValueChange={setSelectedCategory}
+                            >
+                              <SelectTrigger className="w-full lg:w-48">
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="traffic">🚗 Traffic Reports</SelectItem>
+                                <SelectItem value="medical">🏥 Medical Reports</SelectItem>
+                                <SelectItem value="bills">💊 Medical Bills</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {/* Drag and Drop Zone */}
+                          <div
+                            onDragEnter={handleDrag}
+                            onDragLeave={handleDrag}
+                            onDragOver={handleDrag}
+                            onDrop={handleDrop}
+                            className={`
                                 relative border-2 border-dashed rounded-lg p-8 lg:p-12 text-center transition-colors
                                 ${dragActive
-                                  ? "border-blue-500 bg-blue-50"
-                                  : "border-gray-300 bg-gray-50 hover:border-gray-400"
-                                }
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-300 bg-gray-50 hover:border-gray-400"
+                              }
                               `}
-                            >
-                              <input
-                                id="file-upload"
-                                type="file"
-                                multiple
-                                onChange={(e) =>
-                                  setUploadFiles(e.target.files ? Array.from(e.target.files) : [])
-                                }
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                              />
-                              <div className="flex flex-col items-center gap-3">
-                                <Upload className="h-10 w-10 lg:h-12 lg:w-12 text-gray-400" />
-                                <div>
-                                  <p className="text-sm font-medium text-gray-700">
-                                    Drop files here or click to browse
-                                  </p>
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    Supports PDF, DOC, DOCX, JPG, PNG
-                                  </p>
-                                </div>
+                          >
+                            <input
+                              id="file-upload"
+                              type="file"
+                              multiple
+                              onChange={(e) =>
+                                setUploadFiles(e.target.files ? Array.from(e.target.files) : [])
+                              }
+                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            />
+                            <div className="flex flex-col items-center gap-3">
+                              <Upload className="h-10 w-10 lg:h-12 lg:w-12 text-gray-400" />
+                              <div>
+                                <p className="text-sm font-medium text-gray-700">
+                                  Drop files here or click to browse
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Supports PDF, DOC, DOCX, JPG, PNG
+                                </p>
                               </div>
                             </div>
-
-                            {/* Selected Files */}
-                            {uploadFiles.length > 0 && (
-                              <div className="space-y-2">
-                                <Label className="text-sm font-medium">Selected Files ({uploadFiles.length})</Label>
-                                <div className="space-y-2 max-h-64 overflow-y-auto">
-                                  {uploadFiles.map((file, idx) => (
-                                    <div
-                                      key={`${file.name}-${idx}`}
-                                      className="flex items-center justify-between p-3 rounded-lg border bg-white hover:bg-gray-50"
-                                    >
-                                      <div className="flex items-center gap-3 overflow-hidden">
-                                        <FileText className="h-5 w-5 text-blue-500 flex-shrink-0" />
-                                        <div className="min-w-0">
-                                          <p className="text-sm font-medium truncate">{file.name}</p>
-                                          <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
-                                        </div>
-                                      </div>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleRemoveFile(idx)}
-                                        className="p-1.5 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors flex-shrink-0"
-                                        aria-label={`Remove ${file.name}`}
-                                      >
-                                        <Trash2 className="h-4 w-4" />
-                                      </button>
-                                    </div>
-                                  ))}
-                                </div>
-                                <Button
-                                  onClick={handleFileUpload}
-                                  disabled={uploadFiles.length === 0 || isUploading}
-                                  className="w-full"
-                                  size="lg"
-                                >
-                                  {isUploading ? (
-                                    <>
-                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                      Uploading...
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Upload className="h-4 w-4 mr-2" />
-                                      Upload {uploadFiles.length} file(s)
-                                    </>
-                                  )}
-                                </Button>
-                              </div>
-                            )}
                           </div>
-                        </CardContent>
-                      </Card>
 
-                      {/* Uploaded Documents Table */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Uploaded Documents</CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                            All documents uploaded to this demand note
-                          </p>
-                        </CardHeader>
-                        <CardContent>
-                          {demandNote?.files && demandNote.files.length > 0 ? (
-                            <HorizontalScrollContainer>
-                              <table className="w-full">
-                                <thead className="sticky top-0 bg-gray-50 border-b">
-                                  <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <th className="px-4 py-3">Document Name</th>
-                                    <th className="px-4 py-3">Document Type</th>
-                                    <th className="px-4 py-3">Upload Date</th>
-                                    <th className="px-4 py-3">Status</th>
-                                    <th className="px-4 py-3 text-right">Actions</th>
+                          {/* Selected Files */}
+                          {uploadFiles.length > 0 && (
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Selected Files ({uploadFiles.length})</Label>
+                              <div className="space-y-2 max-h-64 overflow-y-auto">
+                                {uploadFiles.map((file, idx) => (
+                                  <div
+                                    key={`${file.name}-${idx}`}
+                                    className="flex items-center justify-between p-3 rounded-lg border bg-white hover:bg-gray-50"
+                                  >
+                                    <div className="flex items-center gap-3 overflow-hidden">
+                                      <FileText className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                                      <div className="min-w-0">
+                                        <p className="text-sm font-medium truncate">{file.name}</p>
+                                        <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                                      </div>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveFile(idx)}
+                                      className="p-1.5 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors flex-shrink-0"
+                                      aria-label={`Remove ${file.name}`}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                              <Button
+                                onClick={handleFileUpload}
+                                disabled={uploadFiles.length === 0 || isUploading}
+                                className="w-full"
+                                size="lg"
+                              >
+                                {isUploading ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    Uploading...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Upload className="h-4 w-4 mr-2" />
+                                    Upload {uploadFiles.length} file(s)
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Uploaded Documents Table */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Uploaded Documents</CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          All documents uploaded to this demand note
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        {demandNote?.files && demandNote.files.length > 0 ? (
+                          <HorizontalScrollContainer>
+                            <table className="w-full">
+                              <thead className="sticky top-0 bg-gray-50 border-b">
+                                <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  <th className="px-4 py-3">Document Name</th>
+                                  <th className="px-4 py-3">Document Type</th>
+                                  <th className="px-4 py-3">Upload Date</th>
+                                  <th className="px-4 py-3">Status</th>
+                                  <th className="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-200">
+                                {Array.from(
+                                  new Map(demandNote.files.map(f => [f.id, f])).values()
+                                ).map(file => (
+                                  <tr key={file.id} className="hover:bg-gray-50 transition-colors">
+                                    <td className="px-4 py-3">
+                                      <div className="flex items-center gap-3">
+                                        <FileText className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                                        <span className="text-sm font-medium text-gray-900">
+                                          {file.fileName}
+                                        </span>
+                                      </div>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                      <Badge variant="outline" className="capitalize">
+                                        {file.fileCategory === "traffic" && "🚗 Traffic"}
+                                        {file.fileCategory === "medical" && "🏥 Medical"}
+                                        {file.fileCategory === "bills" && "💊 Bills"}
+                                      </Badge>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                      <div className="flex items-center gap-1 text-sm text-gray-500">
+                                        <Calendar className="h-3.5 w-3.5" />
+                                        {formatDate(file.uploadedAt, 'MM/dd/yyyy')}
+                                      </div>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                      <Badge variant="secondary" className="text-xs">
+                                        {file.status}
+                                      </Badge>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                      <div className="flex gap-1 justify-end">
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          onClick={() => handlePreviewFile(file.fileUrl, file.fileName)}
+                                          className="h-8 w-8"
+                                          title="Preview"
+                                        >
+                                          <Eye className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          onClick={() => handleDownloadFile(file.fileUrl, file.fileName)}
+                                          className="h-8 w-8"
+                                          title="Download"
+                                        >
+                                          <Download className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          onClick={() => handleDeleteFile(file.id)}
+                                          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                          title="Delete"
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                    </td>
                                   </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                  {Array.from(
-                                    new Map(demandNote.files.map(f => [f.id, f])).values()
-                                  ).map(file => (
+                                ))}
+                              </tbody>
+                            </table>
+                          </HorizontalScrollContainer>
+                        ) : (
+                          <div className="text-center py-12 text-gray-500">
+                            <FileText className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                            <p className="text-sm">No documents uploaded yet</p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              Use the upload section above to add documents
+                            </p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* ---------------- CHRONOLOGY TAB ---------------- */}
+                  <TabsContent value="chronology" className="p-0">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle>Document Chronology & Summary</CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                              Documents ordered by upload date with editable summaries
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={handleCommonIndexing}
+                              disabled={isIndexing || isProcessingDisabled}
+                              variant="outline"
+                              className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                            >
+                              {isIndexing ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  {indexingProgress === 'indexing' && 'Indexing...'}
+                                  {indexingProgress === 'in-progress' && 'Processing...'}
+                                  {indexingProgress === 'complete' && 'Complete!'}
+                                </>
+                              ) : (
+                                <>
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Indexing
+                                </>
+                              )}
+                            </Button>
+                            <Button
+                              onClick={handleCommonSummary}
+                              disabled={isSummarizing || isProcessingDisabled || !demandNote?.files || demandNote.files.length === 0}
+                              variant="outline"
+                              className="bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
+                            >
+                              {isSummarizing ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Summarizing...
+                                </>
+                              ) : (
+                                <>
+                                  <Sparkles className="h-4 w-4 mr-2" />
+                                  Summary
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        {/* NEW: Progress Bar */}
+                        {(isIndexing || isSummarizing) && (
+                          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                                <span className="text-sm font-medium text-blue-900">
+                                  {isIndexing && 'Indexing in progress...'}
+                                  {isSummarizing && 'Summarizing documents...'}
+                                </span>
+                              </div>
+                              <span className="text-xs text-blue-700">
+                                {isSummarizing && summarizationProgress}
+                                {isIndexing && (
+                                  <>
+                                    {indexingProgress === 'indexing' && '33%'}
+                                    {indexingProgress === 'in-progress' && '66%'}
+                                    {indexingProgress === 'complete' && '100%'}
+                                  </>
+                                )}
+                              </span>
+                            </div>
+                            <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
+                              <div
+                                className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 rounded-full transition-all duration-500 ease-out"
+                                style={{
+                                  width: isIndexing
+                                    ? (indexingProgress === 'indexing' ? '33%' : indexingProgress === 'in-progress' ? '66%' : '100%')
+                                    : isSummarizing
+                                      ? summarizationProgress  // Use the direct progress value
+                                      : '0%'
+                                }}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {demandNote?.files && demandNote.files.length > 0 ? (
+                          <HorizontalScrollContainer>
+                            <table className="w-full">
+                              <thead className="sticky top-0 bg-gray-50 border-b">
+                                <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  <th className="px-4 py-3">Document Name</th>
+                                  <th className="px-4 py-3">Document Type</th>
+                                  <th className="px-4 py-3">Chronology</th>
+                                  {/* <th className="px-4 py-3">Status</th> */}
+                                  <th className="px-4 py-3 w-2/5">Summary</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-200">
+                                {[...demandNote.files]
+                                  .sort((a, b) => new Date(a.uploadedAt || a.createdAt || "").getTime() - new Date(b.uploadedAt || b.createdAt || "").getTime())
+                                  .map((file, index) => (
                                     <tr key={file.id} className="hover:bg-gray-50 transition-colors">
                                       <td className="px-4 py-3">
                                         <div className="flex items-center gap-3">
@@ -1212,638 +1647,184 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
                                         </Badge>
                                       </td>
                                       <td className="px-4 py-3">
-                                        <div className="flex items-center gap-1 text-sm text-gray-500">
-                                          <Calendar className="h-3.5 w-3.5" />
-                                          {formatDate(file.uploadedAt, 'MM/dd/yyyy')}
+                                        <div className="flex items-center gap-2">
+                                          <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+                                            {index + 1}
+                                          </div>
+                                          <div className="text-sm text-gray-600">
+                                            {formatDate(file.uploadedAt, 'MM/dd/yyyy')}
+                                          </div>
                                         </div>
                                       </td>
-                                      <td className="px-4 py-3">
-                                        <Badge variant="secondary" className="text-xs">
-                                          {file.status}
+                                      {/* <td className="px-4 py-3">
+                                        <Badge
+                                          variant={
+                                            summaryStatuses[file.id] === 'complete' ? 'default' :
+                                              summaryStatuses[file.id] === 'in-progress' ? 'secondary' :
+                                                'outline'
+                                          }
+                                          className="text-xs capitalize"
+                                        >
+                                          {summaryStatuses[file.id] || 'pending'}
                                         </Badge>
-                                      </td>
+                                      </td> */}
                                       <td className="px-4 py-3">
-                                        <div className="flex gap-1 justify-end">
+                                        <div className="flex items-center gap-2">
+                                          <div className="flex-1 min-w-0">
+                                            {summaryStatuses[file.id] === 'in-progress' ? (
+                                              <div className="flex items-center gap-2">
+                                                <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
+                                                <span className="text-sm text-indigo-600">Generating summary...</span>
+                                              </div>
+                                            ) : (
+                                              <>
+                                                <p
+                                                  className="text-sm text-gray-600 truncate max-w-[200px]"
+                                                  title={(file as any).tasks?.[0]?.outputSummary || "No summary available"}
+                                                >
+                                                  {(() => {
+                                                    const summary = (file as any).tasks?.[0]?.outputSummary || (file as any).tasks?.[0]?.editedSummary || "No summary available";
+                                                    return summary.length > 25 ? summary.substring(0, 25) + "..." : summary;
+                                                  })()}
+                                                </p>
+                                                <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-0.5">
+                                                  <Clock className="h-2.5 w-2.5" />
+                                                  {(() => {
+                                                    const task = (file as any).tasks?.[0];
+                                                    if (!task) return "No data";
+                                                    const ts = task.endTs;
+                                                    return ts ? formatDistanceToNow(new Date(ts), { addSuffix: true }) : "No timestamp";
+                                                  })()}
+                                                </div>
+                                              </>
+                                            )}
+                                          </div>
                                           <Button
                                             variant="ghost"
                                             size="icon"
-                                            onClick={() => {
-                                              setSummarizeFileId(file.id);
-                                              handleOpenSummaryPanel(file.id, file.fileName);
-                                            }}
-                                            disabled={summaryLoadingFileId === file.id}
-                                            className="h-8 w-8 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
-                                            title="Summarize"
+                                            onClick={() => handleOpenSummaryModal(file.id, file.fileName)}
+                                            disabled={summaryLoadingFileId === file.id || summaryStatuses[file.id] === 'in-progress'}
+                                            className="h-8 w-8 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 flex-shrink-0"
+                                            title="View/Edit Summary"
                                           >
                                             {summaryLoadingFileId === file.id ? (
                                               <Loader2 className="h-4 w-4 animate-spin" />
                                             ) : (
-                                              <Sparkles className="h-4 w-4" />
+                                              <Pencil className="h-4 w-4" />
                                             )}
-                                          </Button>
-                                          <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handlePreviewFile(file.fileUrl, file.fileName)}
-                                            className="h-8 w-8"
-                                            title="Preview"
-                                          >
-                                            <Eye className="h-4 w-4" />
-                                          </Button>
-                                          <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handleDownloadFile(file.fileUrl, file.fileName)}
-                                            className="h-8 w-8"
-                                            title="Download"
-                                          >
-                                            <Download className="h-4 w-4" />
-                                          </Button>
-                                          <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handleDeleteFile(file.id)}
-                                            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                            title="Delete"
-                                          >
-                                            <Trash2 className="h-4 w-4" />
                                           </Button>
                                         </div>
                                       </td>
                                     </tr>
                                   ))}
-                                </tbody>
-                              </table>
-                            </HorizontalScrollContainer>
-                          ) : (
-                            <div className="text-center py-12 text-gray-500">
-                              <FileText className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                              <p className="text-sm">No documents uploaded yet</p>
-                              <p className="text-xs text-gray-400 mt-1">
-                                Use the upload section above to add documents
-                              </p>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-
-                    {/* ---------------- CHRONOLOGY TAB ---------------- */}
-                    <TabsContent value="chronology" className="p-0">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Document Chronology & Summary</CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                            Documents ordered by upload date with editable summaries
-                          </p>
-                        </CardHeader>
-                        <CardContent>
-                          {demandNote?.files && demandNote.files.length > 0 ? (
-                            <HorizontalScrollContainer>
-                              <table className="w-full">
-                                <thead className="sticky top-0 bg-gray-50 border-b">
-                                  <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <th className="px-4 py-3">Document Name</th>
-                                    <th className="px-4 py-3">Document Type</th>
-                                    <th className="px-4 py-3">Chronology</th>
-                                    <th className="px-4 py-3 w-2/5">Summary</th>
-                                  </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                  {[...demandNote.files]
-                                    .sort((a, b) => new Date(a.uploadedAt || a.createdAt || "").getTime() - new Date(b.uploadedAt || b.createdAt || "").getTime())
-                                    .map((file, index) => (
-                                      <tr key={file.id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-4 py-3">
-                                          <div className="flex items-center gap-3">
-                                            <FileText className="h-5 w-5 text-blue-500 flex-shrink-0" />
-                                            <span className="text-sm font-medium text-gray-900">
-                                              {file.fileName}
-                                            </span>
-                                          </div>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                          <Badge variant="outline" className="capitalize">
-                                            {file.fileCategory === "traffic" && "🚗 Traffic"}
-                                            {file.fileCategory === "medical" && "🏥 Medical"}
-                                            {file.fileCategory === "bills" && "💊 Bills"}
-                                          </Badge>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                          <div className="flex items-center gap-2">
-                                            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
-                                              {index + 1}
-                                            </div>
-                                            <div className="text-sm text-gray-600">
-                                              {formatDate(file.uploadedAt, 'MM/dd/yyyy')}
-                                            </div>
-                                          </div>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                          <div className="flex items-center gap-2">
-                                            <div className="flex-1 min-w-0">
-                                              <p
-                                                className="text-sm text-gray-600 truncate max-w-[200px]"
-                                                title={(file as any).tasks?.[0]?.outputSummary || "No summary available"}
-                                              >
-                                                {(() => {
-                                                  const summary = (file as any).tasks?.[0]?.outputSummary || (file as any).tasks?.[0]?.editedSummary || "No summary available";
-                                                  return summary.length > 25 ? summary.substring(0, 25) + "..." : summary;
-                                                })()}
-                                              </p>
-                                              <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-0.5">
-                                                <Clock className="h-2.5 w-2.5" />
-                                                {(() => {
-                                                  const task = (file as any).tasks?.[0];
-                                                  if (!task) return "No data";
-                                                  const ts = task.endTs;
-                                                  return ts ? formatDistanceToNow(new Date(ts), { addSuffix: true }) : "No timestamp";
-                                                })()}
-                                              </div>
-                                            </div>
-                                            <Button
-                                              variant="ghost"
-                                              size="icon"
-                                              onClick={() => {
-                                                setSummarizeFileId(file.id);
-                                                handleOpenSummaryPanel(file.id, file.fileName);
-                                              }}
-                                              disabled={summaryLoadingFileId === file.id}
-                                              className="h-8 w-8 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 flex-shrink-0"
-                                              title="View Summary"
-                                            >
-                                              {summaryLoadingFileId === file.id ? (
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                              ) : (
-                                                <Sparkles className="h-4 w-4" />
-                                              )}
-                                            </Button>
-                                          </div>
-                                        </td>
-                                      </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                            </HorizontalScrollContainer>
-                          ) : (
-                            <div className="text-center py-12 text-gray-500">
-                              <FileText className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                              <p className="text-sm">No documents available</p>
-                              <p className="text-xs text-gray-400 mt-1">
-                                Upload documents to view chronology and add summaries
-                              </p>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-
-                    {/* ---------------- DRAFT TAB ---------------- */}
-                    <TabsContent value="draft" className="p-0 space-y-6">
-                      <Card>
-                        <CardHeader>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <CardTitle>Draft Summary</CardTitle>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                Aggregate summaries from all files and refine the final draft
-                              </p>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                onClick={() => handleFetchDraftSummary(true)}
-                                disabled={isDraftLoading || job?.publishStatus === "published"}
-                                variant="outline"
-                              >
-                                {isDraftLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-                                Summary all Uploaded files
-                              </Button>
-                              <Button
-                                onClick={handleSaveDraft}
-                                disabled={isDraftLoading || !isDraftEdited}
-                                variant="outline"
-                                className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-                              >
-                                {isDraftLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
-                                Save Draft
-                              </Button>
-                              <Button
-                                onClick={handleExportDraft}
-                                disabled={!draftContent}
-                                variant="outline"
-                              >
-                                <Download className="h-4 w-4 mr-2" />
-                                Export
-                              </Button>
-                              <Button
-                                onClick={handlePublish}
-                                disabled={isPublishing || !draftContent || draftContent.trim() === "<p><br></p>" || draftContent.trim() === "" || job?.publishStatus === "published"}
-                                className="bg-green-600 hover:bg-green-700"
-                              >
-                                {isPublishing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-                                Publish
-                              </Button>
-                            </div>
+                              </tbody>
+                            </table>
+                          </HorizontalScrollContainer>
+                        ) : (
+                          <div className="text-center py-12 text-gray-500">
+                            <FileText className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                            <p className="text-sm">No documents available</p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              Upload documents to view chronology and add summaries
+                            </p>
                           </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="min-h-[500px] border rounded-md p-4 bg-white prose max-w-none">
-                            {ReactQuill ? (
-                              <ReactQuill
-                                theme="snow"
-                                value={draftContent}
-                                onChange={(content: string) => {
-                                  setDraftContent(content);
-                                  setIsDraftEdited(true);
-                                }}
-                                className="h-[400px] mb-12"
-                              />
-                            ) : (
-                              <textarea
-                                value={draftContent}
-                                onChange={(e) => {
-                                  setDraftContent(e.target.value);
-                                  setIsDraftEdited(true);
-                                }}
-                                className="w-full h-[400px] p-2 border-none focus:ring-0 resize-none font-sans"
-                                placeholder="Start drafting your summary here..."
-                              />
-                            )}
-                          </div>
-
-                          {!isPublishable && publishDetails && (
-                            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
-                              <p className="font-semibold mb-1">Publish Requirements:</p>
-                              <ul className="list-disc list-inside space-y-1">
-                                {!publishDetails.allFilesSummarized && (
-                                  <li>All files must be summarized (Found {publishDetails.unsummarizedCount} unsummarized)</li>
-                                )}
-                                {!publishDetails.tasksSynced && (
-                                  <li>All summarization tasks must be completed</li>
-                                )}
-                              </ul>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                  </div>
-                </Tabs>
-              </DefaultCardComponent>
-            </div>
-
-            {/* Right Column: Activity Timeline + System Info + Summary Panel (Dynamic Order) */}
-            <div className="lg:col-span-4 space-y-6 sticky top-6 self-start">
-              {rightColumnSections.map((sectionId) => {
-                if (sectionId === 'timeline') {
-                  return (
-                    <div
-                      key="timeline"
-                      draggable
-                      onDragStart={(e) => handleSectionDragStart(e, 'timeline')}
-                      onDragOver={handleSectionDragOver}
-                      onDrop={(e) => handleSectionDrop(e, 'timeline')}
-                      className={`transition-opacity ${draggedSection === 'timeline' ? 'opacity-50' : ''}`}
-                    >
-                      <Card>
-                        <CardHeader className="cursor-default group">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="cursor-grab active:cursor-grabbing text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                                <GripVertical className="h-4 w-4" />
-                              </div>
-                              <CardTitle className="text-base">Activity Timeline</CardTitle>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setIsActivityTimelineOpen(!isActivityTimelineOpen)}
-                              className="h-8 w-8 p-0"
-                            >
-                              {isActivityTimelineOpen ? (
-                                <ChevronUp className="h-4 w-4" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </CardHeader>
-                        {isActivityTimelineOpen && (
-                          <CardContent>
-                            {activityEvents.length > 0 ? (
-                              <div className="space-y-4">
-                                {activityEvents.map((event) => (
-                                  <div key={event.id} className="flex gap-3">
-                                    <div className="flex-shrink-0 w-2 h-2 mt-1.5 rounded-full bg-blue-500" />
-                                    <div className="flex-1 space-y-1">
-                                      <p className="text-sm text-foreground">{event.description}</p>
-                                      <p className="text-xs text-muted-foreground">{event.timestamp}</p>
-                                    </div>
-                                  </div>
-                                ))}
-                                {allActivityEvents.length > 3 && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setShowAllActivities(!showAllActivities)}
-                                    className="text-xs w-full"
-                                  >
-                                    {showAllActivities ? "Show Less" : `Show All (${allActivityEvents.length})`}
-                                  </Button>
-                                )}
-                              </div>
-                            ) : (
-                              <p className="text-sm text-muted-foreground">No activity yet</p>
-                            )}
-                          </CardContent>
                         )}
-                      </Card>
-                    </div>
-                  );
-                }
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
 
-                if (sectionId === 'info') {
-                  return (
-                    <div
-                      key="info"
-                      draggable
-                      onDragStart={(e) => handleSectionDragStart(e, 'info')}
-                      onDragOver={handleSectionDragOver}
-                      onDrop={(e) => handleSectionDrop(e, 'info')}
-                      className={`transition-opacity ${draggedSection === 'info' ? 'opacity-50' : ''}`}
-                    >
-                      {/* <Card>
-                        <CardHeader className="cursor-default group">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="cursor-grab active:cursor-grabbing text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                                <GripVertical className="h-4 w-4" />
-                              </div>
-                              <CardTitle className="text-base">System Information</CardTitle>
-                            </div>
+                  {/* ---------------- DRAFT TAB ---------------- */}
+                  <TabsContent value="draft" className="p-0 space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle>Draft Summary</CardTitle>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Aggregate summaries from all files and refine the final draft
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
                             <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setIsSystemInfoOpen(!isSystemInfoOpen)}
-                              className="h-8 w-8 p-0"
+                              onClick={() => handleFetchDraftSummary(true)}
+                              disabled={isDraftLoading || job?.publishStatus === "published"}
+                              variant="outline"
                             >
-                              {isSystemInfoOpen ? (
-                                <ChevronUp className="h-4 w-4" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4" />
+                              {isDraftLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                              Summary
+                            </Button>
+                            <Button
+                              onClick={handleSaveDraft}
+                              disabled={isDraftLoading || !isDraftEdited}
+                              variant="outline"
+                              className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                            >
+                              {isDraftLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
+                              Draft
+                            </Button>
+                            <Button
+                              onClick={handleExportDraft}
+                              disabled={!draftContent}
+                              variant="outline"
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Export
+                            </Button>
+                            <Button
+                              onClick={handlePublish}
+                              disabled={isPublishing || !draftContent || draftContent.trim() === "<p><br></p>" || draftContent.trim() === "" || job?.publishStatus === "published"}
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              {isPublishing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                              Publish
+                            </Button>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="min-h-[500px] border rounded-md p-4 bg-white prose max-w-none">
+                          {ReactQuill ? (
+                            <ReactQuill
+                              theme="snow"
+                              value={draftContent}
+                              onChange={(content: string) => {
+                                setDraftContent(content);
+                                setIsDraftEdited(true);
+                              }}
+                              className="h-[400px] mb-12"
+                            />
+                          ) : (
+                            <textarea
+                              value={draftContent}
+                              onChange={(e) => {
+                                setDraftContent(e.target.value);
+                                setIsDraftEdited(true);
+                              }}
+                              className="w-full h-[400px] p-2 border-none focus:ring-0 resize-none font-sans"
+                              placeholder="Start drafting your summary here..."
+                            />
+                          )}
+                        </div>
+
+                        {!isPublishable && publishDetails && (
+                          <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                            <p className="font-semibold mb-1">Publish Requirements:</p>
+                            <ul className="list-disc list-inside space-y-1">
+                              {!publishDetails.allFilesSummarized && (
+                                <li>All files must be summarized (Found {publishDetails.unsummarizedCount} unsummarized)</li>
                               )}
-                            </Button>
+                              {!publishDetails.tasksSynced && (
+                                <li>All summarization tasks must be completed</li>
+                              )}
+                            </ul>
                           </div>
-                        </CardHeader>
-                        {isSystemInfoOpen && (
-                          <CardContent className="space-y-4">
-                            <div>
-                              <p className="text-sm text-muted-foreground mb-1">Status</p>
-                              <StatusBadge status={demandNote.status} />
-                            </div>
-
-                            <Separator />
-
-                            <div>
-                              <p className="text-sm text-muted-foreground mb-1">Created By</p>
-                              <div className="flex items-center gap-2">
-                                <User className="h-3.5 w-3.5 text-muted-foreground" />
-                                <p className="text-sm font-medium">{demandNote.createdBy.firstName} {demandNote.createdBy.lastName}</p>
-                              </div>
-                            </div>
-
-                            <div>
-                              <p className="text-sm text-muted-foreground mb-1">Created At</p>
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                                <p className="text-sm">{formatDate(demandNote.createdAt, 'MM/dd/yyyy HH:mm')}</p>
-                              </div>
-                            </div>
-
-                            <div>
-                              <p className="text-sm text-muted-foreground mb-1">Last Updated</p>
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                                <p className="text-sm">{formatDate(demandNote.updatedAt, 'MM/dd/yyyy HH:mm')}</p>
-                              </div>
-                            </div>
-                          </CardContent>
                         )}
-                      </Card> */}
-                    </div>
-                  );
-                }
-
-                if (sectionId === 'summary' && summaryPanelFileId) {
-                  return (
-                    <div
-                      key="summary"
-                      draggable
-                      onDragStart={(e) => handleSectionDragStart(e, 'summary')}
-                      onDragOver={handleSectionDragOver}
-                      onDrop={(e) => handleSectionDrop(e, 'summary')}
-                      className={`transition-opacity ${draggedSection === 'summary' ? 'opacity-50' : ''}`}
-                    >
-                      <Card className="border-indigo-100 shadow-lg animate-in slide-in-from-bottom-4 fade-in duration-300">
-                        {/* Compact Header */}
-                        <CardHeader className="p-3 border-b bg-gradient-to-r from-indigo-50/50 to-white group">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="cursor-grab active:cursor-grabbing text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                                <GripVertical className="h-4 w-4" />
-                              </div>
-                              <div className="p-1.5 bg-white border border-indigo-100 rounded-lg text-indigo-600">
-                                <Sparkles className="h-4 w-4" />
-                              </div>
-                              <div className="min-w-0">
-                                <h2 className="text-sm font-semibold text-gray-900">Summary</h2>
-                                <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                  {demandNote?.files.find(f => f.id === summaryPanelFileId)?.fileName}
-                                </p>
-                              </div>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={handleCloseSummaryPanel}
-                              className="h-7 w-7 text-gray-400 hover:text-gray-600 rounded-full flex-shrink-0"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </CardHeader>
-
-                        {/* Compact Content */}
-                        <CardContent className="p-4 bg-gray-50/50">
-                          <div className="space-y-4">
-                            {/* Summary Content */}
-                            <div className="bg-white rounded-lg shadow-sm border border-indigo-100/50 overflow-hidden">
-                              <div className="p-3">
-                                <div className="mb-2 flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <button
-                                      onClick={() => {
-                                        setSummaryMode("ai");
-                                        setPanelSummaryText(aiSummary || "No summary available");
-                                      }}
-                                      className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded transition-colors ${summaryMode === "ai"
-                                        ? "bg-indigo-100 text-indigo-900"
-                                        : "text-gray-400 hover:text-gray-600"
-                                        }`}
-                                    >
-                                      AI Generated
-                                    </button>
-                                    <div className="h-3 w-[1px] bg-gray-200" />
-                                    <button
-                                      onClick={() => {
-                                        setSummaryMode("edited");
-                                        setPanelSummaryText(editedSummary || aiSummary || "No summary available");
-                                      }}
-                                      className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded transition-colors ${summaryMode === "edited"
-                                        ? "bg-indigo-100 text-indigo-900"
-                                        : "text-gray-400 hover:text-gray-600"
-                                        }`}
-                                    >
-                                      Edited Summary
-                                    </button>
-                                  </div>
-                                  {isSummaryLoading && (
-                                    <div className="flex items-center gap-1 text-indigo-600">
-                                      <Loader2 className="h-3 w-3 animate-spin" />
-                                      <span className="text-[10px] font-medium">Loading...</span>
-                                    </div>
-                                  )}
-                                </div>
-                                {isSummaryLoading ? (
-                                  <div className="w-full min-h-[200px] flex items-center justify-center">
-                                    <div className="text-center space-y-3">
-                                      <Loader2 className="h-8 w-8 animate-spin text-indigo-600 mx-auto" />
-                                      <p className="text-xs text-gray-500">Generating summary...</p>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <textarea
-                                    value={panelSummaryText}
-                                    onChange={(e) => setPanelSummaryText(e.target.value)}
-                                    className="w-full min-h-[200px] p-0 text-xs text-gray-700 leading-relaxed border-none focus:ring-0 resize-none bg-transparent"
-                                    placeholder="No summary available"
-                                  />
-                                )}
-                              </div>
-                              <div className="px-3 py-1.5 bg-gray-50/50 border-t border-gray-100 flex justify-between items-center text-[10px] text-gray-400">
-                                <span>{panelSummaryText.length} chars</span>
-                                <span className="flex items-center gap-1">
-                                  <Clock className="h-2.5 w-2.5" />
-                                  {summaryMode === "ai"
-                                    ? (aiSummaryTs ? formatDistanceToNow(new Date(aiSummaryTs), { addSuffix: true }) : "No AI timestamp")
-                                    : (editedSummaryTs ? formatDistanceToNow(new Date(editedSummaryTs), { addSuffix: true }) : "Not edited yet")
-                                  }
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Metadata */}
-                            <div className="grid grid-cols-2 gap-2">
-                              <div className="p-2 bg-white rounded-lg border border-gray-100 shadow-sm">
-                                <p className="text-[9px] text-gray-400 uppercase tracking-wider mb-0.5">Category</p>
-                                <span className="text-xs font-semibold capitalize text-gray-700">
-                                  {demandNote?.files.find(f => f.id === summaryPanelFileId)?.fileCategory || 'General'}
-                                </span>
-                              </div>
-                              <div className="p-2 bg-white rounded-lg border border-gray-100 shadow-sm">
-                                <p className="text-[9px] text-gray-400 uppercase tracking-wider mb-0.5">Uploaded</p>
-                                <span className="text-xs font-semibold text-gray-700">
-                                  {formatDate(demandNote?.files.find(f => f.id === summaryPanelFileId)?.uploadedAt, 'MMM dd')}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex items-center justify-between gap-2 pt-2">
-                              <div className="flex gap-1">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={handleCopySummary}
-                                  disabled={isSummaryLoading || !panelSummaryText}
-                                  className="text-gray-600 border-gray-200 hover:bg-gray-50 h-8 px-2 text-xs"
-                                >
-                                  <Copy className="h-3 w-3 mr-1" />
-                                  Copy
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={handleExportSummary}
-                                  disabled={isSummaryLoading || !panelSummaryText}
-                                  className="text-gray-600 border-gray-200 hover:bg-gray-50 h-8 px-2 text-xs"
-                                >
-                                  <Download className="h-3 w-3 mr-1" />
-                                  Export
-                                </Button>
-                              </div>
-                              <Button
-                                onClick={handleSavePanelSummary}
-                                disabled={isSummaryLoading || !panelSummaryText}
-                                size="sm"
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white h-8 px-3 text-xs"
-                              >
-                                <Edit className="h-3 w-3 mr-1" />
-                                Save
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  );
-                }
-
-                if (sectionId === 'notes' && demandNote.internalNotes && demandNote.internalNotes.length > 0) {
-                  return (
-                    <div
-                      key="notes"
-                      draggable
-                      onDragStart={(e) => handleSectionDragStart(e, 'notes')}
-                      onDragOver={handleSectionDragOver}
-                      onDrop={(e) => handleSectionDrop(e, 'notes')}
-                      className={`transition-opacity ${draggedSection === 'notes' ? 'opacity-50' : ''}`}
-                    >
-                      <Card>
-                        <CardHeader className="cursor-default group">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="cursor-grab active:cursor-grabbing text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                                <GripVertical className="h-4 w-4" />
-                              </div>
-                              <CardTitle className="text-base">Notes</CardTitle>
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3 max-h-48 overflow-y-auto">
-                            {demandNote.internalNotes.map((note) => (
-                              <div key={note.id} className="border-l-2 border-indigo-200 pl-3 py-1">
-                                <p className="text-sm text-foreground whitespace-pre-wrap line-clamp-3">
-                                  {note.content}
-                                </p>
-                                <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                                  <span>{note.createdBy.firstName}</span>
-                                  <span>•</span>
-                                  <span>{formatDate(note.createdAt, 'MM/dd')}</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  );
-                }
-
-                return null;
-              })}
-            </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </div>
+              </Tabs>
+            </DefaultCardComponent>
           </div>
         </div>
       </div>
@@ -1866,6 +1847,126 @@ export default function DemandNoteView({ params }: DemandNoteViewProps) {
           demandFileId={summarizeFileId}
         />
       )}
+
+      {/* NEW: Summary Modal */}
+      <Dialog open={isSummaryModalOpen} onOpenChange={handleCloseSummaryModal}>
+        <DialogContent
+          className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white text-gray-900 border border-gray-200 shadow-xl"
+        >
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <Sparkles className="h-5 w-5 text-indigo-600" />
+              Document Summary
+            </DialogTitle>
+            {summaryModalFile && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {summaryModalFile.name}
+              </p>
+            )}
+          </DialogHeader>
+
+          {isModalLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+              <span className="ml-3 text-muted-foreground">Loading summary...</span>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Tab Selection */}
+              <Tabs value={modalSummaryMode} onValueChange={(v) => setModalSummaryMode(v as "ai" | "edited")}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="ai" className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    AI Summary
+                  </TabsTrigger>
+                  <TabsTrigger value="edited" className="flex items-center gap-2">
+                    <Edit className="h-4 w-4" />
+                    Edited Summary
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* AI Summary Tab */}
+                <TabsContent value="ai" className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-start gap-2">
+                      <Sparkles className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-sm text-blue-900 mb-2">AI-Generated Summary</p>
+                        <p className="text-sm text-blue-800 whitespace-pre-wrap">
+                          {modalAiSummary || "No AI summary available. Please generate a summary first."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Edited Summary Tab */}
+                <TabsContent value="edited" className="space-y-4">
+                  <div>
+                    <Label htmlFor="edited-summary" className="text-base font-medium mb-2 block">
+                      Edit Summary
+                    </Label>
+                    <Textarea
+                      id="edited-summary"
+                      value={modalEditedSummary}
+                      onChange={(e) => setModalEditedSummary(e.target.value)}
+                      placeholder="Edit the summary here..."
+                      className="min-h-[300px] font-sans text-sm"
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between pt-4 border-t">
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopySummaryModal}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExportSummaryModal}
+                  >
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </div>
+
+                <div className="flex gap-2">
+                  {modalSummaryMode === "edited" && (
+                    <Button
+                      onClick={handleSaveEditedSummary}
+                      disabled={isSavingSummary}
+                      className="bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      {isSavingSummary ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Changes
+                        </>
+                      )}
+                    </Button>
+                  )}
+                  <Button variant="outline" onClick={handleCloseSummaryModal}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Floating Download Button */}
       {job?.publishStatus === "published" && (
